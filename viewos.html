@@ -308,7 +308,7 @@
 </head>
 <body>
 
-    <div id="press-key-screen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #000000; z-index: 20000000; display: flex; align-items: center; justify-content: center; opacity: 1; transition: opacity 0.5s ease;">
+    <div id="press-key-screen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #000000; z-index: 11000000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.5s ease;">
         <div style="font-size: 1.8rem; font-weight: 300; letter-spacing: -0.03em; color: #ffffff; text-align: center;">Press any keyboard key to start</div>
     </div>
 
@@ -397,7 +397,7 @@
 
         // View Cloud Configuration & Local Version Parameters
         const VIEW_CLOUD_URL = 'https://script.google.com/macros/s/AKfycbzR_BI7fcEi1B_ZGG0nlP7Xw6vVSJ9WCDnlrsBWN8jDKmUmUtfNTJz0uEzMZsoDFeOgEA/exec';
-        const CURRENT_OS_VERSION = '0.8.4';
+        const CURRENT_OS_VERSION = '0.8.5';
         const CLIENT_VERSION = 1;
 
         (function() {
@@ -421,6 +421,7 @@
             return 0;
         }
 
+        // ... Keeping existing projection helpers: getArtPath, getContentFilePath, formatTime, getResumeTimestamp, etc.
         function getArtPath(item) {
             if (!item || !item.art) return null;
             if (item.art.startsWith('http')) return item.art;
@@ -705,7 +706,7 @@
                 backgroundAppUpdates();
             }, 180000); // 3-minute Background Ping
 
-            setupPressKeyToStart();
+            startBootSequence();
         }
 
         window.initOS = initOS;
@@ -2108,9 +2109,35 @@
             try { localStorage.setItem('viewOS_volume_index', v.currentIndex); } catch(e) {} renderSettingsList(); 
         }
 
+        function startBootSequence() {
+            setTimeout(() => {
+                const bootScreen = document.getElementById('boot-screen');
+                const pressScreen = document.getElementById('press-key-screen');
+                
+                if (pressScreen) {
+                    pressScreen.style.display = 'flex';
+                    pressScreen.offsetHeight; // Force layout engine reflow
+                    pressScreen.style.opacity = '1';
+                }
+
+                if (bootScreen) {
+                    bootScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        bootScreen.style.display = 'none';
+                        setupPressKeyToStart();
+                    }, 800);
+                } else {
+                    setupPressKeyToStart();
+                }
+            }, 3000);
+        }
+
         function setupPressKeyToStart() {
             const pressScreen = document.getElementById('press-key-screen');
-            if (!pressScreen) return;
+            if (!pressScreen) {
+                completeBoot();
+                return;
+            }
             
             const handleKeyPressStart = (e) => {
                 window.removeEventListener('keydown', handleKeyPressStart);
@@ -2118,27 +2145,18 @@
                 pressScreen.style.opacity = '0';
                 setTimeout(() => {
                     pressScreen.style.display = 'none';
-                    startBootSequence();
+                    completeBoot();
                 }, 500);
             };
             
             window.addEventListener('keydown', handleKeyPressStart);
         }
 
-        function startBootSequence() {
-            setTimeout(() => {
-                const bootScreen = document.getElementById('boot-screen');
-                if (bootScreen) {
-                    bootScreen.style.opacity = '0';
-                    setTimeout(() => {
-                        bootScreen.style.display = 'none';
-                        const homeScreen = document.getElementById('home-screen');
-                        if (homeScreen) homeScreen.classList.add('screen-visible');
-                        STATE.booted = true;
-                        updateFocus(true);
-                    }, 800);
-                }
-            }, 3000);
+        function completeBoot() {
+            const homeScreen = document.getElementById('home-screen');
+            if (homeScreen) homeScreen.classList.add('screen-visible');
+            STATE.booted = true;
+            updateFocus(true);
         }
 
         window.onload = initOS;
