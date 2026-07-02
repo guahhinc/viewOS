@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <title>viewOS</title>
     <style>
         /* ==========================================================================
@@ -392,7 +393,7 @@
 
         // View Cloud Configuration & Local Version Parameters
         const VIEW_CLOUD_URL = 'https://script.google.com/macros/s/AKfycbzR_BI7fcEi1B_ZGG0nlP7Xw6vVSJ9WCDnlrsBWN8jDKmUmUtfNTJz0uEzMZsoDFeOgEA/exec';
-        const CURRENT_OS_VERSION = '0.8';
+        const CURRENT_OS_VERSION = '0.8.1';
         const CLIENT_VERSION = 1;
 
         (function() {
@@ -765,7 +766,7 @@
                 const inner = document.createElement('div'); inner.id = 'temp-yt-player'; container.appendChild(inner); document.body.appendChild(container);
             }
             durationPlayer = new YT.Player('temp-yt-player', {
-                height: '1', width: '1', playerVars: { 'autoplay': 1, 'controls': 0, 'disablekb': 1, 'rel': 0, 'showinfo': 0, 'modestbranding': 1, 'mute': 1 },
+                height: '1', width: '1', playerVars: { 'autoplay': 1, 'controls': 0, 'disablekb': 1, 'rel': 0, 'showinfo': 0, 'modestbranding': 1, 'mute': 1, 'enablejsapi': 1, 'origin': window.location.origin },
                 events: {
                     'onReady': () => { processNextYtDuration(); },
                     'onStateChange': (event) => {
@@ -775,6 +776,10 @@
                     }, 'onError': () => { finishYtDurationLoad(); }
                 }
             });
+            const durationIframe = document.getElementById('temp-yt-player');
+            if (durationIframe) {
+                durationIframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+            }
         }
 
         function fetchYtDurations() {
@@ -833,7 +838,7 @@
             
             function createPlayer() {
                 ytPlayer = new YT.Player('cinema-youtube', {
-                    videoId: videoId, playerVars: { 'autoplay': 1, 'controls': 0, 'disablekb': 1, 'rel': 0, 'showinfo': 0, 'modestbranding': 1, 'fs': 0, 'iv_load_policy': 3, 'autohide': 1, 'origin': window.location.origin },
+                    videoId: videoId, playerVars: { 'autoplay': 1, 'controls': 0, 'disablekb': 1, 'rel': 0, 'showinfo': 0, 'modestbranding': 1, 'fs': 0, 'iv_load_policy': 3, 'autohide': 1, 'enablejsapi': 1, 'origin': window.location.origin },
                     events: {
                         'onReady': (e) => {
                             e.target.setVolume(vol); e.target.playVideo();
@@ -848,6 +853,10 @@
                         }
                     }
                 });
+                const iframe = document.getElementById('cinema-youtube');
+                if (iframe) {
+                    iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+                }
             }
             if (typeof YT !== 'undefined' && YT.Player) createPlayer(); else { window.pendingYTLaunchVideoId = videoId; window.createPendingYTPlayer = createPlayer; }
         }
