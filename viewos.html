@@ -291,8 +291,13 @@
 
         .top-bar-tab.is-focused, .settings-item.is-focused, .popup-button.is-focused { background-color: #ffffff !important; color: #000000 !important; }
         .settings-item.is-focused .settings-value { color: #333333 !important; }
+        
         .tilted-focus { transition: none !important; }
         .tilted-focus:not(.top-bar-tab):not(.settings-item):not(.popup-button) { transition: none !important; }
+        /* Strict transition override to completely eliminate color snap/flicker on flat text buttons when untiliting */
+        .top-bar-tab.tilted-focus, .settings-item.tilted-focus, .popup-button.tilted-focus {
+            transition: background-color 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), color 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+        }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
@@ -373,7 +378,7 @@
     <!-- Enhanced System Popup with standardized preview icon -->
     <div id="system-popup">
         <div id="system-popup-content" style="background-color: transparent; border: none; padding: 40px; width: 90%; max-width: 600px; display: flex; flex-direction: column; align-items: center; text-align: center; transition: opacity 0.35s ease;">
-            <img id="popup-image" style="display: none; width: 240px; height: auto; max-height: 160px; object-fit: contain; border-radius: var(--border-radius); margin-bottom: 25px; box-shadow: none !important;">
+            <img id="popup-image" style="display: none; border-radius: var(--border-radius); margin-bottom: 25px; box-shadow: none !important;">
             <h2 id="popup-title" style="font-size: 2.8rem; margin-top: 0; margin-bottom: 15px; color: #ffffff;">Title</h2>
             <p id="popup-desc" style="font-size: 1.5rem; color: var(--secondary-text); margin-bottom: 40px; line-height: 1.5;"></p>
             <div id="popup-buttons-container" style="display: flex; flex-direction: column; width: 100%; gap: 15px; align-items: center;"></div>
@@ -387,7 +392,7 @@
 
         // View Cloud Configuration & Local Version Parameters
         const VIEW_CLOUD_URL = 'https://script.google.com/macros/s/AKfycbzR_BI7fcEi1B_ZGG0nlP7Xw6vVSJ9WCDnlrsBWN8jDKmUmUtfNTJz0uEzMZsoDFeOgEA/exec';
-        const CURRENT_OS_VERSION = 0.6;
+        const CURRENT_OS_VERSION = '0.8';
         const CLIENT_VERSION = 1;
 
         (function() {
@@ -398,6 +403,19 @@
         })();
 
         /* Helpers & Path Projections */
+        function compareVersions(v1, v2) {
+            const p1 = String(v1).split('.').map(Number);
+            const p2 = String(v2).split('.').map(Number);
+            const len = Math.max(p1.length, p2.length);
+            for (let i = 0; i < len; i++) {
+                const n1 = p1[i] || 0;
+                const n2 = p2[i] || 0;
+                if (n1 > n2) return 1;
+                if (n1 < n2) return -1;
+            }
+            return 0;
+        }
+
         function getArtPath(item) {
             if (!item || !item.art) return null;
             if (item.art.startsWith('http')) return item.art;
@@ -525,17 +543,19 @@
             return true;
         };
 
-        function setupSpringPhysics(el) {
+        function setupSpringPhysics(el, includeShineAndBorder = true) {
             if (el.springs) return;
             el.springs = { scale: new Spring(1.0, 0.15, 0.70), posX: new Spring(0, 0.08, 0.70), posY: new Spring(0, 0.08, 0.70), focusState: new Spring(0, 0.12, 0.80) };
             
             el.style.position = 'relative';
             el.style.transformStyle = 'preserve-3d';
             
-            let shine = document.createElement('div'); shine.className = 'card-shine'; 
-            let glassBorder = document.createElement('div'); glassBorder.className = 'card-glass-border'; 
-            el.shine = shine; el.glassBorder = glassBorder;
-            el.appendChild(shine); el.appendChild(glassBorder);
+            if (includeShineAndBorder) {
+                let shine = document.createElement('div'); shine.className = 'card-shine'; 
+                let glassBorder = document.createElement('div'); glassBorder.className = 'card-glass-border'; 
+                el.shine = shine; el.glassBorder = glassBorder;
+                el.appendChild(shine); el.appendChild(glassBorder);
+            }
             springElements.push(el);
         }
 
@@ -849,13 +869,27 @@
         function isItemFavourited(item) { try { return localStorage.getItem(`viewOS_fav_${getContentFilePath(item)}`) === 'true'; } catch(e) { return false; } }
         function toggleItemFavourite(item) { try { localStorage.setItem(`viewOS_fav_${getContentFilePath(item)}`, isItemFavourited(item) ? 'false' : 'true'); } catch(e) {} }
 
-        function showSystemPopup(title, desc, buttons, imageUrl = null) {
+        function showSystemPopup(title, desc, buttons, imageUrl = null, popupType = null) {
             STATE.inPopup = true; STATE.popupFocusedIndex = 0; activePopupButtons = buttons;
             
             const imgEl = document.getElementById('popup-image');
             if (imageUrl) {
                 imgEl.src = imageUrl;
                 imgEl.style.display = 'block';
+
+                if (popupType === 'update') {
+                    imgEl.style.width = '240px';
+                    imgEl.style.height = '240px';
+                    imgEl.style.maxHeight = '240px';
+                    imgEl.style.borderRadius = '50%';
+                    imgEl.style.objectFit = 'cover';
+                } else {
+                    imgEl.style.width = '320px';
+                    imgEl.style.height = 'auto';
+                    imgEl.style.maxHeight = '200px';
+                    imgEl.style.borderRadius = 'var(--border-radius)';
+                    imgEl.style.objectFit = 'contain';
+                }
             } else {
                 imgEl.style.display = 'none';
                 imgEl.src = '';
@@ -867,7 +901,7 @@
             buttons.forEach((btn, index) => {
                 const btnEl = document.createElement('button'); btnEl.className = 'popup-button'; btnEl.id = `popup-btn-${index}`; btnEl.innerText = btn.label;
                 container.appendChild(btnEl); activePopupElements.push({ container: btnEl, icon: btnEl });
-                setupSpringPhysics(btnEl);
+                setupSpringPhysics(btnEl, false);
             });
             const popup = document.getElementById('system-popup'); popup.style.display = 'flex';
             setTimeout(() => { popup.style.opacity = '1'; popup.classList.add('visible'); updateFocus(false); }, 50);
@@ -894,7 +928,7 @@
                 const res = await fetch(`${VIEW_CLOUD_URL}?action=getUpdateInfo`);
                 const info = await res.json();
                 
-                if (info && info.version && parseFloat(info.version) > CURRENT_OS_VERSION) {
+                if (info && info.version && compareVersions(info.version, CURRENT_OS_VERSION) > 0) {
                     const isSupported = info.supportedClientVersions && info.supportedClientVersions.some(v => v.toString().trim() === CLIENT_VERSION.toString());
                     
                     if (!isSupported) {
@@ -917,7 +951,8 @@
                             },
                             { label: 'Cancel', action: () => {} }
                         ],
-                        info.image
+                        info.image,
+                        'update'
                     );
                 } else {
                     showSystemPopup(
@@ -959,7 +994,7 @@
 
         async function executeAppInstall(app) {
             STATE.isInstallingApp = true;
-            showSystemPopup(app.name, "Downloading App...", [], app.art);
+            showSystemPopup(app.name, "Downloading App...", [], app.art, 'app');
             try {
                 const res = await fetch(`${VIEW_CLOUD_URL}?action=getAppCode&appName=${encodeURIComponent(app.name)}`);
                 const code = await res.text();
@@ -1027,7 +1062,7 @@
                 const tabEl = document.createElement('div'); tabEl.className = 'top-bar-tab'; tabEl.id = `top-bar-tab-${index}`; tabEl.innerText = tab.label;
                 if (tab.id === STATE.currentTab) tabEl.classList.add('active');
                 topBar.appendChild(tabEl); activeTopBarElements.push({ container: tabEl, icon: tabEl });
-                setupSpringPhysics(tabEl);
+                setupSpringPhysics(tabEl, false);
             });
         }
 
@@ -1089,7 +1124,7 @@
                 let v = setting.type === 'info' ? setting.value : (setting.type === 'cycle' ? setting.labels[setting.currentIndex] : '');
                 el.innerHTML = `<span>${setting.name}</span><span class="settings-value">${v}</span>`;
                 list.appendChild(el); DOM_CACHE.settings.push({ container: el, icon: el });
-                setupSpringPhysics(el);
+                setupSpringPhysics(el, false);
             });
         }
 
@@ -1295,96 +1330,43 @@
             }, 400);
         }
 
-        // Expanded clean-exit handler to address active playing resources when direct navigating home
+        // Expanded clean-exit handler to force kill ALL media states and perfectly reset to home
         function triggerHomeFromControlCenter() {
             closeControlCenter();
             
-            let fromScreen = null;
-            
-            // 1. Terminate Cinema player video context or Youtube references safely
-            if (STATE.currentScreen === 'player') {
-                fromScreen = document.getElementById('cinema-player');
-                const video = document.getElementById('cinema-video');
-                stopYTProgressTracking();
-                
-                let elapsed = 0, duration = 0;
-                if (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
-                    elapsed = ytPlayer.getCurrentTime();
-                    duration = ytPlayer.getDuration();
-                    const ytDiv = document.getElementById('cinema-youtube');
-                    if (ytDiv) ytDiv.classList.remove('visible');
-                    try { ytPlayer.pauseVideo(); ytPlayer.destroy(); ytPlayer = null; } catch(e) {}
-                    if (ytDiv) ytDiv.remove();
-                } else {
-                    elapsed = video.currentTime || 0;
-                    duration = video.duration || 0;
-                    try { video.pause(); } catch (e) {}
-                }
-                
-                try {
-                    if (elapsed < 20 || (duration && (duration - elapsed) < 180)) {
-                        localStorage.removeItem(`viewOS_resume_${STATE.activePlayingItemPath}`);
-                    } else if (duration) {
-                        localStorage.setItem(`viewOS_resume_${STATE.activePlayingItemPath}`, JSON.stringify({ current: elapsed, duration: duration, timestamp: Date.now() }));
-                    }
-                } catch(e) {}
-                
-                setTimeout(() => {
-                    video.style.display = 'block';
-                    try { video.src = ''; video.load(); } catch (e) {}
-                }, 500);
-            } 
-            // 2. Clear native Audio Player instances 
-            else if (STATE.currentScreen === 'audio_player') {
-                fromScreen = document.getElementById('audio-player-screen');
-                try {
-                    activeAudio.pause();
-                    activeAudio.currentTime = 0;
-                    activeAudio.src = '';
-                } catch(e) {}
-                fromScreen.classList.remove('visible');
-            } 
-            // 3. Clear residual app panels 
-            else if (STATE.currentScreen === 'media') {
-                fromScreen = document.getElementById('media-environment');
-                if (STATE.activeApp === 'music') {
-                    try {
-                        activeAudio.pause();
-                        activeAudio.currentTime = 0;
-                        activeAudio.src = '';
-                    } catch(e) {}
-                }
-            } else if (STATE.currentScreen === 'settings') {
-                fromScreen = document.getElementById('settings-environment');
-            } else if (STATE.currentScreen === 'custom_app') {
-                fromScreen = document.getElementById('custom-app-environment');
-                const iframe = document.getElementById('custom-app-iframe');
-                setTimeout(() => { iframe.srcdoc = ''; }, 500);
+            // 1. Force kill all media universally regardless of current screen state
+            if (activeAudio) {
+                try { activeAudio.pause(); activeAudio.currentTime = 0; activeAudio.src = ''; } catch(e) {}
             }
+            stopYTProgressTracking();
+            if (ytPlayer) {
+                try { ytPlayer.pauseVideo(); ytPlayer.destroy(); } catch(e) {}
+                ytPlayer = null;
+            }
+            const ytDiv = document.getElementById('cinema-youtube');
+            if (ytDiv) ytDiv.remove();
             
-            if (STATE.currentScreen === 'home') {
-                return;
+            const video = document.getElementById('cinema-video');
+            if (video) {
+                try { video.pause(); video.removeAttribute('src'); video.load(); } catch(e) {}
             }
 
-            // 4. Reset and enforce hidden DOM states of all potential viewport overlays
+            // 2. Identify the currently active overlay to transition away from
+            let fromScreen = null;
             const panels = ['media-environment', 'settings-environment', 'custom-app-environment', 'cinema-player', 'audio-player-screen'];
             panels.forEach(id => {
                 const el = document.getElementById(id);
-                if (el && el !== fromScreen) {
-                    el.classList.remove('screen-visible');
-                    el.style.display = 'none';
-                    el.style.transform = '';
-                    el.style.opacity = '';
-                    el.style.pointerEvents = '';
+                if (el && el.classList.contains('screen-visible')) {
+                    fromScreen = el;
                 }
             });
 
-            // 5. Instantly force-reset transforms of scroll wraps to home offsets
-            document.querySelectorAll('.scroll-wrapper').forEach(w => {
-                w.style.transform = 'translateY(0px)';
-            });
+            // 3. Purge custom iframe just in case
+            const iframe = document.getElementById('custom-app-iframe');
+            if (iframe) setTimeout(() => { iframe.srcdoc = ''; }, 500);
 
-            // 6. Navigate directly to Home
+            // 4. Wipe internal states and force scroll positions
+            document.querySelectorAll('.scroll-wrapper').forEach(w => w.style.transform = 'translateY(0px)');
             STATE.currentScreen = 'home';
             STATE.activeApp = null;
             updateColumns();
@@ -1393,6 +1375,8 @@
             if (fromScreen && fromScreen !== toScreen) {
                 navigateScreen(fromScreen, toScreen, false);
             } else {
+                toScreen.style.transform = '';
+                toScreen.style.opacity = '1';
                 toScreen.classList.add('screen-visible');
                 updateFocus(true);
             }
@@ -1551,17 +1535,18 @@
 
         function handleKeydownRaw(e) {
             if (STATE.isInstallingUpdate || STATE.isInstallingApp) { e.preventDefault(); return; }
-            if (STATE.currentScreen === 'custom_app') {
-                if (e.key === 'Escape' || e.key === 'Backspace') {
-                    if (!window.customAppExitTimeout) {
-                        window.customAppExitTimeout = setTimeout(() => {
-                            closeCustomApp();
-                            triggerSystemToast("Fallback App Exit Triggered");
-                        }, 2000);
-                    }
+
+            // GLOBAL BACK/ESCAPE HOLD OVERRIDE - Intercepts ALL screens including custom_apps
+            if (e.key === 'Escape' || e.key === 'Backspace') {
+                if (!isBackDown) {
+                    isBackDown = true; volumeOpenedByHold = false;
+                    backKeyTimeout = setTimeout(() => { volumeOpenedByHold = true; openControlCenter(); }, 400);
                 }
-                return;
+                if (STATE.currentScreen === 'custom_app') return;
             }
+
+            if (STATE.currentScreen === 'custom_app') return;
+
             if ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R') || e.key === 'F5') return;
             if (STATE.inSleep) { if (Date.now() - sleepActiveTime >= 1000) wakeUp(); e.preventDefault(); return; }
 
@@ -1569,21 +1554,23 @@
                 e.preventDefault();
                 if (!INPUT.enterPressed) { INPUT.enterPressed = true; INPUT.enterHoldTriggered = false; if (STATE.currentScreen === 'media' && !STATE.inPopup && STATE.mediaFocusArea !== 'top-bar' && STATE.activeApp !== 'store') INPUT.enterHoldTimer = setTimeout(() => { INPUT.enterHoldTriggered = true; triggerFavouritePopup(); }, 1700); } return;
             }
-            if (e.key === 'Escape' || e.key === 'Backspace') { if (!isBackDown) { isBackDown = true; volumeOpenedByHold = false; backKeyTimeout = setTimeout(() => { volumeOpenedByHold = true; openControlCenter(); }, 400); } return; }
+
             processNavigation(e.key);
         }
 
         function handleKeyupRaw(e) {
             if (STATE.isInstallingUpdate || STATE.isInstallingApp) return;
-            if (STATE.currentScreen === 'custom_app') {
-                if (e.key === 'Escape' || e.key === 'Backspace') {
-                    clearTimeout(window.customAppExitTimeout);
-                    window.customAppExitTimeout = null;
-                }
-                return;
+
+            // GLOBAL BACK/ESCAPE LIFT OVERRIDE
+            if (e.key === 'Escape' || e.key === 'Backspace') {
+                isBackDown = false; clearTimeout(backKeyTimeout); 
+                if (!volumeOpenedByHold && STATE.currentScreen !== 'custom_app') goBack();
+                if (STATE.currentScreen === 'custom_app') return;
             }
+
+            if (STATE.currentScreen === 'custom_app') return;
+
             if (e.key === 'Enter' || e.key === ' ') { if (INPUT.enterPressed) { clearTimeout(INPUT.enterHoldTimer); INPUT.enterHoldTimer = null; if (!INPUT.enterHoldTriggered) processNavigation('Enter'); INPUT.enterPressed = false; INPUT.enterHoldTriggered = false; } return; }
-            if (e.key === 'Escape' || e.key === 'Backspace') { isBackDown = false; clearTimeout(backKeyTimeout); if (!volumeOpenedByHold) goBack(); }
         }
 
         function goBack() {
@@ -1608,13 +1595,13 @@
             
             if (!isSupported) {
                 buttons.push({ label: 'Cancel', action: () => {} });
-                showSystemPopup(app.name, "Requires newer viewOS View Device.", buttons, app.art);
+                showSystemPopup(app.name, "Requires newer viewOS View Device.", buttons, app.art, 'app');
                 return;
             }
 
             if (!localApp) {
                 buttons.push({ label: 'Install', preservePopup: true, action: () => executeAppInstall(app) });
-            } else if (parseFloat(app.version) > parseFloat(localApp.version)) {
+            } else if (compareVersions(app.version, localApp.version) > 0) {
                 buttons.push({ label: 'Update', preservePopup: true, action: () => executeAppInstall(app) });
                 buttons.push({ label: 'Uninstall', action: () => executeAppUninstall(app) });
             } else {
@@ -1624,8 +1611,7 @@
             buttons.push({ label: 'Cancel', action: () => {} });
             
             const popupTitle = `${app.name}<span style="display: block; font-size: 1.3rem; color: var(--secondary-text); margin-top: 6px;">v${app.version}</span>`;
-            const popupDesc = "Manage this application.";
-            showSystemPopup(popupTitle, popupDesc, buttons, app.art);
+            showSystemPopup(popupTitle, "", buttons, app.art, 'app');
         }
 
         function processNavigation(key) {
@@ -1665,12 +1651,15 @@
                 const changed = (oldTarget !== getActiveTarget()); updateFocus(false, changed ? dx : 0, changed ? dy : 0); return;
             }
             if (STATE.currentScreen === 'player') {
+                const cv = document.getElementById('cinema-video');
+                const isYT = STATE.activePlayingItemPath && STATE.activePlayingItemPath.includes('.yt');
                 if (key === 'Enter') {
-                    const cv = document.getElementById('cinema-video'), isYT = STATE.activePlayingItemPath && STATE.activePlayingItemPath.includes('.yt');
                     if (isYT && ytPlayer && typeof ytPlayer.getPlayerState === 'function') { if (ytPlayer.getPlayerState() === YT.PlayerState.PLAYING) ytPlayer.pauseVideo(); else ytPlayer.playVideo(); } else { if (cv && cv.paused) cv.play(); else if (cv) cv.pause(); }
                     triggerCinemaOSD();
                 }
-                else if (key === 'ArrowRight' && !isYT) performScrub('right', 'cinema'); else if (key === 'ArrowLeft' && !isYT) performScrub('left', 'cinema'); return;
+                else if (key === 'ArrowRight') performScrub('right', 'cinema'); 
+                else if (key === 'ArrowLeft') performScrub('left', 'cinema'); 
+                return;
             }
             if (STATE.currentScreen === 'audio_player') {
                 if (key === 'Enter') { if (activeAudio.paused) activeAudio.play(); else activeAudio.pause(); updatePlayStateIcon('audio'); }
@@ -1738,9 +1727,20 @@
                 const back = gp.buttons[1]?.pressed, square = gp.buttons[2]?.pressed; 
                 if (back && square) { if (STATE.forceRebootStart === 0) { STATE.forceRebootStart = Date.now(); } else if (Date.now() - STATE.forceRebootStart >= 3000) { location.reload(); return; } } else { STATE.forceRebootStart = 0; }
 
+                // Universal Back/B hold to open CC - Overrides custom apps unconditionally
+                if (back && !lastGamepadState.back) { 
+                    gamepadBackPressTime = Date.now(); volumeOpenedByHold = false; 
+                } else if (back && lastGamepadState.back) { 
+                    if (!volumeOpenedByHold && (Date.now() - gamepadBackPressTime > 400)) { 
+                        volumeOpenedByHold = true; openControlCenter(); 
+                    } 
+                } else if (!back && lastGamepadState.back) { 
+                    if (!volumeOpenedByHold && STATE.currentScreen !== 'custom_app') { goBack(); } 
+                }
+
                 if (STATE.currentScreen === 'custom_app') {
-                    requestAnimationFrame(pollGamepads);
-                    return;
+                    lastGamepadState = { ...lastGamepadState, back: back };
+                    break;
                 }
 
                 const up = gp.buttons[12]?.pressed || gp.axes[1] < -0.5;
@@ -1759,7 +1759,6 @@
                 if (dir) { if (gamepadActiveDir !== dir) { gamepadActiveDir = dir; gamepadHoldStartTime = Date.now(); gamepadLastRepeatTime = Date.now(); processNavigation({ up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[dir]); } else if (Date.now() - gamepadHoldStartTime > 350 && Date.now() - gamepadLastRepeatTime > 80) { processNavigation({ up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[dir]); gamepadLastRepeatTime = Date.now(); } } else gamepadActiveDir = null; 
 
                 if (enter) { if (!gpEnterPressed) { gpEnterPressed = true; gpEnterHoldTriggered = false; if (STATE.currentScreen === 'media' && !STATE.inPopup && STATE.mediaFocusArea !== 'top-bar' && STATE.activeApp !== 'store') gpEnterHoldTimer = setTimeout(() => { gpEnterHoldTriggered = true; triggerFavouritePopup(); }, 1700); } } else { if (gpEnterPressed) { clearTimeout(gpEnterHoldTimer); gpEnterHoldTimer = null; if (!gpEnterHoldTriggered) processNavigation('Enter'); gpEnterPressed = false; gpEnterHoldTriggered = false; } }
-                if (back && !lastGamepadState.back) { gamepadBackPressTime = Date.now(); volumeOpenedByHold = false; } else if (back && lastGamepadState.back) { if (!volumeOpenedByHold && (Date.now() - gamepadBackPressTime > 400)) { volumeOpenedByHold = true; openControlCenter(); } } else if (!back && lastGamepadState.back) { if (!volumeOpenedByHold) goBack(); }
 
                 lastGamepadState = { up, down, left, right, enter, back, triangle: false }; break; 
             } requestAnimationFrame(pollGamepads);
