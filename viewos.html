@@ -393,7 +393,7 @@
 
         // View Cloud Configuration & Local Version Parameters
         const VIEW_CLOUD_URL = 'https://script.google.com/macros/s/AKfycbzR_BI7fcEi1B_ZGG0nlP7Xw6vVSJ9WCDnlrsBWN8jDKmUmUtfNTJz0uEzMZsoDFeOgEA/exec';
-        const CURRENT_OS_VERSION = '0.8.3';
+        const CURRENT_OS_VERSION = '0.8.4';
         const CLIENT_VERSION = 1;
 
         (function() {
@@ -1957,52 +1957,92 @@
             const changed = (oldTarget !== getActiveTarget()); updateFocus(false, changed ? dx : 0, changed ? dy : 0);
         }
 
-        let lastGamepadState = { up: false, down: false, left: false, right: false, enter: false, back: false, triangle: false }, gamepadBackPressTime = 0, gamepadActiveDir = null, gamepadHoldStartTime = 0, gamepadLastRepeatTime = 0, gpEnterPressed = false, gpEnterHoldTriggered = false, gpEnterHoldTimer = null;
+        let lastGamepadState = { up: false, down: false, left: false, right: false, enter: false, back: false, triangle: false }, gamepadBackPressTime = 0, gamepadActiveDir = null, gamepadHoldStartTime = 0, gamepadLastRepeatTime = 0, gpEnterPressed = false, gpEnterHoldTriggered = false, gpEnterHoldTimer = null, gpSquarePressed = false;
         function pollGamepads() {
             if (STATE.isInstallingUpdate || STATE.isInstallingApp) return requestAnimationFrame(pollGamepads);
             
             const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+            let activeGamepad = null;
             for (let i = 0; i < gamepads.length; i++) {
-                const gp = gamepads[i]; if (!gp) continue;
-                
-                const back = gp.buttons[1]?.pressed, square = gp.buttons[2]?.pressed; 
-                if (back && square) { if (STATE.forceRebootStart === 0) { STATE.forceRebootStart = Date.now(); } else if (Date.now() - STATE.forceRebootStart >= 3000) { location.reload(); return; } } else { STATE.forceRebootStart = 0; }
-
-                // Universal Back/B hold to open CC - Overrides custom apps unconditionally
-                if (back && !lastGamepadState.back) { 
-                    gamepadBackPressTime = Date.now(); volumeOpenedByHold = false; 
-                } else if (back && lastGamepadState.back) { 
-                    if (!volumeOpenedByHold && (Date.now() - gamepadBackPressTime > 400)) { 
-                        volumeOpenedByHold = true; openControlCenter(); 
-                    } 
-                } else if (!back && lastGamepadState.back) { 
-                    if (!volumeOpenedByHold && STATE.currentScreen !== 'custom_app') { goBack(); } 
+                if (gamepads[i]) {
+                    const hasInput = gamepads[i].buttons.some(b => b.pressed) || gamepads[i].axes.some(a => Math.abs(a) > 0.15);
+                    if (hasInput) {
+                        activeGamepad = gamepads[i];
+                        break;
+                    }
                 }
-
-                if (STATE.currentScreen === 'custom_app') {
-                    lastGamepadState = { ...lastGamepadState, back: back };
-                    break;
+            }
+            if (!activeGamepad) {
+                for (let i = 0; i < gamepads.length; i++) {
+                    if (gamepads[i]) {
+                        activeGamepad = gamepads[i];
+                        break;
+                    }
                 }
+            }
+            
+            if (!activeGamepad) return requestAnimationFrame(pollGamepads);
+            const gp = activeGamepad;
+            
+            const back = gp.buttons[1]?.pressed, square = gp.buttons[2]?.pressed; 
+            if (back && square) { if (STATE.forceRebootStart === 0) { STATE.forceRebootStart = Date.now(); } else if (Date.now() - STATE.forceRebootStart >= 3000) { location.reload(); return; } } else { STATE.forceRebootStart = 0; }
 
-                const up = gp.buttons[12]?.pressed || gp.axes[1] < -0.5;
-                const down = gp.buttons[13]?.pressed || gp.axes[1] > 0.5;
-                const left = gp.buttons[14]?.pressed || gp.axes[0] < -0.5;
-                const right = gp.buttons[15]?.pressed || gp.axes[0] > 0.5;
-                const enter = gp.buttons[0]?.pressed;
+            // Universal Back/B hold to open CC - Overrides custom apps unconditionally
+            if (back && !lastGamepadState.back) { 
+                gamepadBackPressTime = Date.now(); volumeOpenedByHold = false; 
+            } else if (back && lastGamepadState.back) { 
+                if (!volumeOpenedByHold && (Date.now() - gamepadBackPressTime > 400)) { 
+                    volumeOpenedByHold = true; openControlCenter(); 
+                } 
+            } else if (!back && lastGamepadState.back) { 
+                if (!volumeOpenedByHold && STATE.currentScreen !== 'custom_app') { goBack(); } 
+            }
 
-                if (STATE.inSleep) {
-                    let input = gp.buttons.some(b => b.pressed) || gp.axes.some(a => Math.abs(a) > 0.5);
-                    if (input && !(back && square) && Date.now() - sleepActiveTime >= 1000) wakeUp(); 
-                    lastGamepadState = { up, down, left, right, enter, back, triangle: false }; break; 
+            if (STATE.currentScreen === 'custom_app') {
+                lastGamepadState = { ...lastGamepadState, back: back };
+                return requestAnimationFrame(pollGamepads);
+            }
+
+            const up = gp.buttons[12]?.pressed || gp.axes[1] < -0.5;
+            const down = gp.buttons[13]?.pressed || gp.axes[1] > 0.5;
+            const left = gp.buttons[14]?.pressed || gp.axes[0] < -0.5;
+            const right = gp.buttons[15]?.pressed || gp.axes[0] > 0.5;
+            const enter = gp.buttons[0]?.pressed;
+
+            if (STATE.inSleep) {
+                let input = gp.buttons.some(b => b.pressed) || gp.axes.some(a => Math.abs(a) > 0.5);
+                if (input && !(back && square) && Date.now() - sleepActiveTime >= 1000) wakeUp(); 
+                lastGamepadState = { up, down, left, right, enter, back, triangle: false }; 
+                return requestAnimationFrame(pollGamepads);
+            }
+
+            let dir = up ? 'up' : down ? 'down' : left ? 'left' : right ? 'right' : null;
+            if (dir) { if (gamepadActiveDir !== dir) { gamepadActiveDir = dir; gamepadHoldStartTime = Date.now(); gamepadLastRepeatTime = Date.now(); processNavigation({ up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[dir]); } else if (Date.now() - gamepadHoldStartTime > 350 && Date.now() - gamepadLastRepeatTime > 80) { processNavigation({ up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[dir]); gamepadLastRepeatTime = Date.now(); } } else gamepadActiveDir = null; 
+
+            // Handle Square (Button 2) to toggle Favourites
+            if (square && !back) {
+                if (!gpSquarePressed) {
+                    gpSquarePressed = true;
+                    if (STATE.currentScreen === 'media' && !STATE.inPopup && STATE.mediaFocusArea !== 'top-bar' && STATE.activeApp !== 'store') {
+                        triggerFavouritePopup();
+                    }
                 }
+            } else if (!square) {
+                gpSquarePressed = false;
+            }
 
-                let dir = up ? 'up' : down ? 'down' : left ? 'left' : right ? 'right' : null;
-                if (dir) { if (gamepadActiveDir !== dir) { gamepadActiveDir = dir; gamepadHoldStartTime = Date.now(); gamepadLastRepeatTime = Date.now(); processNavigation({ up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[dir]); } else if (Date.now() - gamepadHoldStartTime > 350 && Date.now() - gamepadLastRepeatTime > 80) { processNavigation({ up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[dir]); gamepadLastRepeatTime = Date.now(); } } else gamepadActiveDir = null; 
+            // Handle Enter (Button 0) immediately on press down (retains active user gesture context for browsers)
+            if (enter) { 
+                if (!gpEnterPressed) { 
+                    gpEnterPressed = true; 
+                    processNavigation('Enter'); 
+                } 
+            } else { 
+                gpEnterPressed = false; 
+            }
 
-                if (enter) { if (!gpEnterPressed) { gpEnterPressed = true; gpEnterHoldTriggered = false; if (STATE.currentScreen === 'media' && !STATE.inPopup && STATE.mediaFocusArea !== 'top-bar' && STATE.activeApp !== 'store') gpEnterHoldTimer = setTimeout(() => { gpEnterHoldTriggered = true; triggerFavouritePopup(); }, 1700); } } else { if (gpEnterPressed) { clearTimeout(gpEnterHoldTimer); gpEnterHoldTimer = null; if (!gpEnterHoldTriggered) processNavigation('Enter'); gpEnterPressed = false; gpEnterHoldTriggered = false; } }
-
-                lastGamepadState = { up, down, left, right, enter, back, triangle: false }; break; 
-            } requestAnimationFrame(pollGamepads);
+            lastGamepadState = { up, down, left, right, enter, back, triangle: false };
+            requestAnimationFrame(pollGamepads);
         }
 
         let lastTargetElement = null;
