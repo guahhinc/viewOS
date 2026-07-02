@@ -277,13 +277,6 @@
             opacity: 0; transition: opacity 0.3s ease;
         }
 
-        #ai-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: transparent !important; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-            z-index: 2147483647; display: none; flex-direction: column; justify-content: flex-end; align-items: center;
-            opacity: 0; transition: opacity 0.4s ease; pointer-events: none;
-        }
-
         .top-bar-tab, .settings-item, .popup-button {
             transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), color 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             box-shadow: none !important;
@@ -291,27 +284,7 @@
 
         .top-bar-tab.is-focused, .settings-item.is-focused, .popup-button.is-focused { background-color: #ffffff !important; color: #000000 !important; }
         .settings-item.is-focused .settings-value { color: #333333 !important; }
-
-        .suggestion-item {
-            display: flex; align-items: center; gap: 15px; padding: 12px 15px; border-radius: var(--border-radius);
-            background: rgba(255, 255, 255, 0.04); cursor: pointer; transition: background-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
-            width: 100%; scroll-margin: 10px;
-        }
-        .suggestion-item.is-focused { background-color: #ffffff !important; color: #000000 !important; transform: scale(1.03); }
-        .suggestion-item.is-focused * { color: #000000 !important; }
         .tilted-focus { transition: none !important; }
-
-        @keyframes blobOne { 0% { transform: translate(0px, 0px) scale(1); } 33% { transform: translate(25px, -35px) scale(1.15); } 66% { transform: translate(-30px, 20px) scale(0.85); } 100% { transform: translate(0px, 0px) scale(1); } }
-        @keyframes blobTwo { 0% { transform: translate(0px, 0px) scale(1); } 25% { transform: translate(-35px, 25px) scale(0.8); } 50% { transform: translate(20px, -45px) scale(1.25); } 75% { transform: translate(30px, 15px) scale(0.9); } 100% { transform: translate(0px, 0px) scale(1); } }
-        @keyframes blobThree { 0% { transform: translate(0px, 0px) scale(1.1); } 50% { transform: translate(35px, 30px) scale(0.8); } 100% { transform: translate(0px, 0px) scale(1.1); } }
-        @keyframes blobFour { 0% { transform: translate(0px, 0px) scale(0.9); } 40% { transform: translate(-20px, -30px) scale(1.2); } 80% { transform: translate(25px, -15px) scale(0.85); } 100% { transform: translate(0px, 0px) scale(0.9); } }
-
-        #siri-orb.is-talking .siri-blob:nth-child(1) { animation-duration: 2.2s !important; }
-        #siri-orb.is-talking .siri-blob:nth-child(2) { animation-duration: 2.8s !important; }
-        #siri-orb.is-talking .siri-blob:nth-child(3) { animation-duration: 2.4s !important; }
-        #siri-orb.is-talking .siri-blob:nth-child(4) { animation-duration: 3.2s !important; }
-        #siri-orb.is-talking .siri-blob:nth-child(5) { animation-duration: 2.6s !important; }
-        #siri-orb.is-talking .siri-blob:nth-child(6) { animation-duration: 3.5s !important; }
     </style>
 </head>
 <body>
@@ -379,47 +352,25 @@
         </div>
     </div>
 
-    <!-- Enhanced System Popup with circular image support and shadow removed -->
+    <!-- Enhanced Circular System Popup: Upscaled update icon, shadow completely removed -->
     <div id="system-popup">
         <div id="system-popup-content" style="background-color: transparent; border: none; padding: 40px; width: 90%; max-width: 600px; display: flex; flex-direction: column; align-items: center; text-align: center; transition: opacity 0.35s ease;">
-            <img id="popup-image" style="display: none; width: 140px; height: 140px; object-fit: cover; border-radius: 50%; margin-bottom: 25px; box-shadow: none !important;">
+            <img id="popup-image" style="display: none; width: 200px; height: 200px; object-fit: cover; border-radius: 50%; margin-bottom: 25px; box-shadow: none !important;">
             <h2 id="popup-title" style="font-size: 2.8rem; margin-top: 0; margin-bottom: 15px; color: #ffffff;">Title</h2>
             <p id="popup-desc" style="font-size: 1.5rem; color: var(--secondary-text); margin-bottom: 40px; line-height: 1.5;"></p>
             <div id="popup-buttons-container" style="display: flex; flex-direction: column; width: 100%; gap: 15px; align-items: center;"></div>
         </div>
     </div>
 
-    <div id="ai-overlay">
-        <div id="ai-container" style="position: absolute; bottom: 40px; right: 40px; display: flex; flex-direction: column; align-items: flex-end; gap: 20px; pointer-events: auto;">
-            <div id="ai-text-bubble" style="background: rgba(15, 15, 15, 0.55); backdrop-filter: blur(35px) saturate(1.7); -webkit-backdrop-filter: blur(35px) saturate(1.7); border-radius: 20px; padding: 22px 28px; width: 380px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); opacity: 0; transition: opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); max-height: 400px; overflow-y: auto; border: none !important;">
-                <div id="ai-text" style="font-size: 1.6rem; color: #ffffff; text-align: left; line-height: 1.4; font-weight: 300;">Listening...</div>
-                <div id="ai-suggestions-container" style="display: none; flex-direction: column; margin-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 15px; width: 100%;">
-                    <div style="font-size: 1.15rem; color: var(--secondary-text); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 400;">Suggested Shows</div>
-                    <div id="ai-suggestions-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 210px; overflow-y: auto; scrollbar-width: none; padding-right: 2px; width: 100%;"></div>
-                </div>
-            </div>
-            <div id="siri-orb" style="position: relative; width: 110px; height: 110px; border-radius: 50%; background: #000000; overflow: hidden; opacity: 0; transition: opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6); border: none !important;">
-                <div style="position: absolute; width: 100%; height: 100%; filter: blur(14px); mix-blend-mode: screen;">
-                    <div class="siri-blob" style="position: absolute; width: 105px; height: 105px; background: #af52de; border-radius: 50%; top: 0px; left: 0px; opacity: 0.9; animation: blobOne 5.5s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;"></div>
-                    <div class="siri-blob" style="position: absolute; width: 100px; height: 100px; background: #ff2d55; border-radius: 50%; bottom: 0px; right: 0px; opacity: 0.9; animation: blobTwo 7.2s cubic-bezier(0.33, 1, 0.68, 1) infinite;"></div>
-                    <div class="siri-blob" style="position: absolute; width: 95px; height: 95px; background: #007aff; border-radius: 50%; top: -5px; right: 0px; opacity: 0.9; animation: blobThree 6.1s ease-in-out infinite;"></div>
-                    <div class="siri-blob" style="position: absolute; width: 90px; height: 90px; background: #001340; border-radius: 50%; bottom: -5px; left: 0px; opacity: 0.85; animation: blobFour 8.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;"></div>
-                    <div class="siri-blob" style="position: absolute; width: 85px; height: 85px; background: #ffcc00; border-radius: 50%; top: 10px; left: 10px; opacity: 0.85; animation: blobOne 6.5s ease-in-out infinite;"></div>
-                    <div class="siri-blob" style="position: absolute; width: 10px; height: 10px; background: #4cd964; border-radius: 50%; bottom: 35px; right: 35px; opacity: 0.05; animation: blobTwo 9.0s ease-in-out infinite;"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="ai.js" onerror="console.warn('ai.js not found. Guahh AI commands will be disabled.'); window.GuahhAI = null;"></script>
     <script src="content.js" onerror="console.warn('Local content.js missing. Operating without local database.');"></script>
 
     <script>
         const db = window.contentRegistry || [];
 
-        // View Cloud Configuration
+        // View Cloud Configuration & Local Version Parameters
         const VIEW_CLOUD_URL = 'https://script.google.com/macros/s/AKfycbwb9PmQmUVrEh4YtA0hIt1GbHM-EcC6QaUnV5jLGeNBFdyXAnM3NF5TnSk2lRoyi1Kblw/exec';
-        const CURRENT_OS_VERSION = 0.2;
+        const CURRENT_OS_VERSION = 0.3;
+        const CLIENT_VERSION = 1;
 
         (function() {
             const tag = document.createElement('script');
@@ -521,7 +472,7 @@
         const STATE = {
             focusedIndex: 0, settingsFocusedIndex: 0, mediaFocusedIndex: 0, topBarFocusedIndex: 0,
             currentScreen: 'home', activeApp: null, activePlayingItemPath: null,
-            selectedShow: null, savedShowIndex: 0, inControlCenter: false, inSleep: false, inAI: false, mediaLaunchedByAI: false,
+            selectedShow: null, savedShowIndex: 0, inControlCenter: false, inSleep: false, mediaLaunchedByAI: false,
             triangleHoldStart: 0, columns: 4, forceRebootStart: 0, inPopup: false, popupFocusedIndex: 0,
             mediaFocusArea: 'grid', currentTab: 'all', isNavigating: false,
             isInstallingUpdate: false, // Prevents interface actions during high-priority update installations
@@ -531,7 +482,7 @@
             lastAudioSeekTime: 0, audioSeekAcceleration: 5, audioScrubbingTime: null, audioSeekCommitTimer: null,
 
             // Joystick/Mouse micro-translation states
-            joyX: 0, joyY: 0, focusScale: 1.0, aiFocusedSuggestionIndex: -1, ccFocusedIndex: 0 
+            joyX: 0, joyY: 0, focusScale: 1.0, ccFocusedIndex: 0 
         };
 
         const DB_ITEM_ELEMENTS = new Map();
@@ -671,7 +622,6 @@
             cv.addEventListener('ended', closeCinemaPlayer);
 
             updateVolumeUI(); requestAnimationFrame(pollGamepads);
-            if (window.speechSynthesis) { window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices(); }
 
             if (typeof YT !== 'undefined' && YT.Player) initDurationPlayer();
             requestAnimationFrame(tickMicroanimations);
@@ -685,9 +635,6 @@
                         const homeScreen = document.getElementById('home-screen');
                         if (homeScreen) homeScreen.classList.add('screen-visible');
                         updateFocus(true);
-                        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => stream.getTracks().forEach(track => track.stop())).catch(() => {});
-                        }
                     }, 800);
                 }
             }, 3000);
@@ -695,170 +642,6 @@
 
         // Export OS Initialization globally for direct loader access
         window.initOS = initOS;
-
-        /* Guahh AI Integration */
-        let aiAudioContext, aiAnalyser, aiMicSource, isAITalking = false, aiRecognition = null, aiSpeechRequested = false, currentSessionText = '';
-
-        function updateWaveframe() {
-            if (!STATE.inAI) return;
-            const orb = document.getElementById('siri-orb');
-            if (orb) {
-                orb.classList.toggle('is-talking', isAITalking);
-                let scale = 1.0;
-                if (isAITalking) { scale = 1.45 + Math.sin(Date.now() / 70) * 0.15; } 
-                else if (aiAnalyser) {
-                    const array = new Uint8Array(aiAnalyser.frequencyBinCount); aiAnalyser.getByteFrequencyData(array);
-                    let avg = array.reduce((a,b)=>a+b,0) / array.length; scale = 1.0 + Math.max(0, avg / 110);
-                }
-                orb.style.transform = `scale(${scale})`;
-            } requestAnimationFrame(updateWaveframe);
-        }
-
-        async function openGuahhAI() {
-            if (STATE.inAI || !window.GuahhAI || STATE.isInstallingUpdate) return;
-            STATE.inAI = true; aiSpeechRequested = true; isAITalking = false; currentSessionText = '';
-            
-            const overlay = document.getElementById('ai-overlay'), textEl = document.getElementById('ai-text');
-            textEl.style.color = '#ffffff'; textEl.innerText = "Listening..."; overlay.style.display = 'flex';
-            document.getElementById('focus-ring').style.opacity = '0';
-            
-            if (STATE.currentScreen === 'player') {
-                const cv = document.getElementById('cinema-video'); if (cv && !cv.paused) cv.pause();
-                if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') ytPlayer.pauseVideo();
-            } else if (STATE.currentScreen === 'audio_player' && !activeAudio.paused) activeAudio.pause();
-
-            setTimeout(() => { overlay.style.opacity = '1'; document.getElementById('siri-orb').style.opacity = '1'; document.getElementById('ai-text-bubble').style.opacity = '1'; }, 50);
-            updateWaveframe();
-
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                aiAudioContext = new (window.AudioContext || window.webkitAudioContext)();
-                aiAnalyser = aiAudioContext.createAnalyser(); aiAnalyser.smoothingTimeConstant = 0.6; aiAnalyser.fftSize = 512;
-                aiMicSource = aiAudioContext.createMediaStreamSource(stream); aiMicSource.connect(aiAnalyser);
-            } catch (err) {}
-
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (SpeechRecognition) {
-                aiRecognition = new SpeechRecognition(); aiRecognition.continuous = false; aiRecognition.interimResults = true; aiRecognition.lang = 'en-US';
-                aiRecognition.onresult = (event) => {
-                    let interim = '', final = '';
-                    for (let i = event.resultIndex; i < event.results.length; ++i) { if (event.results[i].isFinal) final += event.results[i][0].transcript; else interim += event.results[i][0].transcript; }
-                    if (final) currentSessionText += final + ' ';
-                    const displayTxt = (currentSessionText + interim).trim(); if (displayTxt) textEl.innerText = displayTxt;
-                    if (final) processGuahhAITranscript(currentSessionText.trim());
-                };
-                aiRecognition.onerror = (e) => {
-                    if (e.error === 'no-speech' || e.error === 'aborted') return;
-                    textEl.innerText = (e.error === 'not-allowed') ? "Mic blocked." : "Error."; setTimeout(closeGuahhAI, 2500);
-                };
-                aiRecognition.onend = () => { if (aiSpeechRequested && textEl.innerText === "Listening...") closeGuahhAI(); };
-                aiRecognition.start();
-            } else { textEl.innerText = "Not supported."; setTimeout(closeGuahhAI, 3000); }
-        }
-
-        function closeGuahhAI() {
-            if (!STATE.inAI) return;
-            STATE.inAI = false; aiSpeechRequested = false;
-            volumeOpenedByHold = true; gamepadBackPressTime = Date.now() + 999999; isBackDown = true; clearTimeout(backKeyTimeout);
-            
-            try { if (aiRecognition) aiRecognition.stop(); } catch(e) {}
-            if (aiMicSource) { aiMicSource.mediaStream.getTracks().forEach(t => t.stop()); aiMicSource.disconnect(); aiAnalyser.disconnect(); if (aiAudioContext && aiAudioContext.state !== 'closed') aiAudioContext.close(); }
-            if (window.speechSynthesis) window.speechSynthesis.cancel();
-
-            const overlay = document.getElementById('ai-overlay');
-            document.getElementById('siri-orb').style.opacity = '0'; document.getElementById('ai-text-bubble').style.opacity = '0';
-            overlay.style.opacity = '0';
-            const suggestionsContainer = document.getElementById('ai-suggestions-container'); if (suggestionsContainer) suggestionsContainer.style.display = 'none';
-            
-            setTimeout(() => {
-                overlay.style.display = 'none'; updateFocus(false);
-                if (STATE.currentScreen === 'player') triggerCinemaOSD();
-                if (STATE.currentScreen === 'audio_player') updatePlayStateIcon('audio');
-            }, 400);
-        }
-
-        async function processGuahhAITranscript(transcript) {
-            aiSpeechRequested = false; try { if (aiRecognition) aiRecognition.stop(); } catch(e) {}
-            const textEl = document.getElementById('ai-text'); textEl.innerText = transcript;
-            const response = await window.GuahhAI.processQuery(transcript, { db: window.contentRegistry || [] });
-            textEl.innerText = response.text; textEl.style.color = "var(--secondary-text)";
-            
-            let suggestions = response.suggestions || response.recommendations || response.shows;
-            if (!suggestions || suggestions.length === 0) {
-                const queryWords = transcript.toLowerCase().split(/\s+/).filter(w => w.length > 2);
-                if (queryWords.length > 0) {
-                    const tvshows = db.filter(item => item && item.app === 'tvshows'); const showMap = {};
-                    tvshows.forEach(item => { const showName = item.show || "YouTube"; if (!showMap[showName]) showMap[showName] = item; });
-                    const uniqueShows = Object.values(showMap);
-                    const matches = uniqueShows.filter(show => { const showNameLower = (show.show || '').toLowerCase(); return queryWords.some(word => showNameLower.includes(word)); });
-                    if (matches.length > 0) suggestions = matches.map(m => ({ title: m.show, art: m.art, genre: m.genre || 'Suggested TV Show' }));
-                }
-            }
-            if (suggestions && suggestions.length > 0) window.showAISuggestions(suggestions);
-            speakGuahhAIResponse(response.text, () => { if (response.actions) { executeGuahhAIActions(response.actions); closeGuahhAI(); } });
-        }
-
-        function speakGuahhAIResponse(text, onComplete) {
-            if (window.speechSynthesis) window.speechSynthesis.cancel();
-            const chunks = text.match(/.{1,100}(?=\s|$)/g) || [text]; let currentChunk = 0;
-            function playNextChunk() {
-                if (currentChunk >= chunks.length) { isAITalking = false; if (onComplete) onComplete(); return; }
-                const t = chunks[currentChunk];
-                const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=en&client=tw-ob&q=${encodeURIComponent(t)}`;
-                const audio = new Audio(url); audio.volume = settingsRegistry[1].options[settingsRegistry[1].currentIndex] / 100;
-                audio.onplay = () => { isAITalking = true; };
-                audio.onended = () => { currentChunk++; playNextChunk(); };
-                audio.onerror = () => { speakLocalFallback(text, onComplete); };
-                audio.play().catch(() => { speakLocalFallback(text, onComplete); });
-            } playNextChunk();
-        }
-
-        function speakLocalFallback(text, onComplete) {
-            if (!window.speechSynthesis) { if (onComplete) onComplete(); return; }
-            const utterance = new SpeechSynthesisUtterance(text); utterance.volume = settingsRegistry[1].options[settingsRegistry[1].currentIndex] / 100;
-            const voices = window.speechSynthesis.getVoices();
-            const premiumVoice = voices.find(v => v.name.includes("Natural") || v.name.includes("Google") || v.lang.startsWith("en"));
-            if (premiumVoice) utterance.voice = premiumVoice;
-            utterance.onstart = () => { isAITalking = true; }; utterance.onend = utterance.onerror = () => { isAITalking = false; if (onComplete) onComplete(); };
-            window.speechSynthesis.speak(utterance);
-        }
-
-        function executeGuahhAIActions(actions) {
-            actions.forEach(action => {
-                switch(action.type) {
-                    case 'GO_HOME': if (STATE.currentScreen === 'player') { STATE.mediaLaunchedByAI = true; closeCinemaPlayer(); } else if (STATE.currentScreen === 'audio_player') { STATE.mediaLaunchedByAI = true; closeAudioPlayer(); } else closeAppPanel(); break;
-                    case 'OPEN_APP': openAppPanel(action.appId); break;
-                    case 'PLAYBACK_CONTROL':
-                        if (STATE.currentScreen === 'player') {
-                            const cv = document.getElementById('cinema-video'), isYT = STATE.activePlayingItemPath && STATE.activePlayingItemPath.includes('.yt');
-                            if (action.command === 'pause') { if (isYT && ytPlayer) ytPlayer.pauseVideo(); else cv.pause(); }
-                            else if (action.command === 'play') { if (isYT && ytPlayer) ytPlayer.playVideo(); else cv.play(); }
-                            else if (action.command === 'seek_forward') performScrub('right', 'cinema');
-                            else if (action.command === 'seek_backward') performScrub('left', 'cinema');
-                            triggerCinemaOSD();
-                        } else if (STATE.currentScreen === 'audio_player') {
-                            if (action.command === 'pause') activeAudio.pause(); else if (action.command === 'play') activeAudio.play();
-                            else if (action.command === 'seek_forward') performScrub('right', 'audio');
-                            else if (action.command === 'seek_backward') performScrub('left', 'audio');
-                            updatePlayStateIcon('audio');
-                        } break;
-                    case 'ADJUST_VOLUME':
-                        const volSet = settingsRegistry[1]; volSet.currentIndex = action.direction === 'up' ? Math.min(volSet.options.length - 1, volSet.currentIndex + 1) : Math.max(0, volSet.currentIndex - 1);
-                        updateVolumeUI(); triggerVolumeOverlay(); break;
-                    case 'SET_VOLUME':
-                        const exact = settingsRegistry[1]; let bIdx = 0, bDiff = 100;
-                        exact.options.forEach((o, i) => { if (Math.abs(o - action.value) < bDiff) { bDiff = Math.abs(o - action.value); bIdx = i; } });
-                        exact.currentIndex = bIdx; updateVolumeUI(); triggerVolumeOverlay(); break;
-                    case 'SLEEP': startSleep(); break;
-                    case 'REBOOT': location.reload(); break;
-                    case 'CLEAR_DATA': 
-                        try { localStorage.clear(); } catch(e) {}
-                        settingsRegistry[1].currentIndex = 5; updateVolumeUI(); renderSettingsList(); triggerSystemToast("All Data Cleared"); break;
-                    case 'PLAY_MEDIA': STATE.mediaLaunchedByAI = true; if (action.item.app === 'music') playAudioTrack(action.item); else launchCinemaPlayer(action.item); break;
-                    case 'PLAY_SHOW': STATE.selectedShow = action.showName; STATE.savedShowIndex = 0; STATE.currentTab = 'all'; openAppPanel('tvshows'); break;
-                }
-            });
-        }
 
         let ytPlayer = null, ytProgressInterval = null;
         function getYouTubeId(url) { 
@@ -1057,11 +840,29 @@
                 const info = await res.json();
                 
                 if (info && info.version && parseFloat(info.version) > CURRENT_OS_VERSION) {
+                    // Check client compatibility. String parse safety handles both numeric and string values
+                    const isSupported = info.supportedClientVersions && info.supportedClientVersions.some(v => v.toString().trim() === CLIENT_VERSION.toString());
+                    
+                    if (!isSupported) {
+                        // Device is out of date and discontinued on this version chain
+                        showSystemPopup(
+                            "Device out of date",
+                            "Your device or client has reached the end of viewOS support, please purchase a new View Device, contact support or keep using on current version.",
+                            [{ label: 'OK', action: () => {} }]
+                        );
+                        return;
+                    }
+
+                    // Pre-processed update title without standard descriptive prefix
                     showSystemPopup(
-                        `Software Update: viewOS ${info.version}`,
+                        `viewOS ${info.version}`,
                         info.description || "A new update is available.",
                         [
-                            { label: 'Download & Install', action: () => { installUpdate(); } },
+                            { 
+                                label: 'Download & Install', 
+                                preservePopup: true, // Seamless transition lock prevents flash or dialogue clear
+                                action: () => { installUpdate(); } 
+                            },
                             { label: 'Cancel', action: () => {} }
                         ],
                         info.image
@@ -1206,7 +1007,7 @@
         }
 
         function updateFocusRingPosition() {
-            const ring = document.getElementById('focus-ring'); if (['player','audio_player'].includes(STATE.currentScreen) || STATE.inSleep || STATE.inAI) return;
+            const ring = document.getElementById('focus-ring'); if (['player','audio_player'].includes(STATE.currentScreen) || STATE.inSleep) return;
             const target = getActiveTarget(); if (!target || !target.icon) return; let wrapper = null;
 
             if (STATE.inPopup) {
@@ -1240,7 +1041,7 @@
         function updateFocus(isInitialLoad = false, dx = 0, dy = 0) {
             document.querySelectorAll('.is-focused').forEach(el => el.classList.remove('is-focused'));
             const ring = document.getElementById('focus-ring');
-            if (['player','audio_player'].includes(STATE.currentScreen) || STATE.inSleep || STATE.inAI) { 
+            if (['player','audio_player'].includes(STATE.currentScreen) || STATE.inSleep) { 
                 ring.style.opacity = '0'; 
                 if (lastActiveTarget && lastActiveTarget.icon && lastActiveTarget.icon.springs) {
                     const s = lastActiveTarget.icon.springs; s.scale.target = 1.0; s.focusState.target = 0; s.posX.target = 0; s.posY.target = 0; lastActiveTarget.icon.style.zIndex = '1';
@@ -1425,17 +1226,12 @@
         function wakeUp() { if (!STATE.inSleep || Date.now() - sleepActiveTime < 1000) return; STATE.inSleep = false; const env = document.getElementById('sleep-environment'); env.style.opacity = '0'; setTimeout(() => { env.style.display = 'none'; updateFocus(false); }, 500); }
 
         const INPUT = { enterPressed: false, enterHoldTimer: null, enterHoldTriggered: false };
-        let isBackDown = false, volumeOpenedByHold = false, backKeyTimeout = null, keyboardTriangleStart = 0; 
+        let isBackDown = false, volumeOpenedByHold = false, backKeyTimeout = null; 
 
         function handleKeydownRaw(e) {
             if (STATE.isInstallingUpdate) { e.preventDefault(); return; } // Input lockout during critical system flashes
             if ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R') || e.key === 'F5') return;
-            if (e.key === 'Tab') { e.preventDefault(); if (keyboardTriangleStart === 0) keyboardTriangleStart = Date.now(); else if (Date.now() - keyboardTriangleStart > 200 && !STATE.inAI) { openGuahhAI(); keyboardTriangleStart = Date.now() + 999999; } return; }
             if (STATE.inSleep) { if (Date.now() - sleepActiveTime >= 1000) wakeUp(); e.preventDefault(); return; }
-            if (STATE.inAI) { 
-                if (e.key === 'Escape' || e.key === 'Backspace') { closeGuahhAI(); } 
-                else { const container = document.getElementById('ai-suggestions-container'); if (container && container.style.display === 'flex') { processAISuggestionsNavigation(e.key); e.preventDefault(); } } return; 
-            }
 
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
@@ -1446,16 +1242,14 @@
         }
 
         function handleKeyupRaw(e) {
-            if (e.key === 'Tab') { e.preventDefault(); if (keyboardTriangleStart > 0 && keyboardTriangleStart < Date.now() + 100000 && STATE.inAI) closeGuahhAI(); keyboardTriangleStart = 0; return; }
-            if (STATE.inAI || STATE.isInstallingUpdate) return;
+            if (STATE.isInstallingUpdate) return;
             if (e.key === 'Enter' || e.key === ' ') { if (INPUT.enterPressed) { clearTimeout(INPUT.enterHoldTimer); INPUT.enterHoldTimer = null; if (!INPUT.enterHoldTriggered) processNavigation('Enter'); INPUT.enterPressed = false; INPUT.enterHoldTriggered = false; } return; }
             if (e.key === 'Escape' || e.key === 'Backspace') { isBackDown = false; clearTimeout(backKeyTimeout); if (!volumeOpenedByHold) goBack(); }
         }
 
         function goBack() {
             if (STATE.isNavigating || STATE.isInstallingUpdate) return;
-            if (STATE.inAI) closeGuahhAI(); 
-            else if (STATE.inPopup) closeSystemPopup(); 
+            if (STATE.inPopup) closeSystemPopup(); 
             else if (STATE.inControlCenter) closeControlCenter();
             else if (STATE.currentScreen === 'player') { const osd = document.getElementById('cinema-osd'); if (osd && osd.classList.contains('visible')) { osd.classList.remove('visible'); clearTimeout(osdTimer); } else { closeCinemaPlayer(); } } 
             else if (STATE.currentScreen === 'audio_player') closeAudioPlayer(); 
@@ -1492,7 +1286,14 @@
             if (STATE.inPopup) {
                 if (key === 'ArrowDown' && STATE.popupFocusedIndex < activePopupButtons.length - 1) STATE.popupFocusedIndex++;
                 else if (key === 'ArrowUp' && STATE.popupFocusedIndex > 0) STATE.popupFocusedIndex--;
-                else if (key === 'Enter') { const btn = activePopupButtons[STATE.popupFocusedIndex]; closeSystemPopup(); if (btn && btn.action) btn.action(); }
+                else if (key === 'Enter') { 
+                    const btn = activePopupButtons[STATE.popupFocusedIndex]; 
+                    if (btn) {
+                        // Keep popup open for seamless transitions if preservePopup is configured
+                        if (!btn.preservePopup) closeSystemPopup(); 
+                        if (btn.action) btn.action(); 
+                    }
+                }
                 const changed = (oldTarget !== getActiveTarget()); updateFocus(false, changed ? dx : 0, changed ? dy : 0); return;
             }
             if (STATE.currentScreen === 'player') {
@@ -1565,18 +1366,12 @@
                 if (back && square) { if (STATE.forceRebootStart === 0) STATE.forceRebootStart = Date.now(); else if (Date.now() - STATE.forceRebootStart >= 3000) { location.reload(); return; } } else { STATE.forceRebootStart = 0; }
 
                 const up = gp.buttons[12]?.pressed || gp.axes[1] < -0.5, down = gp.buttons[13]?.pressed || gp.axes[1] > 0.5, left = gp.buttons[14]?.pressed || gp.axes[0] < -0.5, right = gp.buttons[15]?.pressed || gp.axes[0] > 0.5;
-                const enter = gp.buttons[0]?.pressed, triangle = gp.buttons[3]?.pressed;
-
-                if (triangle) { if (STATE.triangleHoldStart === 0) STATE.triangleHoldStart = Date.now(); else if (Date.now() - STATE.triangleHoldStart > 200 && !STATE.inAI) { openGuahhAI(); STATE.triangleHoldStart = Date.now() + 999999; } } else { if (STATE.triangleHoldStart > 0 && STATE.triangleHoldStart < Date.now() + 100000 && STATE.inAI) closeGuahhAI(); STATE.triangleHoldStart = 0; }
+                const enter = gp.buttons[0]?.pressed;
 
                 if (STATE.inSleep) {
                     let input = gp.buttons.some(b => b.pressed) || gp.axes.some(a => Math.abs(a) > 0.5);
                     if (input && !(back && square) && Date.now() - sleepActiveTime >= 1000) wakeUp(); 
-                    lastGamepadState = { up, down, left, right, enter, back, triangle }; break; 
-                }
-                if (STATE.inAI) { 
-                    if (back && !lastGamepadState.back) { closeGuahhAI(); } else { const container = document.getElementById('ai-suggestions-container'); if (container && container.style.display === 'flex') { let dir = null; if (up && !lastGamepadState.up) dir = 'ArrowUp'; else if (down && !lastGamepadState.down) dir = 'ArrowDown'; else if (enter && !lastGamepadState.enter) dir = 'Enter'; if (dir) processAISuggestionsNavigation(dir); } }
-                    lastGamepadState = { up, down, left, right, enter, back, triangle }; break; 
+                    lastGamepadState = { up, down, left, right, enter, back, triangle: false }; break; 
                 }
 
                 let dir = up ? 'up' : down ? 'down' : left ? 'left' : right ? 'right' : null;
@@ -1585,7 +1380,7 @@
                 if (enter) { if (!gpEnterPressed) { gpEnterPressed = true; gpEnterHoldTriggered = false; if (STATE.currentScreen === 'media' && !STATE.inPopup && STATE.mediaFocusArea !== 'top-bar') gpEnterHoldTimer = setTimeout(() => { gpEnterHoldTriggered = true; triggerFavouritePopup(); }, 1700); } } else { if (gpEnterPressed) { clearTimeout(gpEnterHoldTimer); gpEnterHoldTimer = null; if (!gpEnterHoldTriggered) processNavigation('Enter'); gpEnterPressed = false; gpEnterHoldTriggered = false; } }
                 if (back && !lastGamepadState.back) { gamepadBackPressTime = Date.now(); volumeOpenedByHold = false; } else if (back && lastGamepadState.back) { if (!volumeOpenedByHold && (Date.now() - gamepadBackPressTime > 400)) { volumeOpenedByHold = true; openControlCenter(); } } else if (!back && lastGamepadState.back) { if (!volumeOpenedByHold) goBack(); }
 
-                lastGamepadState = { up, down, left, right, enter, back, triangle }; break; 
+                lastGamepadState = { up, down, left, right, enter, back, triangle: false }; break; 
             } requestAnimationFrame(pollGamepads);
         }
 
@@ -1634,7 +1429,6 @@
 
                     const f = Math.max(0, s.focusState.val);
                     if (el.glassBorder) el.glassBorder.style.opacity = (0.3 + 0.7 * f).toFixed(3);
-                    
                     if (el.shine) {
                         el.shine.style.opacity = f.toFixed(3);
                         if (isFocused) {
@@ -1665,33 +1459,11 @@
             } requestAnimationFrame(tickMicroanimations);
         }
 
-        window.showAISuggestions = function(shows) {
-            const container = document.getElementById('ai-suggestions-container'), list = document.getElementById('ai-suggestions-list');
-            if (!container || !list) return; list.innerHTML = ''; STATE.aiFocusedSuggestionIndex = -1;
-            if (!shows || shows.length === 0) { container.style.display = 'none'; return; }
-
-            shows.forEach((show, index) => {
-                if (!show) return;
-                const item = document.createElement('div'); item.className = 'suggestion-item';
-                const imgUrl = show.art ? (show.art.startsWith('http') ? show.art : `Content/${show.art}`) : 'SystemData/Tv Shows.png';
-                item.innerHTML = `<img src="${imgUrl}" style="width: 45px; height: 65px; object-fit: cover; border-radius: 6px; flex-shrink: 0;" onerror="this.src='SystemData/Tv Shows.png';" /><div style="display: flex; flex-direction: column; overflow: hidden; width: 100%;"><div style="font-size: 1.3rem; font-weight: 300; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #ffffff;">${show.title || 'Untitled'}</div><div style="font-size: 1.05rem; color: var(--secondary-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 4px;">${show.genre || show.description || 'Suggested TV Show'}</div></div>`;
-                item.addEventListener('click', () => { closeGuahhAI(); setTimeout(() => { STATE.selectedShow = show.title; STATE.savedShowIndex = 0; openAppPanel('tvshows'); }, 500); });
-                list.appendChild(item);
-            }); container.style.display = 'flex'; setTimeout(() => { processAISuggestionsNavigation('ArrowDown'); }, 100);
-        };
-
-        function processAISuggestionsNavigation(key) {
-            const items = document.querySelectorAll('#ai-suggestions-list .suggestion-item'); if (items.length === 0) return;
-            if (key === 'ArrowDown') { STATE.aiFocusedSuggestionIndex = Math.min(items.length - 1, STATE.aiFocusedSuggestionIndex + 1); } else if (key === 'ArrowUp') { STATE.aiFocusedSuggestionIndex = Math.max(0, STATE.aiFocusedSuggestionIndex - 1); } else if (key === 'Enter') { if (STATE.aiFocusedSuggestionIndex >= 0 && STATE.aiFocusedSuggestionIndex < items.length) { items[STATE.aiFocusedSuggestionIndex].click(); } return; } else { return; }
-            items.forEach((item, idx) => { if (idx === STATE.aiFocusedSuggestionIndex) { item.classList.add('is-focused'); item.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } else { item.classList.remove('is-focused'); } });
-        }
-
         let volumeOverlayTimer = null;
         function triggerVolumeOverlay() { if (STATE.inSleep) return; const o = document.getElementById('control-center'); o.classList.add('visible'); clearTimeout(volumeOverlayTimer); volumeOverlayTimer = setTimeout(() => { if (!STATE.inControlCenter) o.classList.remove('visible'); }, 2000); }
         function openControlCenter() { STATE.inControlCenter = true; STATE.ccFocusedIndex = 0; updateControlCenterFocus(); document.getElementById('control-center').classList.add('visible'); }
         function closeControlCenter() { STATE.inControlCenter = false; document.getElementById('control-center').classList.remove('visible'); updateFocus(); }
         
-        // Settings UI parameters
         function updateControlCenterFocus() {
             const volTile = document.getElementById('cc-vol-tile'), sleepTile = document.getElementById('cc-sleep-tile'), homeTile = document.getElementById('cc-home-tile');
             volTile.classList.remove('cc-tile-focused'); sleepTile.classList.remove('cc-tile-focused'); homeTile.classList.remove('cc-tile-focused');
