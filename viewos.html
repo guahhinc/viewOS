@@ -755,7 +755,7 @@
             });
         }
 
-        let durationPlayer = null, ytDurationQueue = [], isFetchingYtDuration = false, durationTimeout = null, currentDurationLoadingId = null, durationPlayerInitialized = false;
+        let durationPlayer = null, ytDurationQueue = [], isFetchingYtDuration = false, durationTimeout = null, currentDurationLoadingId = null, durationPlayerInitialized = false, durationPlayerReady = false;
 
         function initDurationPlayer() {
             if (durationPlayerInitialized) return; if (typeof YT === 'undefined' || !YT.Player) return; durationPlayerInitialized = true;
@@ -768,7 +768,14 @@
             durationPlayer = new YT.Player('temp-yt-player', {
                 height: '1', width: '1', playerVars: { 'autoplay': 1, 'controls': 0, 'disablekb': 1, 'rel': 0, 'showinfo': 0, 'modestbranding': 1, 'mute': 1, 'enablejsapi': 1, 'origin': window.location.origin },
                 events: {
-                    'onReady': () => { processNextYtDuration(); },
+                    'onReady': () => { 
+                        const durationIframe = document.getElementById('temp-yt-player');
+                        if (durationIframe) {
+                            durationIframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+                        }
+                        durationPlayerReady = true; 
+                        processNextYtDuration(); 
+                    },
                     'onStateChange': (event) => {
                         if (event.data === 1 || (window.YT && YT.PlayerState && event.data === YT.PlayerState.PLAYING)) {
                             const duration = durationPlayer.getDuration(); if (duration > 0) saveYtDuration(currentDurationLoadingId, duration);
@@ -776,10 +783,6 @@
                     }, 'onError': () => { finishYtDurationLoad(); }
                 }
             });
-            const durationIframe = document.getElementById('temp-yt-player');
-            if (durationIframe) {
-                durationIframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
-            }
         }
 
         function fetchYtDurations() {
@@ -798,6 +801,7 @@
         };
 
         function processNextYtDuration() {
+            if (!durationPlayerReady) return;
             if (!durationPlayer || typeof durationPlayer.loadVideoById !== 'function') return;
             if (ytDurationQueue.length === 0) { currentDurationLoadingId = null; isFetchingYtDuration = false; return; }
             isFetchingYtDuration = true; const next = ytDurationQueue[0]; currentDurationLoadingId = next.videoId;
@@ -841,6 +845,10 @@
                     videoId: videoId, playerVars: { 'autoplay': 1, 'controls': 0, 'disablekb': 1, 'rel': 0, 'showinfo': 0, 'modestbranding': 1, 'fs': 0, 'iv_load_policy': 3, 'autohide': 1, 'enablejsapi': 1, 'origin': window.location.origin },
                     events: {
                         'onReady': (e) => {
+                            const iframe = document.getElementById('cinema-youtube');
+                            if (iframe) {
+                                iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+                            }
                             e.target.setVolume(vol); e.target.playVideo();
                             let saved = null; try { saved = localStorage.getItem(`viewOS_resume_${STATE.activePlayingItemPath}`); } catch(err) {}
                             if (saved) { const p = JSON.parse(saved); e.target.seekTo(p.current, true); triggerSystemToast(`Resumed from ${formatTime(p.current)}`); }
@@ -853,10 +861,6 @@
                         }
                     }
                 });
-                const iframe = document.getElementById('cinema-youtube');
-                if (iframe) {
-                    iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
-                }
             }
             if (typeof YT !== 'undefined' && YT.Player) createPlayer(); else { window.pendingYTLaunchVideoId = videoId; window.createPendingYTPlayer = createPlayer; }
         }
