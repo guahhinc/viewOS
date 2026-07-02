@@ -916,10 +916,26 @@
 
             const volSetting = settingsRegistry.find(s => s.id === 'volume');
             const vol = volSetting.options[volSetting.currentIndex];
+            const originVal = (window.location.protocol.startsWith('http')) ? window.location.origin : undefined;
             
             function createPlayer() {
+                const pVars = { 
+                    'autoplay': 1, 
+                    'controls': 0, 
+                    'disablekb': 1, 
+                    'rel': 0, 
+                    'showinfo': 0, 
+                    'modestbranding': 1, 
+                    'fs': 0, 
+                    'iv_load_policy': 3, 
+                    'autohide': 1, 
+                    'enablejsapi': 1, 
+                    'playsinline': 1
+                };
+                if (originVal) pVars.origin = originVal;
+
                 ytPlayer = new YT.Player('cinema-youtube', {
-                    videoId: videoId, playerVars: { 'autoplay': 1, 'controls': 0, 'disablekb': 1, 'rel': 0, 'showinfo': 0, 'modestbranding': 1, 'fs': 0, 'iv_load_policy': 3, 'autohide': 1, 'enablejsapi': 1, 'playsinline': 1, 'origin': window.location.origin },
+                    videoId: videoId, playerVars: pVars,
                     events: {
                         'onReady': (e) => {
                             const iframe = document.getElementById('cinema-youtube');
@@ -1668,32 +1684,25 @@
                 
                 let saved = null; 
                 try { saved = localStorage.getItem(`viewOS_resume_${STATE.activePlayingItemPath}`); } catch(err) {}
+                if (saved) { 
+                    try {
+                        const progress = JSON.parse(saved); 
+                        video.currentTime = progress.current; 
+                        triggerSystemToast(`Resumed from ${formatTime(progress.current)}`); 
+                    } catch(e){}
+                }
                 
-                const handleVideoInit = () => {
-                    if (saved) {
-                        try {
-                            const progress = JSON.parse(saved);
-                            video.currentTime = progress.current;
-                            triggerSystemToast(`Resumed from ${formatTime(progress.current)}`);
-                        } catch(e){}
-                        saved = null; // Clear to prevent double seek
-                    }
-                    video.play()
-                        .then(() => {
-                            updatePlayStateIcon('cinema');
-                            triggerCinemaOSD();
-                        })
-                        .catch((err) => {
-                            console.warn("Autoplay was prevented or failed:", err);
-                            // Keep updating icon and keep OSD visible so user can interact
-                            updatePlayStateIcon('cinema');
-                            triggerCinemaOSD();
-                        });
-                };
-
-                // Wait until there is enough data to play smoothly
-                video.addEventListener('canplay', handleVideoInit, { once: true });
-                video.load(); // Forces resources stream initialization
+                // Synchronously play inside user action call stack to satisfy security policies
+                video.play()
+                    .then(() => {
+                        updatePlayStateIcon('cinema');
+                        triggerCinemaOSD();
+                    })
+                    .catch((err) => {
+                        console.warn("Autoplay was prevented or failed:", err);
+                        updatePlayStateIcon('cinema');
+                        triggerCinemaOSD();
+                    });
             } navigateScreen(fromScreen, player, true);
         }
 
@@ -2031,7 +2040,7 @@
                 gpSquarePressed = false;
             }
 
-            // Handle Enter (Button 0) immediately on press down (retains active user gesture context for browsers)
+            // Handle Enter (Button 0 / A) immediately on press down (retains active user gesture context for browsers)
             if (enter) { 
                 if (!gpEnterPressed) { 
                     gpEnterPressed = true; 
