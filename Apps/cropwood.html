@@ -513,18 +513,18 @@
             other: { egg: 0, milk: 0, wool: 0, goatmilk: 0, bread: 0, cheese: 0, pie: 0, cornbread: 0, jam: 0, soup: 0, juice: 0 },
             
             plots: [
-                { status: 'wild', crop: null },
-                { status: 'wild', crop: null },
-                { status: 'wild', crop: null },
-                { status: 'wild', crop: null },
-                { status: 'soil', crop: null },
-                { status: 'soil', crop: null },
-                { status: 'soil', crop: null },
-                { status: 'soil', crop: null },
-                { status: 'soil', crop: null },
-                { status: 'soil', crop: null },
-                { status: 'soil', crop: null },
-                { status: 'soil', crop: null }
+                { status: 'wild', crop: null, lastHarvestTime: 0 },
+                { status: 'wild', crop: null, lastHarvestTime: 0 },
+                { status: 'wild', crop: null, lastHarvestTime: 0 },
+                { status: 'wild', crop: null, lastHarvestTime: 0 },
+                { status: 'soil', crop: null, lastHarvestTime: 0 },
+                { status: 'soil', crop: null, lastHarvestTime: 0 },
+                { status: 'soil', crop: null, lastHarvestTime: 0 },
+                { status: 'soil', crop: null, lastHarvestTime: 0 },
+                { status: 'soil', crop: null, lastHarvestTime: 0 },
+                { status: 'soil', crop: null, lastHarvestTime: 0 },
+                { status: 'soil', crop: null, lastHarvestTime: 0 },
+                { status: 'soil', crop: null, lastHarvestTime: 0 }
             ],
             
             // Livestock
@@ -939,8 +939,13 @@
                 return true; 
             }
             
-            // 2. Instantly gather mature crops on grid clicks
+            // 2. Instantly gather mature crops on grid clicks (Safely debounced)
             if (plot.crop && plot.crop.age >= plot.crop.maxAge) {
+                const now = Date.now();
+                // 500ms cooldown to completely ignore double-trigger simulation mapping issues
+                if (plot.lastHarvestTime && (now - plot.lastHarvestTime < 500)) {
+                    return true;
+                }
                 if (STATE.energy >= 5) {
                     STATE.energy -= 5;
                     const multiplier = CROPS_DB[plot.crop.id].multiplier || 1;
@@ -953,6 +958,7 @@
                     } else {
                         plot.crop = null;
                     }
+                    plot.lastHarvestTime = now; // Set harvest cooldown timestamp
                     notifySuccess();
                 } else {
                     showActionDeniedFeedback("Need more energy to harvest!");
