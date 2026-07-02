@@ -1595,7 +1595,7 @@
             
             if (!isSupported) {
                 buttons.push({ label: 'Cancel', action: () => {} });
-                showSystemPopup(app.name, "Requires newer viewOS View Device.", buttons, app.art, 'app');
+                showSystemPopup(app.name, "This app requires newer viewOS client or new device.", buttons, app.art, 'app');
                 return;
             }
 
