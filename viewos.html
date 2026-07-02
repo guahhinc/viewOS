@@ -14,8 +14,7 @@
            - Native Engines: Both Media & Audio playback is handled locally.
            - Scrolling: Uses custom hardware-accelerated CSS translation scrolling to match
              focus animations flawlessly. Standard browser smooth scrolling is completely bypassed.
-           - Expandability: Make sure to build everything to be changed and expanded on in the future so its easy to add new features (important)
-           - Stability: Ensure there are never any bugs, check every posibilty, every path, and all logic to ensure there are no bugs and its incredibly stable (important)
+           - Expandability: Make sure to build everything to be changed and expanded on in the future so its easy to add new features
            ========================================================================== */
 
         html {
@@ -309,6 +308,10 @@
 </head>
 <body>
 
+    <div id="press-key-screen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #000000; z-index: 20000000; display: flex; align-items: center; justify-content: center; opacity: 1; transition: opacity 0.5s ease;">
+        <div style="font-size: 1.8rem; font-weight: 300; letter-spacing: -0.03em; color: #ffffff; text-align: center;">Press any keyboard key to start</div>
+    </div>
+
     <div id="boot-screen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #000000; z-index: 10000000; display: flex; align-items: center; justify-content: center; opacity: 1; transition: opacity 0.8s ease;">
         <div style="font-size: 3rem; font-weight: 300; letter-spacing: -0.05em; color: #ffffff;">viewOS</div>
     </div>
@@ -508,6 +511,7 @@
         }
 
         const STATE = {
+            booted: false,
             focusedIndex: 0, settingsFocusedIndex: 0, mediaFocusedIndex: 0, topBarFocusedIndex: 0,
             currentScreen: 'home', activeApp: null, activePlayingItemPath: null,
             selectedShow: null, savedShowIndex: 0, inControlCenter: false, inSleep: false, mediaLaunchedByAI: false,
@@ -701,18 +705,7 @@
                 backgroundAppUpdates();
             }, 180000); // 3-minute Background Ping
 
-            setTimeout(() => {
-                const bootScreen = document.getElementById('boot-screen');
-                if (bootScreen) {
-                    bootScreen.style.opacity = '0';
-                    setTimeout(() => {
-                        bootScreen.style.display = 'none';
-                        const homeScreen = document.getElementById('home-screen');
-                        if (homeScreen) homeScreen.classList.add('screen-visible');
-                        updateFocus(true);
-                    }, 800);
-                }
-            }, 3000);
+            setupPressKeyToStart();
         }
 
         window.initOS = initOS;
@@ -917,26 +910,10 @@
 
             const volSetting = settingsRegistry.find(s => s.id === 'volume');
             const vol = volSetting.options[volSetting.currentIndex];
-            const originVal = (window.location.protocol.startsWith('http')) ? window.location.origin : undefined;
             
             function createPlayer() {
-                const pVars = { 
-                    'autoplay': 1, 
-                    'controls': 0, 
-                    'disablekb': 1, 
-                    'rel': 0, 
-                    'showinfo': 0, 
-                    'modestbranding': 1, 
-                    'fs': 0, 
-                    'iv_load_policy': 3, 
-                    'autohide': 1, 
-                    'enablejsapi': 1, 
-                    'playsinline': 1
-                };
-                if (originVal) pVars.origin = originVal;
-
                 ytPlayer = new YT.Player('cinema-youtube', {
-                    videoId: videoId, playerVars: pVars,
+                    videoId: videoId, playerVars: { 'autoplay': 1, 'controls': 0, 'disablekb': 1, 'rel': 0, 'showinfo': 0, 'modestbranding': 1, 'fs': 0, 'iv_load_policy': 3, 'autohide': 1, 'enablejsapi': 1, 'playsinline': 1, 'origin': window.location.origin },
                     events: {
                         'onReady': (e) => {
                             const iframe = document.getElementById('cinema-youtube');
@@ -1304,6 +1281,7 @@
         }
 
         function updateFocusRingPosition() {
+            if (!STATE.booted) return;
             const ring = document.getElementById('focus-ring'); if (['player','audio_player','custom_app'].includes(STATE.currentScreen) || STATE.inSleep) return;
             const target = getActiveTarget(); if (!target || !target.icon) return; let wrapper = null;
 
@@ -1343,6 +1321,7 @@
 
         let lastActiveTarget = null;
         function updateFocus(isInitialLoad = false, dx = 0, dy = 0) {
+            if (!STATE.booted) return;
             document.querySelectorAll('.is-focused').forEach(el => el.classList.remove('is-focused'));
             const ring = document.getElementById('focus-ring');
             if (['player','audio_player','custom_app'].includes(STATE.currentScreen) || STATE.inSleep) { 
@@ -1685,38 +1664,32 @@
                 
                 let saved = null; 
                 try { saved = localStorage.getItem(`viewOS_resume_${STATE.activePlayingItemPath}`); } catch(err) {}
-                if (saved) { 
-                    try {
-                        const progress = JSON.parse(saved); 
-                        video.currentTime = progress.current; 
-                        triggerSystemToast(`Resumed from ${formatTime(progress.current)}`); 
-                    } catch(e){}
-                }
                 
-                // Synchronously play inside user action call stack to satisfy security policies
-                video.play()
-                    .then(() => {
-                        updatePlayStateIcon('cinema');
-                        triggerCinemaOSD();
-                    })
-                    .catch((err) => {
-                        console.warn("Autoplay was prevented or failed:", err);
-                        // Failsafe: Try forcing a muted play so the UI doesn't visually break
-                        if (err.name === 'NotAllowedError' && !video.muted) {
-                            video.muted = true;
-                            video.play().then(() => {
-                                triggerSystemToast("Audio muted by browser restriction. Press keyboard once.");
-                                updatePlayStateIcon('cinema');
-                                triggerCinemaOSD();
-                            }).catch(() => {
-                                updatePlayStateIcon('cinema');
-                                triggerCinemaOSD();
-                            });
-                        } else {
+                const handleVideoInit = () => {
+                    if (saved) {
+                        try {
+                            const progress = JSON.parse(saved);
+                            video.currentTime = progress.current;
+                            triggerSystemToast(`Resumed from ${formatTime(progress.current)}`);
+                        } catch(e){}
+                        saved = null; // Clear to prevent double seek
+                    }
+                    video.play()
+                        .then(() => {
                             updatePlayStateIcon('cinema');
                             triggerCinemaOSD();
-                        }
-                    });
+                        })
+                        .catch((err) => {
+                            console.warn("Autoplay was prevented or failed:", err);
+                            // Keep updating icon and keep OSD visible so user can interact
+                            updatePlayStateIcon('cinema');
+                            triggerCinemaOSD();
+                        });
+                };
+
+                // Wait until there is enough data to play smoothly
+                video.addEventListener('canplay', handleVideoInit, { once: true });
+                video.load(); // Forces resources stream initialization
             } navigateScreen(fromScreen, player, true);
         }
 
@@ -1745,11 +1718,7 @@
             activeAudio.src = getContentFilePath(track); 
             const volSetting = settingsRegistry.find(s => s.id === 'volume');
             activeAudio.volume = volSetting.options[volSetting.currentIndex] / 100; 
-            activeAudio.play().catch(err => {
-                if (err.name === 'NotAllowedError') {
-                    triggerSystemToast("Audio blocked by browser. Press keyboard once to unlock.");
-                }
-            });
+            activeAudio.play().catch(()=>{});
             
             const fromScreen = document.getElementById(STATE.currentScreen === 'home' ? 'home-screen' : 'media-environment');
             STATE.currentScreen = 'audio_player';
@@ -1774,12 +1743,13 @@
         function triggerSystemToast(msg) { const toast = document.getElementById('resume-toast'); toast.innerText = msg; toast.style.display = 'block'; setTimeout(() => toast.style.opacity = '1', 50); setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.style.display = 'none', 300); }, 3000); }
 
         function startSleep() { STATE.inSleep = true; sleepActiveTime = Date.now(); const env = document.getElementById('sleep-environment'); env.style.display = 'block'; document.getElementById('focus-ring').style.opacity = '0'; setTimeout(() => env.style.opacity = '1', 50); }
-        function wakeUp() { if (!STATE.inSleep || Date.now() - sleepActiveTime < 1000) return; STATE.inSleep = false; const env = document.getElementById('sleep-environment'); env.style.opacity = '0'; setTimeout(() => { env.style.display = 'none'; updateFocus(false); }, 500); }
+        function wakeUp() { if (!STATE.booted || !STATE.inSleep || Date.now() - sleepActiveTime < 1000) return; STATE.inSleep = false; const env = document.getElementById('sleep-environment'); env.style.opacity = '0'; setTimeout(() => { env.style.display = 'none'; updateFocus(false); }, 500); }
 
         const INPUT = { enterPressed: false, enterHoldTimer: null, enterHoldTriggered: false };
         let isBackDown = false, volumeOpenedByHold = false, backKeyTimeout = null; 
 
         function handleKeydownRaw(e) {
+            if (!STATE.booted) return;
             if (STATE.isInstallingUpdate || STATE.isInstallingApp) { e.preventDefault(); return; }
 
             // GLOBAL BACK/ESCAPE HOLD OVERRIDE - Intercepts ALL screens including custom_apps
@@ -1805,6 +1775,7 @@
         }
 
         function handleKeyupRaw(e) {
+            if (!STATE.booted) return;
             if (STATE.isInstallingUpdate || STATE.isInstallingApp) return;
 
             // GLOBAL BACK/ESCAPE LIFT OVERRIDE
@@ -1914,14 +1885,7 @@
                     } else { 
                         if (cv) {
                             if (cv.paused) {
-                                cv.play().catch(err => {
-                                    console.warn("Local play failed:", err);
-                                    if (err.name === 'NotAllowedError' && !cv.muted) {
-                                        cv.muted = true;
-                                        cv.play().catch(()=>{});
-                                        triggerSystemToast("Audio muted by browser restriction. Press keyboard once.");
-                                    }
-                                });
+                                cv.play().catch(err => console.warn("Local play failed:", err));
                             } else {
                                 cv.pause();
                             }
@@ -1991,113 +1955,58 @@
             const changed = (oldTarget !== getActiveTarget()); updateFocus(false, changed ? dx : 0, changed ? dy : 0);
         }
 
-        let lastGamepadState = { up: false, down: false, left: false, right: false, enter: false, back: false, triangle: false }, gamepadBackPressTime = 0, gamepadActiveDir = null, gamepadHoldStartTime = 0, gamepadLastRepeatTime = 0, gpEnterPressed = false, gpEnterHoldTriggered = false, gpEnterHoldTimer = null, gpSquarePressed = false;
+        let lastGamepadState = { up: false, down: false, left: false, right: false, enter: false, back: false, triangle: false }, gamepadBackPressTime = 0, gamepadActiveDir = null, gamepadHoldStartTime = 0, gamepadLastRepeatTime = 0, gpEnterPressed = false, gpEnterHoldTriggered = false, gpEnterHoldTimer = null;
         function pollGamepads() {
+            if (!STATE.booted) return requestAnimationFrame(pollGamepads);
             if (STATE.isInstallingUpdate || STATE.isInstallingApp) return requestAnimationFrame(pollGamepads);
             
             const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
-            let activeGamepad = null;
             for (let i = 0; i < gamepads.length; i++) {
-                if (gamepads[i]) {
-                    const hasInput = gamepads[i].buttons.some(b => b.pressed) || gamepads[i].axes.some(a => Math.abs(a) > 0.15);
-                    if (hasInput) {
-                        if (!document.hasFocus()) window.focus(); // Force browser focus to validate controller user activation
-                        activeGamepad = gamepads[i];
-                        break;
-                    }
+                const gp = gamepads[i]; if (!gp) continue;
+                
+                const back = gp.buttons[1]?.pressed, square = gp.buttons[2]?.pressed; 
+                if (back && square) { if (STATE.forceRebootStart === 0) { STATE.forceRebootStart = Date.now(); } else if (Date.now() - STATE.forceRebootStart >= 3000) { location.reload(); return; } } else { STATE.forceRebootStart = 0; }
+
+                // Universal Back/B hold to open CC - Overrides custom apps unconditionally
+                if (back && !lastGamepadState.back) { 
+                    gamepadBackPressTime = Date.now(); volumeOpenedByHold = false; 
+                } else if (back && lastGamepadState.back) { 
+                    if (!volumeOpenedByHold && (Date.now() - gamepadBackPressTime > 400)) { 
+                        volumeOpenedByHold = true; openControlCenter(); 
+                    } 
+                } else if (!back && lastGamepadState.back) { 
+                    if (!volumeOpenedByHold && STATE.currentScreen !== 'custom_app') { goBack(); } 
                 }
-            }
-            if (!activeGamepad) {
-                for (let i = 0; i < gamepads.length; i++) {
-                    if (gamepads[i]) {
-                        activeGamepad = gamepads[i];
-                        break;
-                    }
+
+                if (STATE.currentScreen === 'custom_app') {
+                    lastGamepadState = { ...lastGamepadState, back: back };
+                    break;
                 }
-            }
-            
-            if (!activeGamepad) return requestAnimationFrame(pollGamepads);
-            const gp = activeGamepad;
-            
-            const back = gp.buttons[1]?.pressed, square = gp.buttons[2]?.pressed; 
-            if (back && square) { if (STATE.forceRebootStart === 0) { STATE.forceRebootStart = Date.now(); } else if (Date.now() - STATE.forceRebootStart >= 3000) { location.reload(); return; } } else { STATE.forceRebootStart = 0; }
 
-            // Universal Back/B hold to open CC - Overrides custom apps unconditionally
-            if (back && !lastGamepadState.back) { 
-                gamepadBackPressTime = Date.now(); volumeOpenedByHold = false; 
-            } else if (back && lastGamepadState.back) { 
-                if (!volumeOpenedByHold && (Date.now() - gamepadBackPressTime > 400)) { 
-                    volumeOpenedByHold = true; openControlCenter(); 
-                } 
-            } else if (!back && lastGamepadState.back) { 
-                if (!volumeOpenedByHold && STATE.currentScreen !== 'custom_app') { goBack(); } 
-            }
+                const up = gp.buttons[12]?.pressed || gp.axes[1] < -0.5;
+                const down = gp.buttons[13]?.pressed || gp.axes[1] > 0.5;
+                const left = gp.buttons[14]?.pressed || gp.axes[0] < -0.5;
+                const right = gp.buttons[15]?.pressed || gp.axes[0] > 0.5;
+                const enter = gp.buttons[0]?.pressed;
 
-            if (STATE.currentScreen === 'custom_app') {
-                lastGamepadState = { ...lastGamepadState, back: back };
-                return requestAnimationFrame(pollGamepads);
-            }
-
-            const up = gp.buttons[12]?.pressed || gp.axes[1] < -0.5;
-            const down = gp.buttons[13]?.pressed || gp.axes[1] > 0.5;
-            const left = gp.buttons[14]?.pressed || gp.axes[0] < -0.5;
-            const right = gp.buttons[15]?.pressed || gp.axes[0] > 0.5;
-            const enter = gp.buttons[0]?.pressed || gp.buttons[9]?.pressed; // Supports A button AND Start button
-
-            if (STATE.inSleep) {
-                let input = gp.buttons.some(b => b.pressed) || gp.axes.some(a => Math.abs(a) > 0.5);
-                if (input && !(back && square) && Date.now() - sleepActiveTime >= 1000) wakeUp(); 
-                lastGamepadState = { up, down, left, right, enter, back, triangle: false }; 
-                return requestAnimationFrame(pollGamepads);
-            }
-
-            let dir = up ? 'up' : down ? 'down' : left ? 'left' : right ? 'right' : null;
-            if (dir) { if (gamepadActiveDir !== dir) { gamepadActiveDir = dir; gamepadHoldStartTime = Date.now(); gamepadLastRepeatTime = Date.now(); processNavigation({ up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[dir]); } else if (Date.now() - gamepadHoldStartTime > 350 && Date.now() - gamepadLastRepeatTime > 80) { processNavigation({ up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[dir]); gamepadLastRepeatTime = Date.now(); } } else gamepadActiveDir = null; 
-
-            // Handle Square (Button 2) to toggle Favourites
-            if (square && !back) {
-                if (!gpSquarePressed) {
-                    gpSquarePressed = true;
-                    if (STATE.currentScreen === 'media' && !STATE.inPopup && STATE.mediaFocusArea !== 'top-bar' && STATE.activeApp !== 'store') {
-                        triggerFavouritePopup();
-                    }
+                if (STATE.inSleep) {
+                    let input = gp.buttons.some(b => b.pressed) || gp.axes.some(a => Math.abs(a) > 0.5);
+                    if (input && !(back && square) && Date.now() - sleepActiveTime >= 1000) wakeUp(); 
+                    lastGamepadState = { up, down, left, right, enter, back, triangle: false }; break; 
                 }
-            } else if (!square) {
-                gpSquarePressed = false;
-            }
 
-            // Handle Enter (Button 0 / A) on RELEASE. Mirrors keyboard logic perfectly and allows 
-            // browser to fully lock in user-activation gesture context before execution.
-            if (enter) { 
-                if (!gpEnterPressed) { 
-                    gpEnterPressed = true;
-                    gpEnterHoldTriggered = false;
-                    
-                    if (STATE.currentScreen === 'media' && !STATE.inPopup && STATE.mediaFocusArea !== 'top-bar' && STATE.activeApp !== 'store') {
-                        gpEnterHoldTimer = setTimeout(() => {
-                            gpEnterHoldTriggered = true;
-                            triggerFavouritePopup();
-                        }, 1700);
-                    }
-                } 
-            } else { 
-                if (gpEnterPressed) {
-                    clearTimeout(gpEnterHoldTimer);
-                    gpEnterHoldTimer = null;
-                    if (!gpEnterHoldTriggered) {
-                        processNavigation('Enter');
-                    }
-                    gpEnterPressed = false;
-                    gpEnterHoldTriggered = false;
-                }
-            }
+                let dir = up ? 'up' : down ? 'down' : left ? 'left' : right ? 'right' : null;
+                if (dir) { if (gamepadActiveDir !== dir) { gamepadActiveDir = dir; gamepadHoldStartTime = Date.now(); gamepadLastRepeatTime = Date.now(); processNavigation({ up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[dir]); } else if (Date.now() - gamepadHoldStartTime > 350 && Date.now() - gamepadLastRepeatTime > 80) { processNavigation({ up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[dir]); gamepadLastRepeatTime = Date.now(); } } else gamepadActiveDir = null; 
 
-            lastGamepadState = { up, down, left, right, enter, back, triangle: false };
-            requestAnimationFrame(pollGamepads);
+                if (enter) { if (!gpEnterPressed) { gpEnterPressed = true; gpEnterHoldTriggered = false; if (STATE.currentScreen === 'media' && !STATE.inPopup && STATE.mediaFocusArea !== 'top-bar' && STATE.activeApp !== 'store') gpEnterHoldTimer = setTimeout(() => { gpEnterHoldTriggered = true; triggerFavouritePopup(); }, 1700); } } else { if (gpEnterPressed) { clearTimeout(gpEnterHoldTimer); gpEnterHoldTimer = null; if (!gpEnterHoldTriggered) processNavigation('Enter'); gpEnterPressed = false; gpEnterHoldTriggered = false; } }
+
+                lastGamepadState = { up, down, left, right, enter, back, triangle: false }; break; 
+            } requestAnimationFrame(pollGamepads);
         }
 
         let lastTargetElement = null;
         function tickMicroanimations() {
+            if (!STATE.booted) { requestAnimationFrame(tickMicroanimations); return; }
             let targetX = 0; let targetY = 0; let gpActive = false;
             const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
             for (let i = 0; i < gamepads.length; i++) {
@@ -2197,6 +2106,39 @@
             const cv = document.getElementById('cinema-video'); if (cv) cv.volume = f; 
             if (ytPlayer && typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(c);
             try { localStorage.setItem('viewOS_volume_index', v.currentIndex); } catch(e) {} renderSettingsList(); 
+        }
+
+        function setupPressKeyToStart() {
+            const pressScreen = document.getElementById('press-key-screen');
+            if (!pressScreen) return;
+            
+            const handleKeyPressStart = (e) => {
+                window.removeEventListener('keydown', handleKeyPressStart);
+                
+                pressScreen.style.opacity = '0';
+                setTimeout(() => {
+                    pressScreen.style.display = 'none';
+                    startBootSequence();
+                }, 500);
+            };
+            
+            window.addEventListener('keydown', handleKeyPressStart);
+        }
+
+        function startBootSequence() {
+            setTimeout(() => {
+                const bootScreen = document.getElementById('boot-screen');
+                if (bootScreen) {
+                    bootScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        bootScreen.style.display = 'none';
+                        const homeScreen = document.getElementById('home-screen');
+                        if (homeScreen) homeScreen.classList.add('screen-visible');
+                        STATE.booted = true;
+                        updateFocus(true);
+                    }, 800);
+                }
+            }, 3000);
         }
 
         window.onload = initOS;
