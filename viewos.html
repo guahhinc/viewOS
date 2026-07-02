@@ -285,6 +285,11 @@
         .top-bar-tab.is-focused, .settings-item.is-focused, .popup-button.is-focused { background-color: #ffffff !important; color: #000000 !important; }
         .settings-item.is-focused .settings-value { color: #333333 !important; }
         .tilted-focus { transition: none !important; }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -324,6 +329,15 @@
         </div>
     </div>
 
+    <!-- Sandboxed Executable Frame for Dynamic Applications -->
+    <div id="custom-app-environment" class="app-panel" style="padding: 0; margin: 0; width: 100vw; height: 100vh; z-index: 5000; background: #000;">
+        <div id="app-loading-overlay" style="position: absolute; inset: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; transition: opacity 0.4s ease; gap: 20px;">
+            <div style="width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            <span id="app-loading-text" style="font-size: 1.6rem; color: var(--secondary-text);">Launching Application...</span>
+        </div>
+        <iframe id="custom-app-iframe" allow="gamepad *; autoplay *; fullscreen *" style="width: 100%; height: 100%; border: none; overflow: hidden; background: #000;"></iframe>
+    </div>
+
     <div id="audio-player-screen">
         <div id="audio-playing-art" class="media-card" style="margin-bottom: 40px; background-size: cover; background-position: center;"></div>
         <div id="audio-playing-title" style="font-size: 2.2rem; margin-bottom: 8px; text-align: center; color: var(--text-color);">Track Title</div>
@@ -352,10 +366,9 @@
         </div>
     </div>
 
-    <!-- Enhanced Circular System Popup: Upscaled update icon, shadow completely removed -->
     <div id="system-popup">
         <div id="system-popup-content" style="background-color: transparent; border: none; padding: 40px; width: 90%; max-width: 600px; display: flex; flex-direction: column; align-items: center; text-align: center; transition: opacity 0.35s ease;">
-            <img id="popup-image" style="display: none; width: 200px; height: 200px; object-fit: cover; border-radius: 50%; margin-bottom: 25px; box-shadow: none !important;">
+            <img id="popup-image" style="display: none; width: 200px; height: 200px; object-fit: cover; border-radius: 20%; margin-bottom: 25px; box-shadow: none !important;">
             <h2 id="popup-title" style="font-size: 2.8rem; margin-top: 0; margin-bottom: 15px; color: #ffffff;">Title</h2>
             <p id="popup-desc" style="font-size: 1.5rem; color: var(--secondary-text); margin-bottom: 40px; line-height: 1.5;"></p>
             <div id="popup-buttons-container" style="display: flex; flex-direction: column; width: 100%; gap: 15px; align-items: center;"></div>
@@ -368,8 +381,8 @@
         const db = window.contentRegistry || [];
 
         // View Cloud Configuration & Local Version Parameters
-        const VIEW_CLOUD_URL = 'https://script.google.com/macros/s/AKfycbwb9PmQmUVrEh4YtA0hIt1GbHM-EcC6QaUnV5jLGeNBFdyXAnM3NF5TnSk2lRoyi1Kblw/exec';
-        const CURRENT_OS_VERSION = 0.3;
+        const VIEW_CLOUD_URL = 'https://script.google.com/macros/s/AKfycbzR_BI7fcEi1B_ZGG0nlP7Xw6vVSJ9WCDnlrsBWN8jDKmUmUtfNTJz0uEzMZsoDFeOgEA/exec';
+        const CURRENT_OS_VERSION = 0.4;
         const CLIENT_VERSION = 1;
 
         (function() {
@@ -475,7 +488,7 @@
             selectedShow: null, savedShowIndex: 0, inControlCenter: false, inSleep: false, mediaLaunchedByAI: false,
             triangleHoldStart: 0, columns: 4, forceRebootStart: 0, inPopup: false, popupFocusedIndex: 0,
             mediaFocusArea: 'grid', currentTab: 'all', isNavigating: false,
-            isInstallingUpdate: false, // Prevents interface actions during high-priority update installations
+            isInstallingUpdate: false, isInstallingApp: false,
             
             // Unified Scrubbing States
             lastSeekTime: 0, seekAcceleration: 10, scrubbingTime: null, seekCommitTimer: null,
@@ -487,12 +500,12 @@
 
         const DB_ITEM_ELEMENTS = new Map();
         const TV_SHOW_FOLDER_ELEMENTS = new Map();
+        const STORE_ITEM_ELEMENTS = new Map();
         const DOM_CACHE = { apps: [], settings: [] };
         let activeMediaElements = [], activeTopBarElements = [], activePopupElements = [], activePopupButtons = [];
         let sleepActiveTime = 0, activeAudio = new Audio(), osdTimer, activeMediaList = [];
-
-        /* Spring Physics Engine for Tiles */
-        const springElements = [];
+        let storeAppsList = [];
+        let springElements = [];
 
         function Spring(val, stiffness, damping) {
             this.val = val; this.target = val; this.vel = 0;
@@ -524,10 +537,10 @@
             { id: "movies", name: "Movies", path: "movies" },
             { id: "music", name: "Music", path: "music" },
             { id: "sports", name: "Sports", path: "sports" },
+            { id: "store", name: "Store", path: "store" },
             { id: "settings", name: "Settings", path: "settings" }
         ];
 
-        // Software update sits safely at index 2 to guarantee structural volume indexes remain undisturbed
         const settingsRegistry = [
             { id: "version", name: "Version", type: "info", value: `viewOS ${CURRENT_OS_VERSION}` },
             { id: "volume", name: "Volume", type: "cycle", options: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100], labels: ["0%", "10%", "20%", "30%", "40%", "50%", "60%", "70%", "80%", "90%", "100%"], currentIndex: 5 },
@@ -570,31 +583,21 @@
         }
 
         async function initOS() {
-            // High-Performance initialization lockout to prevent boot duplication
             if (window.viewOS_initialized) return;
             window.viewOS_initialized = true;
+
+            // Global frame execution listener for installed sandbox apps
+            window.addEventListener('message', (e) => {
+                if (e.data && e.data.type === 'exitApp') {
+                    closeCustomApp();
+                }
+            });
 
             await fetchYouTubeContent();
             preRenderAllMedia();
             fetchYouTubeMetadata();
 
-            const grid = document.getElementById('app-grid'); DOM_CACHE.apps = [];
-
-            appRegistry.forEach((app, index) => {
-                const appEl = document.createElement('div'); appEl.className = 'app-container'; appEl.id = `app-${index}`;
-                const iconName = app.id === 'tvshows' ? 'Tv Shows' : app.name; const iconUrl = `SystemData/${iconName}.png`;
-
-                appEl.innerHTML = `<div class="app-icon" id="app-icon-${app.id}" style="background-image: url('${iconUrl}');"></div><div class="app-name">${app.name}</div>`;
-                grid.appendChild(appEl); const iconNode = appEl.querySelector('.app-icon'); DOM_CACHE.apps.push({ container: appEl, icon: iconNode });
-                
-                setupSpringPhysics(iconNode);
-                const img = new Image(); img.onerror = () => {
-                    if (iconNode) {
-                        iconNode.style.cssText = `background-image: none; background-color: ${app.id === 'youtube' ? '#1e0e0e' : '#111'}; border: 1px solid ${app.id === 'youtube' ? 'rgba(255, 51, 51, 0.25)' : 'rgba(255, 255, 255, 0.05)'}; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: ${app.id === 'youtube' ? '#ff3333' : 'var(--secondary-text)'};`;
-                        iconNode.innerText = app.name[0];
-                    }
-                }; img.src = iconUrl;
-            });
+            renderHomeGrid();
 
             let localVolIndex = null; try { localVolIndex = localStorage.getItem('viewOS_volume_index'); } catch(e) {}
             if (localVolIndex !== null) settingsRegistry[1].currentIndex = parseInt(localVolIndex);
@@ -640,8 +643,47 @@
             }, 3000);
         }
 
-        // Export OS Initialization globally for direct loader access
         window.initOS = initOS;
+
+        function renderHomeGrid() {
+            const grid = document.getElementById('app-grid');
+            grid.innerHTML = '';
+            DOM_CACHE.apps = [];
+
+            // Prune dead Spring references to keep calculations smooth
+            springElements = springElements.filter(el => document.body.contains(el));
+
+            let installedApps = [];
+            try { installedApps = JSON.parse(localStorage.getItem('viewOS_installed_apps') || '[]'); } catch(e) {}
+            installedApps.sort((a, b) => b.installTime - a.installTime);
+
+            const combinedApps = [
+                ...appRegistry,
+                ...installedApps.map(a => ({ id: a.name, name: a.name, path: 'custom', isCustom: true, iconUrl: a.icon }))
+            ];
+
+            combinedApps.forEach((app, index) => {
+                const appEl = document.createElement('div'); appEl.className = 'app-container'; appEl.id = `app-${index}`;
+                const iconUrl = app.isCustom ? app.iconUrl : `SystemData/${app.id === 'tvshows' ? 'Tv Shows' : app.name}.png`;
+
+                appEl.innerHTML = `<div class="app-icon" id="app-icon-${app.id}"></div><div class="app-name">${app.name}</div>`;
+                grid.appendChild(appEl);
+                const iconNode = appEl.querySelector('.app-icon');
+                DOM_CACHE.apps.push({ container: appEl, icon: iconNode, data: app });
+                
+                setupSpringPhysics(iconNode);
+                
+                const img = new Image();
+                img.onload = () => { iconNode.style.backgroundImage = `url('${iconUrl}')`; };
+                img.onerror = () => {
+                    iconNode.style.cssText = `background-image: none; background-color: ${app.id === 'youtube' ? '#1e0e0e' : '#111'}; border: 1px solid ${app.id === 'youtube' ? 'rgba(255, 51, 51, 0.25)' : 'rgba(255, 255, 255, 0.05)'}; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: ${app.id === 'youtube' ? '#ff3333' : 'var(--secondary-text)'};`;
+                    iconNode.innerText = app.name[0];
+                };
+                img.src = iconUrl;
+            });
+
+            if (STATE.currentScreen === 'home') updateFocus(false);
+        }
 
         let ytPlayer = null, ytProgressInterval = null;
         function getYouTubeId(url) { 
@@ -746,7 +788,6 @@
             badge.innerText = formatYtDuration(seconds);
         }
 
-        // Card generation UI pipeline
         function updateYtCardDurationUI(videoId, seconds) { const cards = document.querySelectorAll(`.media-card[data-youtube-id="${videoId}"]`); cards.forEach(card => applyDurationBadge(card, seconds)); }
 
         function initYouTubePlayer(videoId) {
@@ -831,7 +872,6 @@
             ]);
         }
 
-        /* --- OTA UPDATE SYSTEM: CORE LOGIC --- */
         async function checkForUpdates() {
             if (STATE.isInstallingUpdate) return;
             triggerSystemToast("Checking for updates...");
@@ -840,11 +880,9 @@
                 const info = await res.json();
                 
                 if (info && info.version && parseFloat(info.version) > CURRENT_OS_VERSION) {
-                    // Check client compatibility. String parse safety handles both numeric and string values
                     const isSupported = info.supportedClientVersions && info.supportedClientVersions.some(v => v.toString().trim() === CLIENT_VERSION.toString());
                     
                     if (!isSupported) {
-                        // Device is out of date and discontinued on this version chain
                         showSystemPopup(
                             "Device out of date",
                             "Your device or client has reached the end of viewOS support, please purchase a new View Device, contact support or keep using on current version.",
@@ -853,14 +891,13 @@
                         return;
                     }
 
-                    // Pre-processed update title without standard descriptive prefix
                     showSystemPopup(
                         `viewOS ${info.version}`,
                         info.description || "A new update is available.",
                         [
                             { 
                                 label: 'Download & Install', 
-                                preservePopup: true, // Seamless transition lock prevents flash or dialogue clear
+                                preservePopup: true,
                                 action: () => { installUpdate(); } 
                             },
                             { label: 'Cancel', action: () => {} }
@@ -868,10 +905,18 @@
                         info.image
                     );
                 } else {
-                    triggerSystemToast("viewOS is up to date.");
+                    showSystemPopup(
+                        "System Up to Date",
+                        "Your viewOS device is currently running the latest firmware version.",
+                        [{ label: 'OK', action: () => {} }]
+                    );
                 }
             } catch(e) {
-                triggerSystemToast("Failed to connect to View Cloud.");
+                showSystemPopup(
+                    "Connection Error",
+                    "Could not reach View Cloud to perform update verification.",
+                    [{ label: 'OK', action: () => {} }]
+                );
             }
         }
 
@@ -897,6 +942,45 @@
             }
         }
 
+        async function executeAppInstall(app) {
+            STATE.isInstallingApp = true;
+            showSystemPopup(app.name, "Downloading App...", [], app.art);
+            try {
+                const res = await fetch(`${VIEW_CLOUD_URL}?action=getAppCode&appName=${encodeURIComponent(app.name)}`);
+                const code = await res.text();
+                
+                if (code && code.includes('<html')) {
+                    localStorage.setItem(`viewOS_appcode_${app.name}`, code);
+                    
+                    let installedApps = [];
+                    try { installedApps = JSON.parse(localStorage.getItem('viewOS_installed_apps') || '[]'); } catch(e) {}
+                    installedApps = installedApps.filter(a => a.name !== app.name);
+                    installedApps.push({ name: app.name, icon: app.art, version: app.version, installTime: Date.now() });
+                    localStorage.setItem('viewOS_installed_apps', JSON.stringify(installedApps));
+
+                    triggerSystemToast(`${app.name} Installed`);
+                    renderHomeGrid();
+                } else {
+                    triggerSystemToast("Invalid App Code received.");
+                }
+            } catch (e) {
+                triggerSystemToast("Failed to download App.");
+            }
+            STATE.isInstallingApp = false;
+            closeSystemPopup();
+        }
+
+        function executeAppUninstall(app) {
+            let installedApps = [];
+            try { installedApps = JSON.parse(localStorage.getItem('viewOS_installed_apps') || '[]'); } catch(e) {}
+            installedApps = installedApps.filter(a => a.name !== app.name);
+            localStorage.setItem('viewOS_installed_apps', JSON.stringify(installedApps));
+            localStorage.removeItem(`viewOS_appcode_${app.name}`);
+            
+            triggerSystemToast(`${app.name} Uninstalled`);
+            renderHomeGrid();
+        }
+
         function syncElementProgress(item, itemEl, isFolder = false) {
             if (!item || !itemEl) return;
             const card = itemEl.querySelector('.media-card'); if (!card) return; let pData = null;
@@ -912,6 +996,7 @@
         }
 
         function getAvailableTabs() {
+            if (STATE.activeApp === 'store') return [{ id: 'all', label: 'App Store' }];
             if (STATE.activeApp === 'continue') return [{ id: 'all', label: 'Continue' }];
             let appName = appRegistry.find(a => a.id === STATE.activeApp)?.name || "Media";
             if (STATE.activeApp === 'tvshows' && STATE.selectedShow) appName = STATE.selectedShow;
@@ -935,7 +1020,9 @@
             if (!grid) return; activeMediaElements = []; updateColumns();
             
             let list = [];
-            if (STATE.activeApp === 'continue') {
+            if (STATE.activeApp === 'store') {
+                list = storeAppsList; activeMediaList = list;
+            } else if (STATE.activeApp === 'continue') {
                 db.forEach(item => { const ts = getResumeTimestamp(item); if (ts > 0) list.push({ item, timestamp: ts }); });
                 list.sort((a,b) => b.timestamp - a.timestamp); activeMediaList = list.map(e => e.item).filter(Boolean);
             } else if (STATE.activeApp === 'tvshows' && !STATE.selectedShow) {
@@ -958,7 +1045,8 @@
 
             activeMediaList.forEach((item, index) => {
                 if (!item) return; let itemEl = null;
-                if (item.id === 'show-folder') { const folderObj = TV_SHOW_FOLDER_ELEMENTS.get(item.name); itemEl = folderObj ? folderObj.element : null; } else { itemEl = DB_ITEM_ELEMENTS.get(item); }
+                if (STATE.activeApp === 'store') { itemEl = STORE_ITEM_ELEMENTS.get(item); }
+                else if (item.id === 'show-folder') { const folderObj = TV_SHOW_FOLDER_ELEMENTS.get(item.name); itemEl = folderObj ? folderObj.element : null; } else { itemEl = DB_ITEM_ELEMENTS.get(item); }
                 if (itemEl) {
                     const card = itemEl.querySelector('.media-card');
                     if (card) {
@@ -994,6 +1082,7 @@
             else if (STATE.currentScreen === 'media' && grid) {
                 if (STATE.activeApp === 'music') { STATE.columns = 5; grid.classList.add('square-grid', 'five-columns'); grid.classList.remove('portrait-grid'); }
                 else if (STATE.activeApp === 'movies') { STATE.columns = 5; grid.classList.add('portrait-grid', 'five-columns'); grid.classList.remove('square-grid'); }
+                else if (STATE.activeApp === 'store') { STATE.columns = 4; grid.classList.remove('square-grid', 'five-columns', 'portrait-grid'); }
                 else { STATE.columns = 4; grid.classList.remove('square-grid', 'five-columns', 'portrait-grid'); }
             }
         }
@@ -1007,7 +1096,7 @@
         }
 
         function updateFocusRingPosition() {
-            const ring = document.getElementById('focus-ring'); if (['player','audio_player'].includes(STATE.currentScreen) || STATE.inSleep) return;
+            const ring = document.getElementById('focus-ring'); if (['player','audio_player','custom_app'].includes(STATE.currentScreen) || STATE.inSleep) return;
             const target = getActiveTarget(); if (!target || !target.icon) return; let wrapper = null;
 
             if (STATE.inPopup) {
@@ -1041,7 +1130,7 @@
         function updateFocus(isInitialLoad = false, dx = 0, dy = 0) {
             document.querySelectorAll('.is-focused').forEach(el => el.classList.remove('is-focused'));
             const ring = document.getElementById('focus-ring');
-            if (['player','audio_player'].includes(STATE.currentScreen) || STATE.inSleep) { 
+            if (['player','audio_player','custom_app'].includes(STATE.currentScreen) || STATE.inSleep) { 
                 ring.style.opacity = '0'; 
                 if (lastActiveTarget && lastActiveTarget.icon && lastActiveTarget.icon.springs) {
                     const s = lastActiveTarget.icon.springs; s.scale.target = 1.0; s.focusState.target = 0; s.posX.target = 0; s.posY.target = 0; lastActiveTarget.icon.style.zIndex = '1';
@@ -1102,6 +1191,9 @@
             if (!toEl) return;
             STATE.isNavigating = true;
 
+            // Garbage collect inactive Spring instances to ensure loop iterations are fast and memory is clear
+            springElements = springElements.filter(el => document.body.contains(el));
+
             document.querySelectorAll('.screen-transitioning').forEach(el => { el.classList.remove('screen-transitioning', 'transition-forward-exit', 'transition-backward-exit', 'transition-forward-entry-start', 'transition-backward-entry-start'); el.style.pointerEvents = ''; });
             document.querySelectorAll('#home-screen, .app-panel, #audio-player-screen, #cinema-player').forEach(el => {
                 if (el !== fromEl && el !== toEl) { el.style.display = 'none'; el.classList.remove('screen-visible', 'screen-transitioning', 'transition-forward-exit', 'transition-backward-exit', 'transition-forward-entry-start', 'transition-backward-entry-start'); }
@@ -1145,6 +1237,36 @@
             if (appId === 'settings') {
                 STATE.currentScreen = 'settings'; STATE.settingsFocusedIndex = 0; renderSettingsList();
                 const toScreen = document.getElementById('settings-environment'); navigateScreen(fromScreen, toScreen, true);
+            } else if (appId === 'store') {
+                STATE.currentScreen = 'media'; STATE.mediaFocusedIndex = 0; STATE.topBarFocusedIndex = 0; STATE.currentTab = 'all';
+                const toScreen = document.getElementById('media-environment');
+                const topBar = document.getElementById('media-top-bar'); if (topBar) topBar.style.display = 'none';
+                
+                const grid = document.getElementById('media-grid');
+                grid.innerHTML = `
+                    <div id="store-loading" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 150px; gap: 20px;">
+                        <div style="width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                        <span style="font-size: 1.6rem; color: var(--secondary-text);">Connecting to View Cloud...</span>
+                    </div>
+                `;
+                
+                navigateScreen(fromScreen, toScreen, true);
+
+                fetch(`${VIEW_CLOUD_URL}?action=getAppList`).then(r => r.json()).then(d => {
+                    storeAppsList = d.apps.map(a => ({ id: `store-${a.name}`, app: 'store', name: a.name, art: a.icon, version: a.version, supportedClients: a.supportedClients }));
+                    STORE_ITEM_ELEMENTS.clear();
+                    storeAppsList.forEach(app => {
+                        const itemEl = document.createElement('div'); itemEl.className = 'media-item';
+                        const card = document.createElement('div'); card.className = 'media-card'; card.style.backgroundImage = `url('${app.art}')`;
+                        const title = document.createElement('div'); title.className = 'media-title'; title.innerText = app.name;
+                        itemEl.appendChild(card); itemEl.appendChild(title); setupSpringPhysics(card); STORE_ITEM_ELEMENTS.set(app, itemEl);
+                    });
+                    if (topBar) topBar.style.display = 'flex';
+                    STATE.mediaFocusArea = 'grid'; updateColumns(); renderTopBar(); renderMediaGrid('store');
+                    updateFocus(true);
+                }).catch(() => {
+                    grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; font-size: 1.6rem; color: #ff3b30; padding-top: 150px;">Store offline. Connection failed.</div>`;
+                });
             } else {
                 STATE.currentScreen = 'media'; STATE.mediaFocusedIndex = 0; STATE.topBarFocusedIndex = 0; STATE.currentTab = 'all'; STATE.selectedShow = null; 
                 const topBar = document.getElementById('media-top-bar'); if (topBar) topBar.style.display = 'flex';
@@ -1161,6 +1283,41 @@
             const homeW = document.getElementById('home-scroll-wrapper'); if (homeW) homeW.style.transform = 'translateY(0px)';
             STATE.currentScreen = 'home'; STATE.activeApp = null; updateColumns();
             if (fromScreen) navigateScreen(fromScreen, toScreen, false);
+        }
+
+        function launchCustomApp(appName) {
+            const code = localStorage.getItem(`viewOS_appcode_${appName}`);
+            if (!code) { triggerSystemToast("App data corrupted. Reinstall from store."); return; }
+            const iframe = document.getElementById('custom-app-iframe');
+            const overlay = document.getElementById('app-loading-overlay');
+            const loadingText = document.getElementById('app-loading-text');
+
+            overlay.style.opacity = '1';
+            overlay.style.display = 'flex';
+            loadingText.innerText = `Launching ${appName}...`;
+
+            iframe.srcdoc = code;
+            STATE.currentScreen = 'custom_app';
+            
+            const fromEl = document.getElementById(STATE.inPopup ? 'media-environment' : 'home-screen');
+            if (STATE.inPopup) closeSystemPopup();
+            
+            navigateScreen(fromEl, document.getElementById('custom-app-environment'), true);
+            
+            iframe.onload = () => {
+                overlay.style.opacity = '0';
+                setTimeout(() => { overlay.style.display = 'none'; }, 400);
+            };
+
+            setTimeout(() => iframe.focus(), 500);
+        }
+
+        function closeCustomApp() {
+            const iframe = document.getElementById('custom-app-iframe');
+            const toScreen = document.getElementById('home-screen');
+            STATE.currentScreen = 'home'; STATE.activeApp = null; updateColumns();
+            navigateScreen(document.getElementById('custom-app-environment'), toScreen, false);
+            setTimeout(() => { iframe.srcdoc = ''; }, 500);
         }
 
         function launchCinemaPlayer(item) {
@@ -1229,26 +1386,45 @@
         let isBackDown = false, volumeOpenedByHold = false, backKeyTimeout = null; 
 
         function handleKeydownRaw(e) {
-            if (STATE.isInstallingUpdate) { e.preventDefault(); return; } // Input lockout during critical system flashes
+            if (STATE.isInstallingUpdate || STATE.isInstallingApp) { e.preventDefault(); return; }
+            if (STATE.currentScreen === 'custom_app') {
+                // Secure Esc/Backspace fallback to return to system dashboard if sandbox freezes
+                if (e.key === 'Escape' || e.key === 'Backspace') {
+                    if (!window.customAppExitTimeout) {
+                        window.customAppExitTimeout = setTimeout(() => {
+                            closeCustomApp();
+                            triggerSystemToast("App Closed");
+                        }, 2000);
+                    }
+                }
+                return;
+            }
             if ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R') || e.key === 'F5') return;
             if (STATE.inSleep) { if (Date.now() - sleepActiveTime >= 1000) wakeUp(); e.preventDefault(); return; }
 
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                if (!INPUT.enterPressed) { INPUT.enterPressed = true; INPUT.enterHoldTriggered = false; if (STATE.currentScreen === 'media' && !STATE.inPopup && STATE.mediaFocusArea !== 'top-bar') INPUT.enterHoldTimer = setTimeout(() => { INPUT.enterHoldTriggered = true; triggerFavouritePopup(); }, 1700); } return;
+                if (!INPUT.enterPressed) { INPUT.enterPressed = true; INPUT.enterHoldTriggered = false; if (STATE.currentScreen === 'media' && !STATE.inPopup && STATE.mediaFocusArea !== 'top-bar' && STATE.activeApp !== 'store') INPUT.enterHoldTimer = setTimeout(() => { INPUT.enterHoldTriggered = true; triggerFavouritePopup(); }, 1700); } return;
             }
             if (e.key === 'Escape' || e.key === 'Backspace') { if (!isBackDown) { isBackDown = true; volumeOpenedByHold = false; backKeyTimeout = setTimeout(() => { volumeOpenedByHold = true; openControlCenter(); }, 400); } return; }
             processNavigation(e.key);
         }
 
         function handleKeyupRaw(e) {
-            if (STATE.isInstallingUpdate) return;
+            if (STATE.isInstallingUpdate || STATE.isInstallingApp) return;
+            if (STATE.currentScreen === 'custom_app') {
+                if (e.key === 'Escape' || e.key === 'Backspace') {
+                    clearTimeout(window.customAppExitTimeout);
+                    window.customAppExitTimeout = null;
+                }
+                return;
+            }
             if (e.key === 'Enter' || e.key === ' ') { if (INPUT.enterPressed) { clearTimeout(INPUT.enterHoldTimer); INPUT.enterHoldTimer = null; if (!INPUT.enterHoldTriggered) processNavigation('Enter'); INPUT.enterPressed = false; INPUT.enterHoldTriggered = false; } return; }
             if (e.key === 'Escape' || e.key === 'Backspace') { isBackDown = false; clearTimeout(backKeyTimeout); if (!volumeOpenedByHold) goBack(); }
         }
 
         function goBack() {
-            if (STATE.isNavigating || STATE.isInstallingUpdate) return;
+            if (STATE.isNavigating || STATE.isInstallingUpdate || STATE.isInstallingApp) return;
             if (STATE.inPopup) closeSystemPopup(); 
             else if (STATE.inControlCenter) closeControlCenter();
             else if (STATE.currentScreen === 'player') { const osd = document.getElementById('cinema-osd'); if (osd && osd.classList.contains('visible')) { osd.classList.remove('visible'); clearTimeout(osdTimer); } else { closeCinemaPlayer(); } } 
@@ -1259,8 +1435,36 @@
             } else if (STATE.currentScreen !== 'home') closeAppPanel();
         }
 
+        function handleStoreItemAction(app) {
+            let installedApps = [];
+            try { installedApps = JSON.parse(localStorage.getItem('viewOS_installed_apps') || '[]'); } catch(e) {}
+            const localApp = installedApps.find(a => a.name === app.name);
+            const buttons = [];
+            
+            const isSupported = app.supportedClients && app.supportedClients.some(v => v.toString().trim() === CLIENT_VERSION.toString());
+            
+            if (!isSupported) {
+                buttons.push({ label: 'Cancel', action: () => {} });
+                showSystemPopup(app.name, "Requires newer viewOS View Device.", buttons, app.art);
+                return;
+            }
+
+            if (!localApp) {
+                buttons.push({ label: 'Install', preservePopup: true, action: () => executeAppInstall(app) });
+            } else if (parseFloat(app.version) > parseFloat(localApp.version)) {
+                buttons.push({ label: 'Update', preservePopup: true, action: () => executeAppInstall(app) });
+                buttons.push({ label: 'Uninstall', action: () => executeAppUninstall(app) });
+            } else {
+                buttons.push({ label: 'Open', action: () => launchCustomApp(app.name) });
+                buttons.push({ label: 'Uninstall', action: () => executeAppUninstall(app) });
+            }
+            buttons.push({ label: 'Cancel', action: () => {} });
+            
+            showSystemPopup(app.name, `Version ${app.version}`, buttons, app.art);
+        }
+
         function processNavigation(key) {
-            if (STATE.isNavigating || STATE.isInstallingUpdate) return;
+            if (STATE.isNavigating || STATE.isInstallingUpdate || STATE.isInstallingApp) return;
             let dx = 0, dy = 0;
             if (key === 'ArrowRight') dx = 1; if (key === 'ArrowLeft') dx = -1; if (key === 'ArrowDown') dy = 1; if (key === 'ArrowUp') dy = -1;
             const oldTarget = getActiveTarget();
@@ -1289,7 +1493,6 @@
                 else if (key === 'Enter') { 
                     const btn = activePopupButtons[STATE.popupFocusedIndex]; 
                     if (btn) {
-                        // Keep popup open for seamless transitions if preservePopup is configured
                         if (!btn.preservePopup) closeSystemPopup(); 
                         if (btn.action) btn.action(); 
                     }
@@ -1310,12 +1513,15 @@
             }
 
             if (STATE.currentScreen === 'home') {
-                const c = STATE.columns, t = appRegistry.length;
+                const c = STATE.columns, t = DOM_CACHE.apps.length;
                 if (key === 'ArrowRight' && (STATE.focusedIndex + 1) % c !== 0 && STATE.focusedIndex + 1 < t) STATE.focusedIndex++;
                 else if (key === 'ArrowLeft' && STATE.focusedIndex % c !== 0) STATE.focusedIndex--;
                 else if (key === 'ArrowDown' && STATE.focusedIndex + c < t) STATE.focusedIndex += c;
                 else if (key === 'ArrowUp' && STATE.focusedIndex - c >= 0) STATE.focusedIndex -= c;
-                else if (key === 'Enter') openAppPanel(appRegistry[STATE.focusedIndex].id);
+                else if (key === 'Enter') {
+                    const selApp = DOM_CACHE.apps[STATE.focusedIndex].data;
+                    if (selApp.isCustom) launchCustomApp(selApp.name); else openAppPanel(selApp.id);
+                }
             } else if (STATE.currentScreen === 'media') {
                 const tabs = getAvailableTabs();
                 if (STATE.mediaFocusArea === 'top-bar') {
@@ -1330,7 +1536,9 @@
                     else if (key === 'ArrowUp') { if (STATE.mediaFocusedIndex - c >= 0) STATE.mediaFocusedIndex -= c; else STATE.mediaFocusArea = 'top-bar'; }
                     else if (key === 'Enter' && t > 0) {
                         const sel = activeMediaList[STATE.mediaFocusedIndex];
-                        if (sel && sel.id === 'show-folder') {
+                        if (STATE.activeApp === 'store') {
+                            handleStoreItemAction(sel);
+                        } else if (sel && sel.id === 'show-folder') {
                             const wrapper = document.getElementById('media-scroll-wrapper');
                             navigateInnerContent(wrapper, () => { STATE.selectedShow = sel.name; STATE.savedShowIndex = STATE.mediaFocusedIndex; STATE.mediaFocusedIndex = 0; renderTopBar(); renderMediaGrid('tvshows'); }, true);
                         } else if (sel && STATE.activeApp === 'music') playAudioTrack(sel); else if (sel) launchCinemaPlayer(sel);
@@ -1345,8 +1553,8 @@
                     else if (set.id === 'software_update' && key === 'Enter') checkForUpdates();
                     else if (set.id === 'sleep' && key === 'Enter') startSleep(); 
                     else if (set.id === 'reboot' && key === 'Enter') location.reload();
-                    else if (set.id === 'clear_data' && key === 'Enter') showSystemPopup("Erase All Data?", "All data other than the content in apps will be deleted are you sure?", [
-                        { label: 'Continue', action: () => { try { localStorage.clear(); } catch(e) {} settingsRegistry[1].currentIndex = 5; updateVolumeUI(); renderSettingsList(); triggerSystemToast("All Data Cleared"); } }, 
+                    else if (set.id === 'clear_data' && key === 'Enter') showSystemPopup("Erase All Data?", "All data including installed apps will be deleted are you sure?", [
+                        { label: 'Continue', action: () => { try { localStorage.clear(); } catch(e) {} settingsRegistry[1].currentIndex = 5; updateVolumeUI(); renderSettingsList(); triggerSystemToast("All Data Cleared"); setTimeout(() => location.reload(), 1000); } }, 
                         { label: 'Cancel', action: () => {} }
                     ]);
                 }
@@ -1356,7 +1564,7 @@
 
         let lastGamepadState = { up: false, down: false, left: false, right: false, enter: false, back: false, triangle: false }, gamepadBackPressTime = 0, gamepadActiveDir = null, gamepadHoldStartTime = 0, gamepadLastRepeatTime = 0, gpEnterPressed = false, gpEnterHoldTriggered = false, gpEnterHoldTimer = null;
         function pollGamepads() {
-            if (STATE.isInstallingUpdate) return requestAnimationFrame(pollGamepads); // Hold inputs during critical update phase
+            if (STATE.isInstallingUpdate || STATE.isInstallingApp) return requestAnimationFrame(pollGamepads);
             
             const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
             for (let i = 0; i < gamepads.length; i++) {
@@ -1364,6 +1572,12 @@
                 
                 const back = gp.buttons[1]?.pressed, square = gp.buttons[2]?.pressed; 
                 if (back && square) { if (STATE.forceRebootStart === 0) STATE.forceRebootStart = Date.now(); else if (Date.now() - STATE.forceRebootStart >= 3000) { location.reload(); return; } } else { STATE.forceRebootStart = 0; }
+
+                if (STATE.currentScreen === 'custom_app') {
+                    // Bypass system keyboard/controller listening to avoid input overlapping on local frames
+                    requestAnimationFrame(pollGamepads);
+                    return;
+                }
 
                 const up = gp.buttons[12]?.pressed || gp.axes[1] < -0.5, down = gp.buttons[13]?.pressed || gp.axes[1] > 0.5, left = gp.buttons[14]?.pressed || gp.axes[0] < -0.5, right = gp.buttons[15]?.pressed || gp.axes[0] > 0.5;
                 const enter = gp.buttons[0]?.pressed;
@@ -1377,7 +1591,7 @@
                 let dir = up ? 'up' : down ? 'down' : left ? 'left' : right ? 'right' : null;
                 if (dir) { if (gamepadActiveDir !== dir) { gamepadActiveDir = dir; gamepadHoldStartTime = Date.now(); gamepadLastRepeatTime = Date.now(); processNavigation({ up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[dir]); } else if (Date.now() - gamepadHoldStartTime > 350 && Date.now() - gamepadLastRepeatTime > 80) { processNavigation({ up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[dir]); gamepadLastRepeatTime = Date.now(); } } else gamepadActiveDir = null; 
 
-                if (enter) { if (!gpEnterPressed) { gpEnterPressed = true; gpEnterHoldTriggered = false; if (STATE.currentScreen === 'media' && !STATE.inPopup && STATE.mediaFocusArea !== 'top-bar') gpEnterHoldTimer = setTimeout(() => { gpEnterHoldTriggered = true; triggerFavouritePopup(); }, 1700); } } else { if (gpEnterPressed) { clearTimeout(gpEnterHoldTimer); gpEnterHoldTimer = null; if (!gpEnterHoldTriggered) processNavigation('Enter'); gpEnterPressed = false; gpEnterHoldTriggered = false; } }
+                if (enter) { if (!gpEnterPressed) { gpEnterPressed = true; gpEnterHoldTriggered = false; if (STATE.currentScreen === 'media' && !STATE.inPopup && STATE.mediaFocusArea !== 'top-bar' && STATE.activeApp !== 'store') gpEnterHoldTimer = setTimeout(() => { gpEnterHoldTriggered = true; triggerFavouritePopup(); }, 1700); } } else { if (gpEnterPressed) { clearTimeout(gpEnterHoldTimer); gpEnterHoldTimer = null; if (!gpEnterHoldTriggered) processNavigation('Enter'); gpEnterPressed = false; gpEnterHoldTriggered = false; } }
                 if (back && !lastGamepadState.back) { gamepadBackPressTime = Date.now(); volumeOpenedByHold = false; } else if (back && lastGamepadState.back) { if (!volumeOpenedByHold && (Date.now() - gamepadBackPressTime > 400)) { volumeOpenedByHold = true; openControlCenter(); } } else if (!back && lastGamepadState.back) { if (!volumeOpenedByHold) goBack(); }
 
                 lastGamepadState = { up, down, left, right, enter, back, triangle: false }; break; 
@@ -1476,7 +1690,7 @@
             if (activeAudio && !activeAudio.paused) activeAudio.pause(); closeControlCenter(); startSleep();
         }
         
-        function triggerHomeFromControlCenter() { closeControlCenter(); if (STATE.currentScreen === 'player') closeCinemaPlayer(); if (STATE.currentScreen === 'audio_player') closeAudioPlayer(); if (STATE.currentScreen === 'media' || STATE.currentScreen === 'settings') closeAppPanel(); STATE.currentScreen = 'home'; updateColumns(); updateFocus(true); }
+        function triggerHomeFromControlCenter() { closeControlCenter(); if (STATE.currentScreen === 'player') closeCinemaPlayer(); if (STATE.currentScreen === 'audio_player') closeAudioPlayer(); if (STATE.currentScreen === 'media' || STATE.currentScreen === 'settings' || STATE.currentScreen === 'custom_app') closeAppPanel(); STATE.currentScreen = 'home'; updateColumns(); updateFocus(true); }
         
         function updateVolumeUI() {
             const v = settingsRegistry[1], c = v.options[v.currentIndex]; 
