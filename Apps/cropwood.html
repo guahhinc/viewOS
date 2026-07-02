@@ -60,7 +60,7 @@
             justify-content: center;
             align-items: flex-start;
             width: 100%;
-            max-width: 1500px;
+            max-width: 1600px; /* Expanded max-width to cleanly fit larger sidebar */
             margin-top: 10px;
         }
 
@@ -174,35 +174,35 @@
             transition: color 0.2s ease;
         }
 
-        /* Persistent Inventory & Backpack Sidebar */
+        /* Persistent Inventory & Backpack Sidebar (Widened & Scaled Up) */
         #inventory-sidebar {
-            width: 380px;
+            width: 440px; /* Widened from 380px */
             background: rgba(255, 255, 255, 0.02);
             border: 1.5px solid rgba(255, 255, 255, 0.06);
             border-radius: var(--border-radius);
-            padding: 24px;
+            padding: 28px; /* Expanded padding */
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 24px; /* Slightly wider content spacing */
             align-self: flex-start;
             margin-top: 10px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         .sidebar-title {
-            font-size: 1.8rem;
+            font-size: 2.0rem; /* Increased from 1.8rem */
             font-weight: 500 !important;
             color: #d1ffc4;
             border-bottom: 1.5px solid rgba(255, 255, 255, 0.08);
-            padding-bottom: 10px;
+            padding-bottom: 12px;
             margin-bottom: 4px;
         }
         .sidebar-section {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
         }
         .section-title {
-            font-size: 1.05rem;
+            font-size: 1.2rem; /* Increased from 1.05rem */
             text-transform: uppercase;
             color: var(--secondary-text);
             letter-spacing: 0.06em;
@@ -211,28 +211,28 @@
         .tools-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 14px;
         }
         .tool-slot {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 8px;
-            padding: 10px 14px;
+            padding: 12px 16px;
         }
         .tool-icon {
-            font-size: 1.4rem;
+            font-size: 1.6rem; /* Increased from 1.4rem */
         }
         .tool-text {
-            font-size: 1.1rem;
+            font-size: 1.25rem; /* Increased from 1.1rem */
             color: #ffffff;
         }
         .inv-items-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
+            gap: 12px; /* Increased item grid spacing */
         }
         .inv-slot {
             position: relative;
@@ -248,15 +248,15 @@
             opacity: 0.2;
         }
         .inv-emoji {
-            font-size: 1.7rem;
+            font-size: 1.95rem; /* Increased from 1.7rem */
         }
         .inv-badge {
             position: absolute;
-            bottom: 4px;
-            right: 6px;
-            font-size: 0.95rem;
+            bottom: 6px;
+            right: 8px;
+            font-size: 1.05rem; /* Increased from 0.95rem */
             background: rgba(0, 0, 0, 0.85);
-            padding: 1px 6px;
+            padding: 2px 8px;
             border-radius: 6px;
             color: #ffffff;
         }
@@ -485,7 +485,7 @@
             // Row 4: Farm Hub Facilities
             { id: "shop", title: "Seed Shop", type: "facility" },
             { id: "coop", title: "Barn & Coop", type: "facility" },
-            { id: "shipping", title: "Shipping Bin", type: "facility" }, // Replaced cooking and kitchen
+            { id: "shipping", title: "Shipping Crate", type: "facility" }, // Replaced cooking/kitchen with Shipping Crate
             { id: "farmhouse", title: "Cozy Farmhouse", type: "facility" }
         ];
 
@@ -541,7 +541,7 @@
                 firstHarvest: false,
                 tycoon: false,
                 animalLover: false,
-                masterShipper: false, // Updated cooking milestone to shipping
+                masterShipper: false, // Milestone using Shipping Crate
                 starPlanter: false
             }
         };
@@ -724,8 +724,12 @@
                 target.container.classList.add('is-focused');
                 if (target.icon !== target.container) target.icon.classList.add('is-focused');
                 
-                // Automatically scroll layout window for visual tracking of grid rows
-                target.container.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                // If focused on the first row of plots (0-3), scroll browser smoothly back to top
+                if (STATE.currentScreen === 'grid' && STATE.focusedIndex < 4) {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    target.container.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                }
             }
         }
 
@@ -1018,7 +1022,47 @@
                     actions.push({ text: "Upgrade to Iridium Hoe (400g)", disabled: STATE.gold < 400, handler: () => { STATE.gold -= 400; STATE.hoeLevel = 3; notifySuccess(); } });
                 }
             } else if (item.id === 'shipping') {
-                // Central crop and yield sales market
+                // 1. Bulk "Sell All" Button at the top of the Shipping Crate
+                let totalGoldToGain = 0;
+                let itemsToSell = [];
+
+                seedsConfig.forEach(cfg => {
+                    const price = CROPS_DB[cfg.id].cropSell;
+                    const amount = STATE.crops[cfg.id] || 0;
+                    if (amount > 0) {
+                        totalGoldToGain += amount * price;
+                        itemsToSell.push({ type: 'crops', id: cfg.id });
+                    }
+                });
+
+                const productPrices = { egg: 40, milk: 90 };
+                ['egg', 'milk'].forEach(id => {
+                    const price = productPrices[id];
+                    const amount = STATE.other[id] || 0;
+                    if (amount > 0) {
+                        totalGoldToGain += amount * price;
+                        itemsToSell.push({ type: 'other', id: id });
+                    }
+                });
+
+                actions.push({
+                    text: `💰 SELL ALL INVENTORY (+${totalGoldToGain}g)`,
+                    disabled: totalGoldToGain <= 0,
+                    handler: () => {
+                        STATE.gold += totalGoldToGain;
+                        itemsToSell.forEach(item => {
+                            if (item.type === 'crops') {
+                                STATE.crops[item.id] = 0;
+                            } else {
+                                STATE.other[item.id] = 0;
+                            }
+                        });
+                        STATE.milestones.masterShipper = true;
+                        notifySuccess();
+                    }
+                });
+
+                // 2. Individual items sell list
                 seedsConfig.forEach(cfg => {
                     const price = CROPS_DB[cfg.id].cropSell;
                     const amount = STATE.crops[cfg.id];
@@ -1093,7 +1137,7 @@
                     actions.push({ text: `🌾 First Harvest: ${STATE.milestones.firstHarvest ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
                     actions.push({ text: `💰 Tycoon (1k gold balance): ${STATE.milestones.tycoon ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
                     actions.push({ text: `🐮 Animal Lover (4 livestock): ${STATE.milestones.animalLover ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
-                    actions.push({ text: `📦 Master Shipper (Use Shipping Bin): ${STATE.milestones.masterShipper ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
+                    actions.push({ text: `📦 Master Shipper (Use Shipping Crate): ${STATE.milestones.masterShipper ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
                     actions.push({ text: `✨ Star Planter (Starfruit): ${STATE.milestones.starPlanter ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
                     actions.push({
                         text: "Back",
@@ -1147,7 +1191,7 @@
             STATE.gold += amount * price;
             if (category === 'crops') STATE.crops[type] = 0;
             else STATE.other[type] = 0;
-            STATE.milestones.masterShipper = true; // Complete Milestone using Bin
+            STATE.milestones.masterShipper = true; // Complete Milestone using Crate
             notifySuccess();
         }
 
@@ -1182,7 +1226,10 @@
                 DOM_CACHE.detailActions.appendChild(btn);
             });
             
-            STATE.detailFocusedIndex = 0;
+            // Adjust index to prevent out-of-bounds error when active list updates live
+            if (STATE.detailFocusedIndex >= actions.length) {
+                STATE.detailFocusedIndex = Math.max(0, actions.length - 1);
+            }
             updateDetailFocus();
         }
 
@@ -1234,11 +1281,6 @@
             STATE.energy = STATE.maxEnergy;
             STATE.dayTimer = STATE.dayDuration; // Reset to exactly 50 seconds
 
-            // Auto close sub menus
-            if (STATE.currentScreen === 'detail') {
-                closeDetailView();
-            }
-
             // Advance Crops growth
             let cropsGrown = 0;
             STATE.plots.forEach((plot, index) => {
@@ -1275,6 +1317,11 @@
             }
             
             saveGameState(); // Auto-save on day transition
+
+            // Menus are NOT closed. If currently in a menu, update its action items live
+            if (STATE.currentScreen === 'detail') {
+                renderDetailMenu();
+            }
             
             // Non-intrusive status report banner in the header description
             let summaryMsg = `☀️ Day ${STATE.day} started! `;
