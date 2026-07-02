@@ -13,17 +13,17 @@
             --text-color: #ffffff;
             --secondary-text: #a0b0a5; /* Slate-green gray */
             
-            /* Symmetrical compact squares */
-            --card-width: 160px;
-            --card-height: 160px; 
-            --border-radius: 12px;
+            /* Symmetrical compact squares - Scaled up for readability */
+            --card-width: 185px;
+            --card-height: 185px; 
+            --border-radius: 14px;
         }
 
         * {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            font-weight: 300 !important;
-            letter-spacing: -0.02em !important;
-            line-height: 1.25;
+            font-weight: 350 !important;
+            letter-spacing: -0.015em !important;
+            line-height: 1.35;
             box-sizing: border-box;
             user-select: none;
             -webkit-font-smoothing: antialiased;
@@ -56,11 +56,11 @@
         #app-layout {
             display: flex;
             flex-direction: row;
-            gap: 35px;
+            gap: 40px;
             justify-content: center;
             align-items: flex-start;
             width: 100%;
-            max-width: 1350px;
+            max-width: 1500px;
             margin-top: 10px;
         }
 
@@ -77,16 +77,16 @@
         }
         
         #app-header h1 { 
-            font-size: 3.2rem; 
-            font-weight: 400 !important; 
-            margin-bottom: 6px; 
+            font-size: 3.8rem; 
+            font-weight: 500 !important; 
+            margin-bottom: 10px; 
             color: #d1ffc4;
         }
         
         #app-header p { 
-            font-size: 1.15rem; 
+            font-size: 1.35rem; 
             color: var(--secondary-text); 
-            margin-bottom: 15px; 
+            margin-bottom: 20px; 
             transition: color 0.25s ease;
         }
 
@@ -95,11 +95,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 24px;
+            gap: 32px;
             background: rgba(255, 255, 255, 0.03);
             border: 1.5px solid rgba(255, 255, 255, 0.08);
-            border-radius: 14px;
-            padding: 12px 28px;
+            border-radius: 16px;
+            padding: 16px 36px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             margin: 0 auto;
         }
@@ -107,25 +107,25 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-width: 85px;
+            min-width: 110px;
         }
         .hud-label {
-            font-size: 0.8rem;
+            font-size: 0.95rem;
             color: var(--secondary-text);
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 2px;
+            letter-spacing: 0.06em;
+            margin-bottom: 4px;
         }
         .hud-val {
-            font-size: 1.35rem;
-            font-weight: 400 !important;
+            font-size: 1.65rem;
+            font-weight: 500 !important;
             color: #ffffff;
         }
 
         #content-grid {
             display: grid;
             grid-template-columns: repeat(4, var(--card-width));
-            gap: 20px;
+            gap: 24px;
             justify-content: center;
             perspective: 1200px;
         }
@@ -163,9 +163,9 @@
         }
 
         .card-title {
-            font-size: 1rem;
+            font-size: 1.2rem;
             color: var(--secondary-text); 
-            margin-top: 8px;
+            margin-top: 12px;
             text-align: center; 
             white-space: nowrap; 
             overflow: hidden;
@@ -176,68 +176,69 @@
 
         /* Persistent Inventory & Backpack Sidebar */
         #inventory-sidebar {
-            width: 330px;
+            width: 380px;
             background: rgba(255, 255, 255, 0.02);
             border: 1.5px solid rgba(255, 255, 255, 0.06);
             border-radius: var(--border-radius);
-            padding: 20px;
+            padding: 24px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 20px;
             align-self: flex-start;
             margin-top: 10px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         .sidebar-title {
-            font-size: 1.4rem;
-            font-weight: 400 !important;
+            font-size: 1.8rem;
+            font-weight: 500 !important;
             color: #d1ffc4;
             border-bottom: 1.5px solid rgba(255, 255, 255, 0.08);
-            padding-bottom: 8px;
-            margin-bottom: 2px;
+            padding-bottom: 10px;
+            margin-bottom: 4px;
         }
         .sidebar-section {
             display: flex;
             flex-direction: column;
+            gap: 10px;
         }
         .section-title {
-            font-size: 0.85rem;
+            font-size: 1.05rem;
             text-transform: uppercase;
             color: var(--secondary-text);
-            letter-spacing: 0.05em;
-            margin-bottom: 6px;
+            letter-spacing: 0.06em;
+            margin-bottom: 2px;
         }
         .tools-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            gap: 12px;
         }
         .tool-slot {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 6px;
-            padding: 6px 10px;
+            border-radius: 8px;
+            padding: 10px 14px;
         }
         .tool-icon {
-            font-size: 1.1rem;
+            font-size: 1.4rem;
         }
         .tool-text {
-            font-size: 0.85rem;
+            font-size: 1.1rem;
             color: #ffffff;
         }
         .inv-items-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
+            gap: 8px;
         }
         .inv-slot {
             position: relative;
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 6px;
+            border-radius: 8px;
             aspect-ratio: 1;
             display: flex;
             align-items: center;
@@ -247,16 +248,16 @@
             opacity: 0.2;
         }
         .inv-emoji {
-            font-size: 1.3rem;
+            font-size: 1.7rem;
         }
         .inv-badge {
             position: absolute;
-            bottom: 2px;
-            right: 4px;
-            font-size: 0.75rem;
+            bottom: 4px;
+            right: 6px;
+            font-size: 0.95rem;
             background: rgba(0, 0, 0, 0.85);
-            padding: 0 4px;
-            border-radius: 4px;
+            padding: 1px 6px;
+            border-radius: 6px;
             color: #ffffff;
         }
 
@@ -307,9 +308,10 @@
             pointer-events: all;
         }
         #detail-view h2 { 
-            font-size: 3rem; 
-            margin-bottom: 20px; 
+            font-size: 3.6rem; 
+            margin-bottom: 24px; 
             color: #d1ffc4;
+            font-weight: 400 !important;
         }
 
         /* Vertical Scrollable Action List container */
@@ -319,21 +321,21 @@
             align-items: center; 
             justify-content: flex-start; 
             margin-bottom: 20px;
-            max-height: 480px; 
+            max-height: 550px; 
             overflow-y: auto;
             padding-right: 12px;
             width: 100%;
         }
 
         .detail-action-btn {
-            font-size: 1.4rem;
+            font-size: 1.65rem;
             color: #ffffff;
             background: rgba(255, 255, 255, 0.04);
             border: 1.5px solid rgba(255, 255, 255, 0.08);
-            padding: 12px 40px;
-            margin: 5px 0;
+            padding: 16px 40px;
+            margin: 6px 0;
             border-radius: var(--border-radius);
-            width: 480px;
+            width: 580px;
             text-align: center;
             transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
             transform-style: preserve-3d;
@@ -368,22 +370,23 @@
             opacity: 1;
         }
         #night-text {
-            font-size: 4.5rem;
+            font-size: 5.5rem;
             color: #d1b3ff;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             animation: pulse 2s infinite ease-in-out;
+            font-weight: 400 !important;
         }
         @keyframes pulse {
             0%, 100% { transform: scale(1); opacity: 0.8; }
             50% { transform: scale(1.05); opacity: 1; }
         }
         #night-summary {
-            font-size: 1.6rem;
+            font-size: 2.0rem;
             color: var(--secondary-text);
             text-align: center;
-            max-width: 600px;
-            margin-bottom: 40px;
-            line-height: 1.6;
+            max-width: 800px;
+            margin-bottom: 45px;
+            line-height: 1.7;
         }
 
         .grid-item.is-focused .card-title { color: #ffffff !important; }
@@ -413,7 +416,13 @@
                     <div class="hud-container">
                         <div class="hud-item"><span class="hud-label">DAY</span><span id="hud-day" class="hud-val">1</span></div>
                         <div class="hud-item" style="border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1); padding: 0 25px;"><span class="hud-label">GOLD</span><span id="hud-gold" class="hud-val" style="color:#ffd700;">150g</span></div>
-                        <div class="hud-item"><span class="hud-label">ENERGY</span><span id="hud-energy" class="hud-val" style="color:#00ffcc;">100/100</span></div>
+                        <div class="hud-item" style="border-right: 1px solid rgba(255,255,255,0.1); padding-right: 25px;"><span class="hud-label">ENERGY</span><span id="hud-energy" class="hud-val" style="color:#00ffcc;">100/100</span></div>
+                        <div class="hud-item"><span class="hud-label">TIME LEFT</span><span id="hud-timer" class="hud-val" style="color:#ffcc00;">45s</span></div>
+                    </div>
+
+                    <!-- Dynamic Day progression track bar -->
+                    <div id="day-progress-container" style="width: 100%; max-width: 620px; height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; margin: 20px auto 0 auto; overflow: hidden; border: 1.5px solid rgba(255,255,255,0.04);">
+                        <div id="day-progress-bar" style="width: 100%; height: 100%; background: linear-gradient(90deg, #ffd700, #ff8c00); transition: width 1s linear; border-radius: 4px;"></div>
                     </div>
                 </header>
 
@@ -461,7 +470,7 @@
     <div id="night-overlay">
         <div id="night-text">Zzz...</div>
         <div id="night-summary"></div>
-        <div id="night-continue-btn" class="detail-action-btn">Wake Up</div>
+        <div id="night-continue-btn" class="detail-action-btn">Wake Up (Auto in 5s)</div>
     </div>
 
     <script>
@@ -535,6 +544,10 @@
             day: 1,
             energy: 100,
             maxEnergy: 100,
+
+            // Real-Time Day Configuration
+            dayDuration: 45, // seconds per day
+            dayTimer: 45,    // remaining seconds
             
             seeds: { wheat: 2, potato: 2, carrot: 0, corn: 0, strawberry: 0, blueberry: 0, pumpkin: 0, starfruit: 0 },
             crops: { wheat: 0, potato: 0, carrot: 0, corn: 0, strawberry: 0, blueberry: 0, pumpkin: 0, starfruit: 0 },
@@ -585,6 +598,8 @@
 
         let cachedElements = [];
         let springElements = [];
+        let nightAutoWakeTimer = null;
+        let nightSecondsLeft = 5;
 
         // Helper calculations
         function getTillingCost() { return [15, 8, 2][STATE.hoeLevel - 1]; }
@@ -784,16 +799,16 @@
                 if (plot.status === 'wild') {
                     bg = 'linear-gradient(135deg, #1e281a, #0d140b)';
                     label = `Plot ${item.plotIndex + 1}: Overgrown`;
-                    graphic = `<div style="font-size: 2.8rem; margin-top: 15px;">🌿</div>`;
+                    graphic = `<div style="font-size: 3.2rem; margin-top: 15px;">🌿</div>`;
                 } else if (plot.status === 'soil') {
                     bg = 'linear-gradient(135deg, #3d2816, #25180c)';
                     label = `Plot ${item.plotIndex + 1}: Dry Soil`;
-                    graphic = `<div style="font-size: 2.8rem; margin-top: 15px; opacity:0.5;">🟫</div>`;
+                    graphic = `<div style="font-size: 3.2rem; margin-top: 15px; opacity:0.5;">🟫</div>`;
                 } else if (plot.status === 'watered') {
                     bg = 'linear-gradient(135deg, #1b2636, #0c121b)';
                     label = `Plot ${item.plotIndex + 1}: Wet Soil`;
-                    graphic = `<div style="font-size: 2.8rem; margin-top: 15px;">🟫</div>`;
-                    badges += `<span style="position:absolute; top:6px; right:6px; font-size:0.75rem; background:rgba(0,150,255,0.4); border:1px solid rgba(0,200,255,0.6); padding:2px 8px; border-radius:12px; backdrop-filter:blur(4px); line-height:1; z-index:10; font-weight:400 !important;">💧 Wet</span>`;
+                    graphic = `<div style="font-size: 3.2rem; margin-top: 15px;">🟫</div>`;
+                    badges += `<span style="position:absolute; top:6px; right:6px; font-size:0.9rem; background:rgba(0,150,255,0.4); border:1px solid rgba(0,200,255,0.6); padding:4px 10px; border-radius:12px; backdrop-filter:blur(4px); line-height:1; z-index:10; font-weight:400 !important;">💧 Wet</span>`;
                 }
                 
                 if (plot.crop) {
@@ -809,10 +824,10 @@
                     }
                     
                     if (isReady) {
-                        badges += `<span style="position:absolute; bottom:6px; right:6px; font-size:0.7rem; font-weight:bold; background:rgba(255,200,0,0.45); border:1px solid rgba(255,230,0,0.6); padding:3px 8px; border-radius:12px; backdrop-filter:blur(4px); color:#fff; line-height:1; z-index:10; animation: bounce 1s infinite alternate; font-weight:400 !important;">✨ HARVEST</span>`;
+                        badges += `<span style="position:absolute; bottom:6px; right:6px; font-size:0.85rem; font-weight:bold; background:rgba(255,200,0,0.45); border:1px solid rgba(255,230,0,0.6); padding:4px 10px; border-radius:12px; backdrop-filter:blur(4px); color:#fff; line-height:1; z-index:10; animation: bounce 1s infinite alternate; font-weight:400 !important;">✨ HARVEST</span>`;
                     }
                     
-                    graphic = `<div style="font-size: 3.2rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));">${cropEmoji}</div>`;
+                    graphic = `<div style="font-size: 3.8rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));">${cropEmoji}</div>`;
                 }
                 
                 visual.style.background = bg;
@@ -832,7 +847,7 @@
                 } else if (item.id === 'coop') {
                     bg = 'linear-gradient(135deg, #381a1a, #1a0c0c)';
                     graphic = '🐔';
-                    badges += `<span style="position:absolute; top:6px; right:6px; font-size:0.75rem; background:rgba(255,100,100,0.25); border:1px solid rgba(255,100,100,0.4); padding:2px 8px; border-radius:12px; backdrop-filter:blur(4px); line-height:1; z-index:10;">🐔${STATE.chickens} 🐮${STATE.cows}</span>`;
+                    badges += `<span style="position:absolute; top:6px; right:6px; font-size:0.9rem; background:rgba(255,100,100,0.25); border:1px solid rgba(255,100,100,0.4); padding:4px 10px; border-radius:12px; backdrop-filter:blur(4px); line-height:1; z-index:10;">🐔${STATE.chickens} 🐮${STATE.cows}</span>`;
                 } else if (item.id === 'kitchen') {
                     bg = 'linear-gradient(135deg, #132b24, #081410)';
                     graphic = '🍳';
@@ -840,14 +855,14 @@
                     bg = 'linear-gradient(135deg, #2a1b3d, #120b1c)';
                     graphic = '🏡';
                     if (STATE.energy < STATE.maxEnergy * 0.3) {
-                        badges += `<span style="position:absolute; top:6px; right:6px; font-size:0.75rem; background:rgba(255,150,0,0.3); border:1px solid rgba(255,150,0,0.5); padding:2px 8px; border-radius:12px; backdrop-filter:blur(4px); line-height:1; z-index:10; animation: blink 1s infinite alternate;">⚠️ Tired</span>`;
+                        badges += `<span style="position:absolute; top:6px; right:6px; font-size:0.9rem; background:rgba(255,150,0,0.3); border:1px solid rgba(255,150,0,0.5); padding:4px 10px; border-radius:12px; backdrop-filter:blur(4px); line-height:1; z-index:10; animation: blink 1s infinite alternate;">⚠️ Tired</span>`;
                     }
                 }
                 
                 visual.style.background = bg;
                 visual.innerHTML = `
                     <div class="card-inner-art" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; width:100%; position:relative; z-index:2;">
-                        <div style="font-size: 3.2rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));">${graphic}</div>
+                        <div style="font-size: 3.8rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));">${graphic}</div>
                         ${badges}
                     </div>`;
                 titleEl.textContent = item.title;
@@ -896,9 +911,21 @@
         }
 
         function updateHUD() {
-            document.getElementById('hud-day').innerText = STATE.day;
-            document.getElementById('hud-gold').innerText = STATE.gold + 'g';
-            document.getElementById('hud-energy').innerText = STATE.energy + '/' + STATE.maxEnergy;
+            const dayEl = document.getElementById('hud-day');
+            if (dayEl) dayEl.innerText = STATE.day;
+
+            const goldEl = document.getElementById('hud-gold');
+            if (goldEl) goldEl.innerText = STATE.gold + 'g';
+
+            const energyEl = document.getElementById('hud-energy');
+            if (energyEl) energyEl.innerText = STATE.energy + '/' + STATE.maxEnergy;
+
+            const pct = (STATE.dayTimer / STATE.dayDuration) * 100;
+            const bar = document.getElementById('day-progress-bar');
+            if (bar) bar.style.width = `${pct}%`;
+
+            const timerVal = document.getElementById('hud-timer');
+            if (timerVal) timerVal.innerText = `${STATE.dayTimer}s`;
         }
 
         // Action indicator feedback text
@@ -1143,11 +1170,6 @@
                     });
                 } else {
                     actions.push({
-                        text: "Sleep & Save (Start Next Day)",
-                        disabled: false,
-                        handler: () => startNextDay()
-                    });
-                    actions.push({
                         text: `Check Milestones (${getCompletedMilestones()}/5 Completed)`,
                         disabled: false,
                         handler: () => {
@@ -1275,6 +1297,11 @@
             STATE.day++;
             STATE.energy = STATE.maxEnergy;
             
+            // Close active menus
+            if (STATE.currentScreen === 'detail') {
+                DOM_CACHE.detail.classList.remove('visible');
+            }
+
             // Advance Crops growth
             let cropsGrown = 0;
             STATE.plots.forEach((plot, index) => {
@@ -1324,14 +1351,33 @@
             nightSummary.innerHTML = log;
             document.getElementById('night-overlay').classList.add('visible');
             
-            setTimeout(() => {
-                document.getElementById('night-continue-btn').classList.add('is-focused');
-            }, 60);
+            const wakeBtn = document.getElementById('night-continue-btn');
+            wakeBtn.classList.add('is-focused');
+            
+            // Set up automatic wake up timer
+            nightSecondsLeft = 5;
+            wakeBtn.innerText = `Wake Up (Auto in ${nightSecondsLeft}s)`;
+            
+            if (nightAutoWakeTimer) clearInterval(nightAutoWakeTimer);
+            nightAutoWakeTimer = setInterval(() => {
+                nightSecondsLeft--;
+                if (nightSecondsLeft <= 0) {
+                    wakeUp();
+                } else {
+                    wakeBtn.innerText = `Wake Up (Auto in ${nightSecondsLeft}s)`;
+                }
+            }, 1000);
         }
 
         function wakeUp() {
+            if (nightAutoWakeTimer) {
+                clearInterval(nightAutoWakeTimer);
+                nightAutoWakeTimer = null;
+            }
             document.getElementById('night-overlay').classList.remove('visible');
             STATE.currentScreen = 'grid';
+            STATE.dayTimer = STATE.dayDuration; // Reset day timer
+            updateHUD();
             closeDetailView();
         }
 
@@ -1521,6 +1567,23 @@
 
             requestAnimationFrame(tickMicroanimations);
         }
+
+        // ==========================================================================
+        // Automated Day Progression Interval Loop
+        // ==========================================================================
+        setInterval(() => {
+            if (STATE.currentScreen !== 'night') {
+                STATE.dayTimer--;
+                if (STATE.dayTimer <= 0) {
+                    STATE.dayTimer = STATE.dayDuration;
+                    startNextDay();
+                }
+                updateHUD();
+            }
+        }, 1000);
+
+        // Bind clicking/touching the sleep continue button
+        document.getElementById('night-continue-btn').addEventListener('click', wakeUp);
 
         window.onload = initApp;
     </script>
