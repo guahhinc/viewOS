@@ -3,31 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DRIFT - viewOS</title>
+    <title>Cropwood</title>
     <style>
         /* ==========================================================================
            viewOS System Typography & Layout Constants
            ========================================================================== */
-        @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400&display=swap');
 
         :root {
-            --bg-color: #0c0c0e;
+            --bg-color: #0b0d09; /* Dark organic moss black */
             --text-color: #ffffff;
-            --secondary-text: #8e8e93;
-            --card-width: 320px;
+            --secondary-text: #a0b0a5; /* Slate-green gray */
+            
+            /* Sizing adjusted to fit a 4x3 grid beautifully on standard displays */
+            --card-width: 270px;
             --card-height: calc(var(--card-width) * 0.625); /* 16:10 aspect ratio */
-            --border-radius: 8px;
+            --border-radius: 12px;
         }
 
         * {
             font-family: 'Inter Tight', -apple-system, sans-serif;
             font-weight: 300 !important;
-            letter-spacing: -0.02em !important;
+            letter-spacing: -0.03em !important;
             line-height: 1.25;
             box-sizing: border-box;
             user-select: none;
             -webkit-font-smoothing: antialiased;
-            cursor: none !important; /* Managed by gamepad/system interface */
+            /* viewOS maps gamepad/keyboard navigation, so the default cursor is hidden */
+            cursor: none !important;
             margin: 0; 
             padding: 0;
         }
@@ -48,27 +51,65 @@
             flex-direction: column;
             align-items: center; 
             justify-content: flex-start;
-            padding: 100px 4vw 140px 4vw;
+            padding: 40px 4vw 40px 4vw;
         }
 
         #app-header {
             text-align: center;
-            margin-bottom: 80px;
+            margin-bottom: 25px;
         }
         
         #app-header h1 { 
             font-size: 3.6rem; 
-            font-weight: 700 !important; 
-            margin-bottom: 16px; 
-            text-transform: uppercase;
-            letter-spacing: 0.1em !important;
+            font-weight: 400 !important; 
+            margin-bottom: 8px; 
+            color: #d1ffc4;
+            text-shadow: 0 0 20px rgba(115, 255, 131, 0.15);
         }
-        #app-header p { font-size: 1.5rem; color: var(--secondary-text); max-width: 800px; margin: 0 auto; }
+        #app-header p { 
+            font-size: 1.2rem; 
+            color: var(--secondary-text); 
+            max-width: 800px; 
+            margin: 0 auto 15px auto; 
+        }
+
+        /* High-fidelity Glass-morphic HUD */
+        .hud-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 24px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1.5px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 12px 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin: 0 auto;
+        }
+        .hud-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 80px;
+        }
+        .hud-label {
+            font-size: 0.8rem;
+            color: var(--secondary-text);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+        .hud-val {
+            font-size: 1.3rem;
+            font-weight: 400 !important;
+            color: #ffffff;
+        }
 
         #content-grid {
             display: grid;
-            grid-template-columns: repeat(3, var(--card-width));
-            gap: 45px;
+            grid-template-columns: repeat(4, var(--card-width));
+            gap: 25px;
             justify-content: center;
             perspective: 1200px;
         }
@@ -85,23 +126,30 @@
         .card-visual {
             width: var(--card-width); 
             height: var(--card-height);
+            background-color: #1c1c1e; 
             border-radius: var(--border-radius);
             position: relative; 
             z-index: 1; 
             transform-style: preserve-3d;
+            background-size: cover; 
+            background-position: center;
             border: 1.5px solid rgba(255, 255, 255, 0.08);
-            transition: border-color 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             overflow: hidden;
         }
 
         .grid-item.is-focused .card-visual {
-            border-color: rgba(255, 255, 255, 0.35);
+            border-color: rgba(115, 255, 131, 0.4);
+            box-shadow: 0 0 35px rgba(115, 255, 131, 0.15);
         }
 
         .card-title {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             color: var(--secondary-text); 
-            margin-top: 24px;
+            margin-top: 14px;
             text-align: center; 
             white-space: nowrap; 
             overflow: hidden;
@@ -130,153 +178,236 @@
             border-radius: inherit; 
             pointer-events: none; 
             z-index: 12;
-            border: 1.5px solid rgba(255, 255, 255, 0.2); 
+            border: 1.5px solid rgba(255, 255, 255, 0.3); 
             opacity: 0; 
             will-change: opacity;
             transform: translate3d(0, 0, 1px);
         }
 
-        /* Fullscreen Game Overlay Stage */
+        /* Detail/Sub-navigation View Overlay */
         #detail-view {
             position: fixed; 
             inset: 0; 
-            background: #000000;
-            display: none; 
+            background: rgba(11, 13, 9, 0.95);
+            backdrop-filter: blur(15px);
+            display: flex; 
+            opacity: 0; 
+            pointer-events: none;
             flex-direction: column; 
             align-items: center; 
             justify-content: center;
-            opacity: 0; 
             transition: opacity 0.3s ease; 
             z-index: 1000; 
-            padding: 0;
-            overflow: hidden;
+            padding: 40px;
         }
-        #detail-view.visible { display: flex; opacity: 1; }
+        #detail-view.visible { 
+            opacity: 1; 
+            pointer-events: all;
+        }
+        #detail-view h2 { 
+            font-size: 3.5rem; 
+            margin-bottom: 24px; 
+            color: #d1ffc4;
+            text-shadow: 0 0 20px rgba(115, 255, 131, 0.1);
+        }
 
+        /* Cozy Action Buttons inside Overlay */
+        .detail-action-btn {
+            font-size: 1.5rem;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1.5px solid rgba(255, 255, 255, 0.08);
+            padding: 14px 40px;
+            margin: 6px 0;
+            border-radius: var(--border-radius);
+            width: 450px;
+            text-align: center;
+            transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+            transform-style: preserve-3d;
+        }
+        .detail-action-btn.is-focused {
+            color: #000000 !important;
+            background-color: #ffffff !important;
+            border-color: #ffffff !important;
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(255, 255, 255, 0.15);
+        }
+        .detail-action-btn.disabled {
+            opacity: 0.3;
+        }
+
+        /* Overnight / Sleep Skipping Overlay */
+        #night-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.96);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        #night-overlay.visible {
+            display: flex;
+            opacity: 1;
+        }
+        #night-text {
+            font-size: 5rem;
+            color: #d1b3ff;
+            margin-bottom: 20px;
+            text-shadow: 0 0 25px rgba(162, 115, 255, 0.4);
+            animation: pulse 2s infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.06); opacity: 1; }
+        }
+        #night-summary {
+            font-size: 1.8rem;
+            color: var(--secondary-text);
+            text-align: center;
+            max-width: 600px;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        /* Custom Specificity overrides to avoid CSS clashing when focused */
         .grid-item.is-focused .card-title { color: #ffffff !important; }
         .tilted-focus { transition: none !important; }
 
-        /* ==========================================================================
-           Minimalist HUD & Game State Overlays (Standard Theme)
-           ========================================================================== */
-        .hud-panel {
-            background: rgba(18, 18, 20, 0.9) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            padding: 16px 24px !important;
-            border-radius: var(--border-radius) !important;
-            min-width: 240px !important;
-            backdrop-filter: blur(12px) !important;
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-4px); }
         }
-        .hud-label {
-            font-size: 0.8rem !important;
-            color: #8e8e93 !important;
-            text-transform: uppercase !important;
-            letter-spacing: 0.05em !important;
-            margin-bottom: 4px !important;
-        }
-        .hud-value {
-            font-size: 1.8rem !important;
-            font-weight: 400 !important;
-            color: #ffffff !important;
-        }
-        .hud-small-text {
-            font-size: 0.75rem !important;
-            color: #8e8e93 !important;
-            margin-top: 4px;
-        }
-        .overlay-btn {
-            font-size: 1.5rem !important; 
-            color: #ffffff; 
-            background: rgba(255, 255, 255, 0.08);
-            padding: 16px 40px !important; 
-            border-radius: var(--border-radius);
-            transform-style: preserve-3d; 
-            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
-        }
-        .overlay-btn.is-focused {
-            color: #000000 !important;
-            background-color: #ffffff !important;
-            transform: scale(1.05);
+        @keyframes blink {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
         }
     </style>
-    <!-- Import Three.js Library for True 3D Rendering -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
-    <!-- Main Navigation / Launcher Root -->
     <div id="app-root">
         <header id="app-header">
-            <h1>Drift</h1>
-            <p>A minimalist 3D driving simulator. Push the joystick forward to accelerate, steer into curves, and beat your best record on each circuit.</p>
+            <h1>Cropwood</h1>
+            <p>Cozy modular 2D farming estate. Navigate using Arrow Keys/D-pad, Select with Enter/A.</p>
+            
+            <div class="hud-container">
+                <div class="hud-item"><span class="hud-label">DAY</span><span id="hud-day" class="hud-val">1</span></div>
+                <div class="hud-item" style="border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1); padding: 0 25px;"><span class="hud-label">GOLD</span><span id="hud-gold" class="hud-val" style="color:#ffd700;">100g</span></div>
+                <div class="hud-item" style="border-right: 1px solid rgba(255,255,255,0.1); padding-right: 25px;"><span class="hud-label">ENERGY</span><span id="hud-energy" class="hud-val" style="color:#00ffcc;">100/100</span></div>
+                <div class="hud-item"><span class="hud-label">SEEDS</span><span id="hud-seeds" class="hud-val">🌾0 🥕0 🍓0 🌟0</span></div>
+                <div class="hud-item" style="border-left: 1px solid rgba(255,255,255,0.1); padding-left: 25px;"><span class="hud-label">CROPS</span><span id="hud-crops" class="hud-val">🌾0 🥕0 🍓0 🌟0</span></div>
+                <div class="hud-item" style="border-left: 1px solid rgba(255,255,255,0.1); padding-left: 25px;"><span class="hud-label">OTHER</span><span id="hud-other" class="hud-val">🥚0 🍞0 🥧0 🍹0</span></div>
+            </div>
         </header>
 
-        <!-- Dynamic Level Selection Grid -->
+        <!-- Dynamic Content Grid -->
         <main id="content-grid"></main>
     </div>
 
-    <!-- Active Simulator Container -->
+    <!-- Interactive Sub-navigation Overlay -->
     <div id="detail-view">
-        <canvas id="game-canvas" style="position:absolute; inset:0; width:100%; height:100%; z-index:1000;"></canvas>
-        
-        <!-- Standard HUD Overlay -->
-        <div id="game-hud" style="display:none; position:absolute; top:40px; left:40px; right:40px; pointer-events:none; display:flex; justify-content:space-between; align-items:center; z-index:1100;">
-            <div class="hud-panel">
-                <div class="hud-label">Circuit</div>
-                <div id="hud-track-name" class="hud-value">URBAN CIRCUIT</div>
-            </div>
-            <div class="hud-panel" style="text-align:center;">
-                <div class="hud-label">Velocity</div>
-                <div id="hud-speed" class="hud-value" style="font-family: monospace !important;">0 KM/H</div>
-                <div class="hud-small-text">PUSH STICK UP TO ACCELERATE</div>
-            </div>
-            <div class="hud-panel" style="text-align:right;">
-                <div class="hud-label">Record</div>
-                <div id="hud-record" class="hud-value" style="color: #a0a0a5; font-family: monospace !important;">000,000</div>
-                <div class="hud-small-text">SCORE: <span id="hud-score" style="color:#ffffff;">0</span></div>
-            </div>
-        </div>
+        <h2 id="detail-title">Facility Details</h2>
+        <div id="detail-actions"></div>
+    </div>
 
-        <!-- Terminal Pause / End Overlays -->
-        <div id="game-overlay" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.85); z-index:1200; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
-            <h2 id="overlay-title" style="font-size:3.5rem; text-transform:uppercase; margin-bottom:16px; font-weight:700 !important;">SIMULATION PAUSED</h2>
-            <p id="overlay-subtitle" style="font-size:1.4rem; color:var(--secondary-text); margin-bottom:48px; max-width:600px;">SYSTEM HALTED.</p>
-            <div id="overlay-buttons" style="display:flex; gap:24px;">
-                <div id="game-retry-btn" class="overlay-btn is-focused">Resume Drive</div>
-                <div id="game-exit-btn" class="overlay-btn">Return to Menu</div>
-            </div>
-        </div>
+    <!-- Night Summary Modal -->
+    <div id="night-overlay">
+        <div id="night-text">Zzz...</div>
+        <div id="night-summary"></div>
+        <div id="night-continue-btn" class="detail-action-btn">Wake Up</div>
     </div>
 
     <script>
         // ==========================================================================
-        // Track Lists & State Variables
+        // Developer Configuration & Farming Core State
         // ==========================================================================
         const appItems = [
-            { id: 0, title: "Urban Circuit", color: "#1c2541", length: 120, curveScale: 0.8, obstacleDensity: 0.12, difficulty: "Easy" },
-            { id: 1, title: "Desert Highway", color: "#328cc1", length: 180, curveScale: 1.5, obstacleDensity: 0.16, difficulty: "Medium" },
-            { id: 2, title: "Alpine Drift", color: "#1f1a3a", length: 240, curveScale: 2.2, obstacleDensity: 0.20, difficulty: "Hard" }
+            // Row 1 & 2: Land Plots (Indices 0 - 7)
+            { id: "plot-0", title: "Plot 1", type: "plot", plotIndex: 0 },
+            { id: "plot-1", title: "Plot 2", type: "plot", plotIndex: 1 },
+            { id: "plot-2", title: "Plot 3", type: "plot", plotIndex: 2 },
+            { id: "plot-3", title: "Plot 4", type: "plot", plotIndex: 3 },
+            { id: "plot-4", title: "Plot 5", type: "plot", plotIndex: 4 },
+            { id: "plot-5", title: "Plot 6", type: "plot", plotIndex: 5 },
+            { id: "plot-6", title: "Plot 7", type: "plot", plotIndex: 6 },
+            { id: "plot-7", title: "Plot 8", type: "plot", plotIndex: 7 },
+            // Row 3: Farm Hub Facilities (Indices 8 - 11)
+            { id: "shop", title: "Seed Shop", type: "facility" },
+            { id: "coop", title: "Coop & Animals", type: "facility" },
+            { id: "kitchen", title: "Cooking & Kitchen", type: "facility" },
+            { id: "farmhouse", title: "Cozy Farmhouse", type: "facility" }
         ];
 
         const STATE = {
-            currentScreen: 'grid', // 'grid' | 'game'
+            currentScreen: 'grid', // 'grid' | 'detail' | 'night'
             focusedIndex: 0,
-            overlayFocusedIndex: 0,
-            columns: 3,
+            detailFocusedIndex: 0,
+            columns: 4,
             joyX: 0, joyY: 0,
-            highScores: { 0: 0, 1: 0, 2: 0 }
+            
+            // Gameplay Variables
+            gold: 100,
+            day: 1,
+            energy: 100,
+            maxEnergy: 100,
+            
+            seeds: { wheat: 3, carrot: 0, strawberry: 0, starfruit: 0 },
+            crops: { wheat: 0, carrot: 0, strawberry: 0, starfruit: 0 },
+            other: { egg: 0, bread: 0, pie: 0, juice: 0 },
+            
+            // Land plots: Statuses: 'wild', 'soil', 'watered'
+            plots: [
+                { status: 'wild', crop: null },
+                { status: 'wild', crop: null },
+                { status: 'wild', crop: null },
+                { status: 'wild', crop: null },
+                { status: 'soil', crop: null },
+                { status: 'soil', crop: null },
+                { status: 'soil', crop: null },
+                { status: 'soil', crop: null }
+            ],
+            
+            // Coop Variables
+            chickens: 0,
+            chickensFed: false,
+            eggsInCoop: 0,
+            
+            // Facility Tool Levels
+            waterCanLevel: 1, // 1: Standard (5 Energy), 2: Copper (3 Energy), 3: Golden (1 Energy)
+            hoeLevel: 1,      // 1: Standard (15 Energy), 2: Steel (8 Energy), 3: Iridium (2 Energy)
+            
+            // Farm Milestones (Achievements)
+            viewingMilestones: false,
+            milestones: {
+                firstHarvest: false,
+                tycoon: false,
+                coop: false,
+                masterChef: false,
+                starPlanter: false
+            }
         };
 
         const DOM_CACHE = {
             grid: document.getElementById('content-grid'),
             detail: document.getElementById('detail-view'),
+            detailTitle: document.getElementById('detail-title'),
+            detailActions: document.getElementById('detail-actions')
         };
 
         let cachedElements = [];
         let springElements = [];
 
+        // Tool Energy Helper Calculation Functions
+        function getTillingCost() { return [15, 8, 2][STATE.hoeLevel - 1]; }
+        function getWateringCost() { return [5, 3, 1][STATE.waterCanLevel - 1]; }
+        function getCompletedMilestones() { return Object.values(STATE.milestones).filter(Boolean).length; }
+
         // ==========================================================================
-        // Physics Engine Implementation (Selection System)
+        // Physics Engine Implementation
         // ==========================================================================
         function Spring(val, stiffness = 0.12, damping = 0.78) {
             this.val = val; 
@@ -317,37 +448,18 @@
         // Application Lifecycle Initializer
         // ==========================================================================
         function initApp() {
-            buildGridMenu();
-
-            document.addEventListener('keydown', handleKeydown);
-            document.addEventListener('keyup', handleKeyup);
-            
-            requestAnimationFrame(pollGamepads);
-            requestAnimationFrame(tickMicroanimations);
-        }
-
-        function buildGridMenu() {
             DOM_CACHE.grid.innerHTML = '';
             cachedElements = [];
+            springElements = [];
             
             appItems.forEach((item, index) => {
                 const itemEl = document.createElement('div');
                 itemEl.className = 'grid-item';
                 itemEl.id = `item-${index}`;
                 
-                let scoreText = '';
-                if (STATE.highScores[item.id] > 0) {
-                    scoreText = `<div style="position:absolute; top:20px; right:20px; font-size:1rem; color:#ffea00; font-family:monospace; font-weight:700 !important;">RECORD: ${STATE.highScores[item.id].toLocaleString()}</div>`;
-                }
-
                 itemEl.innerHTML = `
-                    <div class="card-visual" style="background: linear-gradient(135deg, ${item.color}bb, #0c0c0e 85%);">
-                        ${scoreText}
-                        <div style="position:absolute; bottom:20px; left:20px; font-size:1rem; color: #8e8e93; letter-spacing: 0.05em !important; text-transform: uppercase; font-weight:700 !important;">
-                            ${item.difficulty} • ${(item.length * 10 / 1000).toFixed(1)}KM
-                        </div>
-                    </div>
-                    <div class="card-title">${item.title}</div>
+                    <div class="card-visual"></div>
+                    <div class="card-title"></div>
                 `;
                 
                 DOM_CACHE.grid.appendChild(itemEl);
@@ -355,12 +467,28 @@
                 setupSpringPhysics(visual);
                 
                 cachedElements.push({ container: itemEl, icon: visual, data: item });
+                renderCardContent(index);
             });
+
+            document.addEventListener('keydown', handleKeydown);
+            
+            requestAnimationFrame(pollGamepads);
+            requestAnimationFrame(tickMicroanimations);
+            
+            updateHUD();
             updateFocus(true);
         }
 
         function getActiveTarget() {
             if (STATE.currentScreen === 'grid') return cachedElements[STATE.focusedIndex] || null;
+            if (STATE.currentScreen === 'detail') {
+                const activeBtn = document.getElementById(`action-btn-${STATE.detailFocusedIndex}`);
+                if (activeBtn) return { container: activeBtn, icon: activeBtn };
+            }
+            if (STATE.currentScreen === 'night') {
+                const continueBtn = document.getElementById('night-continue-btn');
+                return { container: continueBtn, icon: continueBtn };
+            }
             return null;
         }
 
@@ -382,7 +510,7 @@
 
             if (target && target.icon && target.icon.springs) {
                 const s = target.icon.springs; 
-                s.scale.target = 1.1;
+                s.scale.target = 1.12; 
                 s.focusState.target = 1.0;
                 if (dx) s.posX.vel = dx * 28; 
                 if (dy) s.posY.vel = dy * 28; 
@@ -397,80 +525,567 @@
         }
 
         // ==========================================================================
-        // Input Routing
+        // Visual Dynamic Renderer
+        // ==========================================================================
+        function renderCardContent(index) {
+            const item = appItems[index];
+            const el = document.getElementById(`item-${index}`);
+            if (!el) return;
+            const visual = el.querySelector('.card-visual');
+            const titleEl = el.querySelector('.card-title');
+            
+            let badges = '';
+            
+            if (item.type === 'plot') {
+                const plot = STATE.plots[item.plotIndex];
+                let bg = '';
+                let label = '';
+                let graphic = '';
+                
+                if (plot.status === 'wild') {
+                    bg = 'linear-gradient(135deg, #1e281a, #0d140b)';
+                    label = `Plot ${item.plotIndex + 1}: Overgrown`;
+                    graphic = `<div style="font-size: 3rem; margin-top: 15px;">🌿</div>`;
+                } else if (plot.status === 'soil') {
+                    bg = 'linear-gradient(135deg, #3d2816, #25180c)';
+                    label = `Plot ${item.plotIndex + 1}: Dry Soil`;
+                    graphic = `<div style="font-size: 3rem; margin-top: 15px; opacity:0.6;">🟫</div>`;
+                } else if (plot.status === 'watered') {
+                    bg = 'linear-gradient(135deg, #1b2636, #0c121b)';
+                    label = `Plot ${item.plotIndex + 1}: Wet Soil`;
+                    graphic = `<div style="font-size: 3rem; margin-top: 15px;">🟫</div>`;
+                    badges += `<span style="position:absolute; top:10px; right:10px; font-size:0.9rem; background:rgba(0,150,255,0.4); border:1px solid rgba(0,200,255,0.6); padding:2px 8px; border-radius:12px; backdrop-filter:blur(4px); line-height:1; z-index:10; font-weight:400 !important;">💧 Wet</span>`;
+                }
+                
+                if (plot.crop) {
+                    const c = plot.crop;
+                    const isReady = c.age >= c.maxAge;
+                    label = `Plot ${item.plotIndex + 1}: ${c.name} (${isReady ? 'READY' : 'Day ' + c.age + '/' + c.maxAge})`;
+                    
+                    let cropEmoji = '🌱';
+                    if (isReady) {
+                        if (c.id === 'wheat') cropEmoji = '🌾';
+                        if (c.id === 'carrot') cropEmoji = '🥕';
+                        if (c.id === 'strawberry') cropEmoji = '🍓';
+                        if (c.id === 'starfruit') cropEmoji = '🌟';
+                    } else if (c.age > c.maxAge / 2) {
+                        cropEmoji = '🌿';
+                    }
+                    
+                    let ripeGlow = '';
+                    if (isReady) {
+                        let glowColor = { wheat: 'rgba(255, 234, 121, 0.25)', carrot: 'rgba(255, 159, 67, 0.25)', strawberry: 'rgba(255, 82, 82, 0.25)', starfruit: 'rgba(241, 196, 15, 0.25)' }[c.id];
+                        ripeGlow = `box-shadow: inset 0 0 30px ${glowColor};`;
+                        badges += `<span style="position:absolute; bottom:10px; right:10px; font-size:0.8rem; font-weight:bold; background:rgba(255,200,0,0.4); border:1px solid rgba(255,230,0,0.6); padding:3px 8px; border-radius:12px; backdrop-filter:blur(4px); color:#fff; line-height:1; z-index:10; animation: bounce 1s infinite alternate; font-weight:400 !important;">✨ HARVEST</span>`;
+                    }
+                    
+                    graphic = `<div style="font-size: 3.5rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); ${ripeGlow}">${cropEmoji}</div>`;
+                }
+                
+                visual.style.background = bg;
+                visual.innerHTML = `
+                    <div class="card-inner-art" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; width:100%; position:relative; z-index:2;">
+                        ${graphic}
+                        ${badges}
+                    </div>`;
+                titleEl.textContent = label;
+                
+            } else {
+                let bg = '';
+                let graphic = '';
+                if (item.id === 'shop') {
+                    bg = 'linear-gradient(135deg, #1b2636, #0c121b)';
+                    graphic = '🛒';
+                } else if (item.id === 'coop') {
+                    bg = 'linear-gradient(135deg, #381a1a, #1a0c0c)';
+                    graphic = '🐔';
+                    badges += `<span style="position:absolute; top:10px; right:10px; font-size:0.9rem; background:rgba(255,100,100,0.25); border:1px solid rgba(255,100,100,0.4); padding:2px 8px; border-radius:12px; backdrop-filter:blur(4px); line-height:1; z-index:10; font-weight:400 !important;">🐔 ${STATE.chickens}/4</span>`;
+                } else if (item.id === 'kitchen') {
+                    bg = 'linear-gradient(135deg, #132b24, #081410)';
+                    graphic = '🍳';
+                } else if (item.id === 'farmhouse') {
+                    bg = 'linear-gradient(135deg, #2a1b3d, #120b1c)';
+                    graphic = '🏡';
+                    if (STATE.energy < STATE.maxEnergy * 0.3) {
+                        badges += `<span style="position:absolute; top:10px; right:10px; font-size:0.9rem; background:rgba(255,150,0,0.3); border:1px solid rgba(255,150,0,0.5); padding:2px 8px; border-radius:12px; backdrop-filter:blur(4px); line-height:1; z-index:10; animation: blink 1s infinite alternate; font-weight:400 !important;">⚠️ Exhausted</span>`;
+                    }
+                }
+                
+                visual.style.background = bg;
+                visual.innerHTML = `
+                    <div class="card-inner-art" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; width:100%; position:relative; z-index:2;">
+                        <div style="font-size: 3.5rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));">${graphic}</div>
+                        ${badges}
+                    </div>`;
+                titleEl.textContent = item.title;
+            }
+        }
+
+        function updateHUD() {
+            document.getElementById('hud-day').innerText = STATE.day;
+            document.getElementById('hud-gold').innerText = STATE.gold + 'g';
+            document.getElementById('hud-energy').innerText = STATE.energy + '/' + STATE.maxEnergy;
+            
+            document.getElementById('hud-seeds').innerText = 
+                `🌾${STATE.seeds.wheat} 🥕${STATE.seeds.carrot} 🍓${STATE.seeds.strawberry} 🌟${STATE.seeds.starfruit}`;
+            
+            document.getElementById('hud-crops').innerText = 
+                `🌾${STATE.crops.wheat} 🥕${STATE.crops.carrot} 🍓${STATE.crops.strawberry} 🌟${STATE.crops.starfruit}`;
+            
+            document.getElementById('hud-other').innerText = 
+                `🥚${STATE.other.egg} 🍞${STATE.other.bread} 🥧${STATE.other.pie} 🍹${STATE.other.juice}`;
+        }
+
+        // ==========================================================================
+        // Sub-navigation & Game Action Lists
+        // ==========================================================================
+        function getActionsForModule(item) {
+            const actions = [];
+            
+            if (item.type === 'plot') {
+                const plot = STATE.plots[item.plotIndex];
+                if (plot.status === 'wild') {
+                    actions.push({
+                        text: `Clear Overgrowth (${getTillingCost()} Energy)`,
+                        disabled: STATE.energy < getTillingCost(),
+                        handler: () => {
+                            STATE.energy -= getTillingCost();
+                            plot.status = 'soil';
+                            notifySuccess();
+                        }
+                    });
+                } else {
+                    if (plot.crop === null) {
+                        actions.push({
+                            text: `Plant Wheat Seed (Have ${STATE.seeds.wheat})`,
+                            disabled: STATE.seeds.wheat <= 0,
+                            handler: () => {
+                                STATE.seeds.wheat--;
+                                plot.crop = { id: 'wheat', name: 'Wheat', age: 0, maxAge: 2 };
+                                notifySuccess();
+                            }
+                        });
+                        actions.push({
+                            text: `Plant Carrot Seed (Have ${STATE.seeds.carrot})`,
+                            disabled: STATE.seeds.carrot <= 0,
+                            handler: () => {
+                                STATE.seeds.carrot--;
+                                plot.crop = { id: 'carrot', name: 'Carrot', age: 0, maxAge: 3 };
+                                notifySuccess();
+                            }
+                        });
+                        actions.push({
+                            text: `Plant Strawberry Seed (Have ${STATE.seeds.strawberry})`,
+                            disabled: STATE.seeds.strawberry <= 0,
+                            handler: () => {
+                                STATE.seeds.strawberry--;
+                                plot.crop = { id: 'strawberry', name: 'Strawberry', age: 0, maxAge: 4 };
+                                notifySuccess();
+                            }
+                        });
+                        actions.push({
+                            text: `Plant Starfruit Seed (Have ${STATE.seeds.starfruit})`,
+                            disabled: STATE.seeds.starfruit <= 0,
+                            handler: () => {
+                                STATE.seeds.starfruit--;
+                                plot.crop = { id: 'starfruit', name: 'Starfruit', age: 0, maxAge: 5 };
+                                notifySuccess();
+                            }
+                        });
+                    } else {
+                        const isReady = plot.crop.age >= plot.crop.maxAge;
+                        if (isReady) {
+                            actions.push({
+                                text: `Harvest ${plot.crop.name} (5 Energy)`,
+                                disabled: STATE.energy < 5,
+                                handler: () => {
+                                    STATE.energy -= 5;
+                                    STATE.crops[plot.crop.id]++;
+                                    STATE.milestones.firstHarvest = true;
+                                    if (plot.crop.id === 'starfruit') STATE.milestones.starPlanter = true;
+                                    
+                                    if (plot.crop.id === 'strawberry') {
+                                        // Strawberry regrows! Sets growth level back to mid-stage
+                                        plot.crop.age = 2;
+                                    } else {
+                                        plot.crop = null;
+                                    }
+                                    notifySuccess();
+                                }
+                            });
+                        } else {
+                            actions.push({
+                                text: `Crop growing: ${plot.crop.name} (${plot.crop.maxAge - plot.crop.age} days left)`,
+                                disabled: true,
+                                handler: () => {}
+                            });
+                        }
+                    }
+                    
+                    if (plot.status === 'soil') {
+                        actions.push({
+                            text: `Water Plot (${getWateringCost()} Energy)`,
+                            disabled: STATE.energy < getWateringCost(),
+                            handler: () => {
+                                STATE.energy -= getWateringCost();
+                                plot.status = 'watered';
+                                notifySuccess();
+                            }
+                        });
+                    }
+                }
+            } else if (item.id === 'shop') {
+                actions.push({ text: "Buy Wheat Seed (10g)", disabled: STATE.gold < 10, handler: () => buySeed('wheat', 10) });
+                actions.push({ text: "Buy Carrot Seed (20g)", disabled: STATE.gold < 20, handler: () => buySeed('carrot', 20) });
+                actions.push({ text: "Buy Strawberry Seed (40g)", disabled: STATE.gold < 40, handler: () => buySeed('strawberry', 40) });
+                actions.push({ text: "Buy Starfruit Seed (80g)", disabled: STATE.gold < 80, handler: () => buySeed('starfruit', 80) });
+                
+                actions.push({ 
+                    text: `Sell Wheat (Have ${STATE.crops.wheat} | +${STATE.crops.wheat * 25}g)`, 
+                    disabled: STATE.crops.wheat <= 0, 
+                    handler: () => sellItem('crops', 'wheat', 25) 
+                });
+                actions.push({ 
+                    text: `Sell Carrots (Have ${STATE.crops.carrot} | +${STATE.crops.carrot * 50}g)`, 
+                    disabled: STATE.crops.carrot <= 0, 
+                    handler: () => sellItem('crops', 'carrot', 50) 
+                });
+                actions.push({ 
+                    text: `Sell Strawberries (Have ${STATE.crops.strawberry} | +${STATE.crops.strawberry * 110}g)`, 
+                    disabled: STATE.crops.strawberry <= 0, 
+                    handler: () => sellItem('crops', 'strawberry', 110) 
+                });
+                actions.push({ 
+                    text: `Sell Starfruit (Have ${STATE.crops.starfruit} | +${STATE.crops.starfruit * 240}g)`, 
+                    disabled: STATE.crops.starfruit <= 0, 
+                    handler: () => sellItem('crops', 'starfruit', 240) 
+                });
+                actions.push({ 
+                    text: `Sell Eggs (Have ${STATE.other.egg} | +${STATE.other.egg * 40}g)`, 
+                    disabled: STATE.other.egg <= 0, 
+                    handler: () => sellItem('other', 'egg', 40) 
+                });
+                actions.push({ 
+                    text: `Sell Bread (Have ${STATE.other.bread} | +${STATE.other.bread * 65}g)`, 
+                    disabled: STATE.other.bread <= 0, 
+                    handler: () => sellItem('other', 'bread', 65) 
+                });
+                actions.push({ 
+                    text: `Sell Pies (Have ${STATE.other.pie} | +${STATE.other.pie * 320}g)`, 
+                    disabled: STATE.other.pie <= 0, 
+                    handler: () => sellItem('other', 'pie', 320) 
+                });
+                actions.push({ 
+                    text: `Sell Juice (Have ${STATE.other.juice} | +${STATE.other.juice * 300}g)`, 
+                    disabled: STATE.other.juice <= 0, 
+                    handler: () => sellItem('other', 'juice', 300) 
+                });
+                
+                if (STATE.waterCanLevel === 1) {
+                    actions.push({ text: "Upgrade to Copper Watering Can (150g)", disabled: STATE.gold < 150, handler: () => { STATE.gold -= 150; STATE.waterCanLevel = 2; notifySuccess(); } });
+                } else if (STATE.waterCanLevel === 2) {
+                    actions.push({ text: "Upgrade to Golden Watering Can (400g)", disabled: STATE.gold < 400, handler: () => { STATE.gold -= 400; STATE.waterCanLevel = 3; notifySuccess(); } });
+                }
+                
+                if (STATE.hoeLevel === 1) {
+                    actions.push({ text: "Upgrade to Steel Hoe (150g)", disabled: STATE.gold < 150, handler: () => { STATE.gold -= 150; STATE.hoeLevel = 2; notifySuccess(); } });
+                } else if (STATE.hoeLevel === 2) {
+                    actions.push({ text: "Upgrade to Iridium Hoe (400g)", disabled: STATE.gold < 400, handler: () => { STATE.gold -= 400; STATE.hoeLevel = 3; notifySuccess(); } });
+                }
+            } else if (item.id === 'coop') {
+                actions.push({
+                    text: `Buy Chicken (120g | Space ${STATE.chickens}/4)`,
+                    disabled: STATE.gold < 120 || STATE.chickens >= 4,
+                    handler: () => {
+                        STATE.gold -= 120;
+                        STATE.chickens++;
+                        if (STATE.chickens === 4) STATE.milestones.coop = true;
+                        notifySuccess();
+                    }
+                });
+                actions.push({
+                    text: `Feed Chickens (5g per bird | Costs ${STATE.chickens * 5}g)`,
+                    disabled: STATE.gold < (STATE.chickens * 5) || STATE.chickens <= 0 || STATE.chickensFed,
+                    handler: () => {
+                        STATE.gold -= (STATE.chickens * 5);
+                        STATE.chickensFed = true;
+                        notifySuccess();
+                    }
+                });
+                actions.push({
+                    text: `Collect Eggs (Gather ${STATE.eggsInCoop} eggs)`,
+                    disabled: STATE.eggsInCoop <= 0,
+                    handler: () => {
+                        STATE.other.egg += STATE.eggsInCoop;
+                        STATE.eggsInCoop = 0;
+                        notifySuccess();
+                    }
+                });
+            } else if (item.id === 'kitchen') {
+                actions.push({
+                    text: "Bake Crusty Bread (Uses 2 Wheat)",
+                    disabled: STATE.crops.wheat < 2,
+                    handler: () => {
+                        STATE.crops.wheat -= 2;
+                        STATE.other.bread++;
+                        notifySuccess();
+                    }
+                });
+                actions.push({
+                    text: "Bake Strawberry Pie (Uses 2 Strawberry, 1 Egg)",
+                    disabled: STATE.crops.strawberry < 2 || STATE.other.egg < 1,
+                    handler: () => {
+                        STATE.crops.strawberry -= 2;
+                        STATE.other.egg -= 1;
+                        STATE.other.pie++;
+                        STATE.milestones.masterChef = true;
+                        notifySuccess();
+                    }
+                });
+                actions.push({
+                    text: "Press Starfruit Juice (Uses 1 Starfruit)",
+                    disabled: STATE.crops.starfruit < 1,
+                    handler: () => {
+                        STATE.crops.starfruit -= 1;
+                        STATE.other.juice++;
+                        notifySuccess();
+                    }
+                });
+            } else if (item.id === 'farmhouse') {
+                if (STATE.viewingMilestones) {
+                    actions.push({ text: `🌾 First Harvest: ${STATE.milestones.firstHarvest ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
+                    actions.push({ text: `💰 Tycoon (1000g Cash): ${STATE.milestones.tycoon ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
+                    actions.push({ text: `🐔 Coop Owner (4 birds): ${STATE.milestones.coop ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
+                    actions.push({ text: `🥧 Master Chef (Bake Pie): ${STATE.milestones.masterChef ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
+                    actions.push({ text: `✨ Star Planter: ${STATE.milestones.starPlanter ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
+                    actions.push({
+                        text: "Back to House Options",
+                        disabled: false,
+                        handler: () => {
+                            STATE.viewingMilestones = false;
+                            renderDetailMenu();
+                        }
+                    });
+                } else {
+                    actions.push({
+                        text: "Sleep & Save (Start Next Day)",
+                        disabled: false,
+                        handler: () => startNextDay()
+                    });
+                    actions.push({
+                        text: `Check Milestones (${getCompletedMilestones()}/5 Completed)`,
+                        disabled: false,
+                        handler: () => {
+                            STATE.viewingMilestones = true;
+                            renderDetailMenu();
+                        }
+                    });
+                }
+            }
+            
+            // Standard back navigation is appended automatically
+            if (!STATE.viewingMilestones) {
+                actions.push({
+                    text: "Return to Farm Grid",
+                    disabled: false,
+                    handler: () => closeDetailView()
+                });
+            }
+            
+            return actions;
+        }
+
+        function buySeed(type, cost) {
+            STATE.gold -= cost;
+            STATE.seeds[type]++;
+            notifySuccess();
+        }
+
+        function sellItem(category, type, price) {
+            const amount = category === 'crops' ? STATE.crops[type] : STATE.other[type];
+            STATE.gold += amount * price;
+            if (category === 'crops') STATE.crops[type] = 0;
+            else STATE.other[type] = 0;
+            notifySuccess();
+        }
+
+        function notifySuccess() {
+            if (STATE.gold >= 1000) STATE.milestones.tycoon = true;
+            updateHUD();
+            renderCardContent(STATE.focusedIndex);
+            renderDetailMenu();
+        }
+
+        // ==========================================================================
+        // Sub-navigation Framework
+        // ==========================================================================
+        function renderDetailMenu() {
+            const item = appItems[STATE.focusedIndex];
+            DOM_CACHE.detailTitle.innerText = item.title;
+            DOM_CACHE.detailActions.innerHTML = '';
+            
+            const actions = getActionsForModule(item);
+            actions.forEach((act, idx) => {
+                const btn = document.createElement('div');
+                btn.className = 'detail-action-btn';
+                btn.id = `action-btn-${idx}`;
+                btn.innerText = act.text;
+                if (act.disabled) {
+                    btn.classList.add('disabled');
+                }
+                DOM_CACHE.detailActions.appendChild(btn);
+            });
+            
+            STATE.detailFocusedIndex = 0;
+            updateDetailFocus();
+        }
+
+        function updateDetailFocus() {
+            document.querySelectorAll('.detail-action-btn').forEach(btn => btn.classList.remove('is-focused'));
+            const activeBtn = document.getElementById(`action-btn-${STATE.detailFocusedIndex}`);
+            if (activeBtn) activeBtn.classList.add('is-focused');
+        }
+
+        function navigateDetail(dir) {
+            const actions = getActionsForModule(appItems[STATE.focusedIndex]);
+            const total = actions.length;
+            let nextIndex = STATE.detailFocusedIndex;
+            
+            for (let i = 0; i < total; i++) {
+                nextIndex = (nextIndex + dir + total) % total;
+                if (!actions[nextIndex].disabled) {
+                    STATE.detailFocusedIndex = nextIndex;
+                    updateDetailFocus();
+                    break;
+                }
+            }
+        }
+
+        function executeDetailAction() {
+            const actions = getActionsForModule(appItems[STATE.focusedIndex]);
+            const act = actions[STATE.detailFocusedIndex];
+            if (act && !act.disabled) {
+                act.handler();
+            }
+        }
+
+        function closeDetailView() {
+            STATE.viewingMilestones = false;
+            STATE.currentScreen = 'grid';
+            DOM_CACHE.detail.classList.remove('visible');
+            updateFocus(false);
+        }
+
+        // ==========================================================================
+        // Day Progression System (Sleep skips)
+        // ==========================================================================
+        function startNextDay() {
+            STATE.day++;
+            STATE.energy = STATE.maxEnergy;
+            
+            // Progression updates
+            let cropsGrown = 0;
+            STATE.plots.forEach((plot, index) => {
+                if (plot.crop) {
+                    if (plot.status === 'watered') {
+                        plot.crop.age++;
+                        cropsGrown++;
+                    }
+                }
+                // Reset watering stage overnight
+                if (plot.status === 'watered') {
+                    plot.status = 'soil';
+                }
+            });
+            
+            let eggsLaid = 0;
+            if (STATE.chickens > 0) {
+                if (STATE.chickensFed) {
+                    eggsLaid = STATE.chickens;
+                    STATE.eggsInCoop += eggsLaid;
+                    STATE.chickensFed = false;
+                }
+            }
+            
+            updateHUD();
+            for (let i = 0; i < 12; i++) {
+                renderCardContent(i);
+            }
+            
+            // Show skip animations summary
+            STATE.currentScreen = 'night';
+            const nightSummary = document.getElementById('night-summary');
+            let log = `Day ${STATE.day - 1} ended safely.<br><br>`;
+            if (cropsGrown > 0) log += `🌱 ${cropsGrown} plots grew closer to harvest.<br>`;
+            if (eggsLaid > 0) log += `🥚 Your hens laid ${eggsLaid} egg(s).<br>`;
+            if (STATE.chickens > 0 && !STATE.chickensFed) log += `🐔 Your chickens went hungry! (Remember to buy feed)<br>`;
+            log += `<br>Energy fully restored.`;
+            
+            nightSummary.innerHTML = log;
+            document.getElementById('night-overlay').classList.add('visible');
+            
+            setTimeout(() => {
+                document.getElementById('night-continue-btn').classList.add('is-focused');
+            }, 60);
+        }
+
+        function wakeUp() {
+            document.getElementById('night-overlay').classList.remove('visible');
+            STATE.currentScreen = 'grid';
+            closeDetailView();
+        }
+
+        // ==========================================================================
+        // Input Routing System (Keys & Controllers)
         // ==========================================================================
         function executeAction() {
             if (STATE.currentScreen === 'grid') {
-                const item = appItems[STATE.focusedIndex];
-                startGame(item);
+                STATE.currentScreen = 'detail';
+                DOM_CACHE.detail.classList.add('visible');
+                renderDetailMenu();
+                updateFocus(false);
+            } else if (STATE.currentScreen === 'detail') {
+                executeDetailAction();
+            } else if (STATE.currentScreen === 'night') {
+                wakeUp();
             }
         }
 
         function handleSystemBack() {
-            if (STATE.currentScreen === 'game') {
-                if (game.state === 'running') {
-                    pauseGame();
-                } else {
-                    closeGame();
-                }
+            if (STATE.currentScreen === 'detail') {
+                closeDetailView();
+            } else if (STATE.currentScreen === 'night') {
+                wakeUp();
             } else {
                 window.parent.postMessage({ type: 'exitApp' }, '*');
             }
         }
 
-        const keysPressed = {};
-        const INPUT_STATE = {
-            steer: 0,
-            boost: false,
-            brake: false,
-            enter: false,
-            back: false
-        };
-
         function handleKeydown(e) {
-            keysPressed[e.key] = true;
+            if (e && typeof e.preventDefault === 'function') e.preventDefault();
             
+            let dx = 0, dy = 0;
+            const c = STATE.columns, t = appItems.length;
+
+            if (e.key === 'Escape' || e.key === 'Backspace') { handleSystemBack(); return; }
+            if (e.key === 'Enter' || e.key === ' ') { executeAction(); return; }
+
             if (STATE.currentScreen === 'grid') {
-                if (e && typeof e.preventDefault === 'function') e.preventDefault();
-                let dx = 0, dy = 0;
-                const c = STATE.columns, t = appItems.length;
-
-                if (e.key === 'Escape' || e.key === 'Backspace') { handleSystemBack(); return; }
-                if (e.key === 'Enter' || e.key === ' ') { executeAction(); return; }
-
                 if (e.key === 'ArrowRight' && (STATE.focusedIndex + 1) % c !== 0 && STATE.focusedIndex + 1 < t) { STATE.focusedIndex++; dx = 1; }
                 else if (e.key === 'ArrowLeft' && STATE.focusedIndex % c !== 0) { STATE.focusedIndex--; dx = -1; }
                 else if (e.key === 'ArrowDown' && STATE.focusedIndex + c < t) { STATE.focusedIndex += c; dy = 1; }
                 else if (e.key === 'ArrowUp' && STATE.focusedIndex - c >= 0) { STATE.focusedIndex -= c; dy = -1; }
                 
                 if (dx !== 0 || dy !== 0) updateFocus(false, dx, dy);
-            } else if (STATE.currentScreen === 'game') {
-                if (game.state === 'running') {
-                    if (e.key === 'Escape' || e.key === 'Backspace') {
-                        e.preventDefault();
-                        pauseGame();
-                    }
-                } else {
-                    if (e && typeof e.preventDefault === 'function') e.preventDefault();
-                    if (e.key === 'ArrowLeft') {
-                        STATE.overlayFocusedIndex = 0;
-                        updateOverlayFocus();
-                    } else if (e.key === 'ArrowRight') {
-                        STATE.overlayFocusedIndex = 1;
-                        updateOverlayFocus();
-                    } else if (e.key === 'Enter' || e.key === ' ') {
-                        executeOverlayAction();
-                    } else if (e.key === 'Escape' || e.key === 'Backspace') {
-                        closeGame();
-                    }
-                }
+            } else if (STATE.currentScreen === 'detail') {
+                if (e.key === 'ArrowDown') navigateDetail(1);
+                else if (e.key === 'ArrowUp') navigateDetail(-1);
             }
         }
 
-        function handleKeyup(e) {
-            keysPressed[e.key] = false;
-        }
-
+        // ==========================================================================
+        // Gamepad Loop & Input Polling
+        // ==========================================================================
         let lastGamepadState = { up: false, down: false, left: false, right: false, enter: false, back: false };
         let gpActiveDir = null;
         let holdTime = 0, lastRepeatTime = 0;
@@ -484,12 +1099,11 @@
                 const down = gp.buttons[13]?.pressed || gp.axes[1] > 0.5;
                 const left = gp.buttons[14]?.pressed || gp.axes[0] < -0.5;
                 const right = gp.buttons[15]?.pressed || gp.axes[0] > 0.5;
-                const enter = gp.buttons[0]?.pressed; // A
-                const back = gp.buttons[1]?.pressed;   // B
+                const enter = gp.buttons[0]?.pressed; // A Button
+                const back = gp.buttons[1]?.pressed;   // B Button
 
-                // Continuous joystick capture
-                STATE.joyX = Math.abs(gp.axes[0]) > 0.15 ? gp.axes[0] : 0;
-                STATE.joyY = Math.abs(gp.axes[1]) > 0.15 ? gp.axes[1] : 0;
+                STATE.joyX = Math.abs(gp.axes[0]) > 0.12 ? gp.axes[0] : 0;
+                STATE.joyY = Math.abs(gp.axes[1]) > 0.12 ? gp.axes[1] : 0;
 
                 let dir = up ? 'up' : down ? 'down' : left ? 'left' : right ? 'right' : null;
                 if (dir) {
@@ -502,13 +1116,8 @@
                     }
                 } else gpActiveDir = null;
 
-                if (enter && !lastGamepadState.enter) {
-                    if (STATE.currentScreen === 'grid') executeAction();
-                    else if (STATE.currentScreen === 'game' && game.state !== 'running') executeOverlayAction();
-                }
-                if (back && !lastGamepadState.back) {
-                    handleSystemBack();
-                }
+                if (enter && !lastGamepadState.enter) executeAction();
+                if (back && !lastGamepadState.back) handleSystemBack();
 
                 lastGamepadState = { up, down, left, right, enter, back };
                 break;
@@ -517,416 +1126,11 @@
         }
 
         // ==========================================================================
-        // True WebGL 3D Driving Simulator Implementation (Three.js)
+        // Render & Physics Loop
         // ==========================================================================
-        let scene, camera, renderer;
-        const segmentLength = 10; // units per segment
+        let lastTargetElement = null;
+        let focusScale = 1.0;
 
-        const game = {
-            track: null,
-            road: [],
-            position: 0,
-            speed: 0,
-            maxSpeed: 4.5,
-            playerX: 0,
-            playerVX: 0,
-            score: 0,
-            state: 'idle', // 'idle' | 'running' | 'paused' | 'gameover' | 'victory'
-            carMesh: null,
-            obstacles: [],
-            particles: [],
-            countdown: 0,
-            shakeAmount: 0
-        };
-
-        function buildProcedural3DTrack(track) {
-            const segments = [];
-            let currentX = 0;
-            let currentY = 0;
-            let curve = 0;
-            let hill = 0;
-
-            const roadGroup = new THREE.Group();
-            scene.add(roadGroup);
-
-            for (let i = 0; i < track.length; i++) {
-                if (i > 15 && i % 25 === 0) {
-                    curve = (Math.random() - 0.5) * track.curveScale;
-                    hill = (Math.random() - 0.5) * 0.4;
-                }
-                // Maintain flat landing area near start/finish
-                if (i < 10 || i > track.length - 15) {
-                    curve = 0;
-                    hill = 0;
-                }
-
-                currentX += curve;
-                currentY += hill;
-
-                // Base Road Plane
-                const geom = new THREE.BoxGeometry(11, 0.1, segmentLength);
-                const mat = new THREE.MeshLambertMaterial({
-                    color: i % 2 === 0 ? 0x1e1e21 : 0x161619
-                });
-                const mesh = new THREE.Mesh(geom, mat);
-                mesh.position.set(currentX, currentY, -i * segmentLength);
-                roadGroup.add(mesh);
-
-                // Track Boundary Stripes
-                const railGeom = new THREE.BoxGeometry(0.3, 0.4, segmentLength);
-                const railMat = new THREE.MeshBasicMaterial({
-                    color: i % 2 === 0 ? 0xffffff : 0xaa1111
-                });
-                const leftRail = new THREE.Mesh(railGeom, railMat);
-                leftRail.position.set(-5.5, 0.2, 0);
-                mesh.add(leftRail);
-
-                const rightRail = new THREE.Mesh(railGeom, railMat);
-                rightRail.position.set(5.5, 0.2, 0);
-                mesh.add(rightRail);
-
-                segments.push({
-                    index: i,
-                    x: currentX,
-                    y: currentY,
-                    z: -i * segmentLength,
-                    mesh: mesh,
-                    obstacles: []
-                });
-
-                // Generate Simple Cone Obstacles
-                if (i > 15 && i < track.length - 15 && Math.random() < track.obstacleDensity) {
-                    let sideChoice = Math.floor(Math.random() * 3);
-                    let lateralOffset = sideChoice === 0 ? -3.5 : (sideChoice === 1 ? 0 : 3.5);
-
-                    const coneGeom = new THREE.ConeGeometry(0.5, 1.4, 5);
-                    const coneMat = new THREE.MeshLambertMaterial({ color: 0xff6600 });
-                    const cone = new THREE.Mesh(coneGeom, coneMat);
-                    cone.position.set(lateralOffset, 0.7, 0);
-                    mesh.add(cone);
-
-                    segments[i].obstacles.push({
-                        offset: lateralOffset,
-                        mesh: cone
-                    });
-                }
-            }
-            return segments;
-        }
-
-        function createCarMesh() {
-            const carGroup = new THREE.Group();
-
-            // Minimalist Main Chassis
-            const bodyGeom = new THREE.BoxGeometry(1.4, 0.5, 2.8);
-            const bodyMat = new THREE.MeshLambertMaterial({ color: 0xe5e5ea });
-            const body = new THREE.Mesh(bodyGeom, bodyMat);
-            body.position.y = 0.35;
-            carGroup.add(body);
-
-            // Roof Cabin
-            const cabinGeom = new THREE.BoxGeometry(1.0, 0.4, 1.4);
-            const cabinMat = new THREE.MeshLambertMaterial({ color: 0x1c1c1e });
-            const cabin = new THREE.Mesh(cabinGeom, cabinMat);
-            cabin.position.set(0, 0.75, 0.2);
-            carGroup.add(cabin);
-
-            // Simple Wheels
-            const wheelGeom = new THREE.CylinderGeometry(0.35, 0.35, 0.25, 12);
-            const wheelMat = new THREE.MeshBasicMaterial({ color: 0x2c2c2e });
-            wheelGeom.rotateZ(Math.PI / 2);
-
-            const fl = new THREE.Mesh(wheelGeom, wheelMat); fl.position.set(-0.8, 0.25, -0.8); carGroup.add(fl);
-            const fr = new THREE.Mesh(wheelGeom, wheelMat); fr.position.set(0.8, 0.25, -0.8); carGroup.add(fr);
-            const rl = new THREE.Mesh(wheelGeom, wheelMat); rl.position.set(-0.8, 0.25, 0.8); carGroup.add(rl);
-            const rr = new THREE.Mesh(wheelGeom, wheelMat); rr.position.set(0.8, 0.25, 0.8); carGroup.add(rr);
-
-            scene.add(carGroup);
-            return carGroup;
-        }
-
-        function cleanupThreeJS() {
-            if (renderer) {
-                renderer.dispose();
-                while(scene.children.length > 0) { 
-                    scene.remove(scene.children[0]); 
-                }
-            }
-            const oldCanvas = document.getElementById('game-canvas');
-            if (oldCanvas) oldCanvas.remove();
-
-            const newCanvas = document.createElement('canvas');
-            newCanvas.id = 'game-canvas';
-            newCanvas.style.position = 'absolute';
-            newCanvas.style.inset = '0';
-            newCanvas.style.width = '100%';
-            newCanvas.style.height = '100%';
-            newCanvas.style.zIndex = '1000';
-            DOM_CACHE.detail.insertBefore(newCanvas, DOM_CACHE.detail.firstChild);
-        }
-
-        // ==========================================================================
-        // Gameplay Management & Game Loop
-        // ==========================================================================
-        function startGame(track) {
-            cleanupThreeJS();
-            
-            canvas = document.getElementById('game-canvas');
-            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setClearColor(0x0a0a0c, 1);
-
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-            // Add standard structural lighting
-            const ambient = new THREE.AmbientLight(0xffffff, 0.55);
-            scene.add(ambient);
-            const directional = new THREE.DirectionalLight(0xffffff, 0.7);
-            directional.position.set(10, 20, 15);
-            scene.add(directional);
-
-            // Procedural sky starfield
-            const starGeom = new THREE.BufferGeometry();
-            const starsCount = 600;
-            const starPos = new Float32Array(starsCount * 3);
-            for(let i=0; i<starsCount*3; i+=3) {
-                starPos[i] = (Math.random() - 0.5) * 800;
-                starPos[i+1] = Math.random() * 250 + 20;
-                starPos[i+2] = (Math.random() - 0.5) * 800;
-            }
-            starGeom.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-            const starsMat = new THREE.PointsMaterial({ color: 0x8e8e93, size: 1.2 });
-            const starfield = new THREE.Points(starGeom, starsMat);
-            scene.add(starfield);
-
-            // Construct 3D track properties
-            game.track = track;
-            game.road = buildProcedural3DTrack(track);
-            game.carMesh = createCarMesh();
-
-            game.position = 0;
-            game.speed = 0;
-            game.playerX = 0;
-            game.playerVX = 0;
-            game.score = 0;
-            game.countdown = 90;
-            game.shakeAmount = 0;
-            game.particles = [];
-            game.state = 'running';
-
-            STATE.currentScreen = 'game';
-            
-            // HUD DOM Setup
-            DOM_CACHE.detail.classList.add('visible');
-            document.getElementById('game-hud').style.display = 'flex';
-            document.getElementById('game-overlay').style.display = 'none';
-            document.getElementById('hud-track-name').innerText = track.title;
-            document.getElementById('hud-record').innerText = STATE.highScores[track.id].toLocaleString();
-
-            requestAnimationFrame(gameTick);
-        }
-
-        function pauseGame() {
-            game.state = 'paused';
-            STATE.overlayFocusedIndex = 0;
-            document.getElementById('overlay-title').innerText = "Drive Halted";
-            document.getElementById('overlay-subtitle').innerText = "Circuit execution paused.";
-            document.getElementById('game-retry-btn').innerText = "Resume Simulation";
-            document.getElementById('game-overlay').style.display = 'flex';
-            updateOverlayFocus();
-        }
-
-        function resumeGame() {
-            game.state = 'running';
-            document.getElementById('game-overlay').style.display = 'none';
-        }
-
-        function triggerCrash() {
-            game.speed *= 0.15; // Heavy deceleration penalty
-            game.shakeAmount = 1.2;
-
-            // Simple collision particle burst
-            for(let i=0; i<15; i++) {
-                const partGeom = new THREE.BoxGeometry(0.15, 0.15, 0.15);
-                const partMat = new THREE.MeshBasicMaterial({ color: 0xff6600 });
-                const mesh = new THREE.Mesh(partGeom, partMat);
-                mesh.position.set(game.carMesh.position.x + (Math.random() - 0.5) * 2, game.carMesh.position.y + 0.5, game.carMesh.position.z - 1.5);
-                scene.add(mesh);
-
-                game.particles.push({
-                    mesh: mesh,
-                    vX: (Math.random() - 0.5) * 6,
-                    vY: Math.random() * 5 + 2,
-                    vZ: Math.random() * 6 - 3,
-                    life: 1.0
-                });
-            }
-        }
-
-        function victoryGame() {
-            game.state = 'victory';
-            STATE.overlayFocusedIndex = 0;
-            
-            document.getElementById('overlay-title').innerText = "Circuit Complete";
-            const isRecord = game.score > STATE.highScores[game.track.id];
-            
-            if (isRecord) {
-                STATE.highScores[game.track.id] = game.score;
-                document.getElementById('overlay-subtitle').innerText = `New record achieved: ${game.score.toLocaleString()} points.`;
-            } else {
-                document.getElementById('overlay-subtitle').innerText = `Score: ${game.score.toLocaleString()} points. Best: ${STATE.highScores[game.track.id].toLocaleString()}`;
-            }
-
-            document.getElementById('game-retry-btn').innerText = "Drive Again";
-            document.getElementById('game-overlay').style.display = 'flex';
-            updateOverlayFocus();
-        }
-
-        function closeGame() {
-            game.state = 'idle';
-            STATE.currentScreen = 'grid';
-            DOM_CACHE.detail.classList.remove('visible');
-            document.getElementById('game-hud').style.display = 'none';
-            document.getElementById('game-overlay').style.display = 'none';
-            cleanupThreeJS();
-            buildGridMenu();
-        }
-
-        function gameTick() {
-            if (STATE.currentScreen !== 'game') return;
-            updateGamePhysics();
-            render3DScene();
-            requestAnimationFrame(gameTick);
-        }
-
-        function updateGamePhysics() {
-            if (game.state !== 'running') return;
-
-            // Wait for countdown buffer
-            if (game.countdown > 0) {
-                game.countdown--;
-                return;
-            }
-
-            // 1. Steering & Slide/Drift Mechanics
-            let steerVal = 0;
-            if (keysPressed['ArrowLeft'] || keysPressed['a'] || keysPressed['A']) steerVal = -1.0;
-            if (keysPressed['ArrowRight'] || keysPressed['d'] || keysPressed['D']) steerVal = 1.0;
-            if (Math.abs(STATE.joyX) > 0.15) steerVal = STATE.joyX;
-
-            // Simple drifty lateral speed calculation
-            let steerAgility = 0.22;
-            let speedPercentage = game.speed / game.maxSpeed;
-            game.playerVX += steerVal * steerAgility * speedPercentage;
-            game.playerVX *= 0.85; // Sideways drag friction
-            
-            game.playerX += game.playerVX;
-            game.playerX = Math.max(-5.0, Math.min(5.0, game.playerX));
-
-            // 2. Active Joystick Acceleration Mechanics (Requires active forward tilt/Up)
-            let isAccelerating = keysPressed['ArrowUp'] || keysPressed['w'] || keysPressed['W'] || (STATE.joyY < -0.15);
-            if (isAccelerating) {
-                // Read continuous analog value of joystick, or treat keys as 100% tilt
-                let tiltAmount = (STATE.joyY < -0.15) ? Math.max(0, -STATE.joyY) : 1.0;
-                game.speed += 0.08 * tiltAmount;
-            } else {
-                game.speed *= 0.97; // Engine breaking drag
-            }
-            game.speed = Math.max(0, Math.min(game.maxSpeed, game.speed));
-
-            // Move the vehicle forward along the Z coordinate
-            game.position += game.speed;
-
-            // 3. Track segments references
-            let startSegIndex = Math.floor(game.position / segmentLength);
-            let percent = (game.position % segmentLength) / segmentLength;
-
-            // Boundary check for completion
-            if (startSegIndex >= game.road.length - 2) {
-                victoryGame();
-                return;
-            }
-
-            let curSeg = game.road[startSegIndex];
-            let nextSeg = game.road[startSegIndex + 1];
-
-            // Project absolute 3D position of the player car on road surface
-            let segX = curSeg.x + (nextSeg.x - curSeg.x) * percent;
-            let segY = curSeg.y + (nextSeg.y - curSeg.y) * percent;
-
-            game.carMesh.position.set(segX + game.playerX, segY + 0.1, -game.position);
-
-            // Align rotation heading vector to match upcoming segments
-            let lookSeg = game.road[Math.min(game.road.length - 1, startSegIndex + 3)];
-            let targetHeading = Math.atan2(lookSeg.x - curSeg.x, lookSeg.z - curSeg.z);
-            let visualDriftSlideAngle = -game.playerVX * 0.15; // Visual slide swing-out
-
-            game.carMesh.rotation.y = targetHeading + visualDriftSlideAngle;
-
-            // 4. Boundary Wall or obstacle collisions
-            if (curSeg.obstacles.length > 0 && Math.floor(game.position) % segmentLength < 8) {
-                curSeg.obstacles.forEach(obs => {
-                    let distanceDiff = Math.abs(game.playerX - obs.offset);
-                    if (distanceDiff < 0.9) {
-                        triggerCrash();
-                    }
-                });
-            }
-
-            // Standard score calculation
-            if (game.speed > 0.5) {
-                game.score += Math.round(game.speed * 1.5);
-            }
-
-            // Cleanup/Animate physics particles
-            for(let i=game.particles.length-1; i>=0; i--) {
-                let p = game.particles[i];
-                p.mesh.position.x += p.vX * 0.016;
-                p.mesh.position.y += p.vY * 0.016;
-                p.mesh.position.z += p.vZ * 0.016;
-                p.vY -= 9.8 * 0.016; // gravity
-                p.life -= 0.04;
-                if (p.life <= 0) {
-                    scene.remove(p.mesh);
-                    game.particles.splice(i, 1);
-                }
-            }
-        }
-
-        function render3DScene() {
-            if (!renderer || !scene || !camera) return;
-
-            // 1. Position Camera chasing the car
-            let targetCamX = game.carMesh.position.x;
-            let targetCamY = game.carMesh.position.y + 3.2;
-            let targetCamZ = game.carMesh.position.z + 9.5;
-
-            camera.position.x += (targetCamX - camera.position.x) * 0.12;
-            camera.position.y += (targetCamY - camera.position.y) * 0.12;
-            camera.position.z += (targetCamZ - camera.position.z) * 0.12;
-
-            // 2. Point camera at upcoming path
-            camera.lookAt(game.carMesh.position.x, game.carMesh.position.y + 0.8, game.carMesh.position.z - 12);
-
-            // 3. Screen shake logic
-            if (game.shakeAmount > 0) {
-                camera.position.x += (Math.random() - 0.5) * game.shakeAmount;
-                camera.position.y += (Math.random() - 0.5) * game.shakeAmount;
-                game.shakeAmount *= 0.85;
-                if (game.shakeAmount < 0.01) game.shakeAmount = 0;
-            }
-
-            renderer.render(scene, camera);
-
-            // 4. Update HUD
-            document.getElementById('hud-speed').innerText = `${Math.round(game.speed * 45)} KM/H`;
-            document.getElementById('hud-score').innerText = game.score.toLocaleString();
-        }
-
-        // ==========================================================================
-        // UI Menu Selection Springs Tick
-        // ==========================================================================
         function tickMicroanimations() {
             const activeTarget = getActiveTarget();
             const currentElement = activeTarget ? activeTarget.icon : null;
@@ -985,6 +1189,27 @@
                     }
                 }
             });
+
+            // Action overlay button tilts
+            if (activeTarget && activeTarget.icon && activeTarget.container && !activeTarget.icon.springs) {
+                const container = activeTarget.container;
+                const icon = activeTarget.icon;
+                if (icon !== lastTargetElement) { focusScale = 1.0; lastTargetElement = icon; }
+                focusScale += (1.06 - focusScale) * 0.12;
+
+                container.classList.add('tilted-focus');
+                icon.classList.add('tilted-focus');
+                
+                const maxIconRotate = 8, maxIconTranslate = 6;
+                const iconRotateY = STATE.joyX * maxIconRotate;
+                const iconRotateX = -STATE.joyY * maxIconRotate;
+                const iconTranslateX = STATE.joyX * maxIconTranslate;
+                const iconTranslateY = STATE.joyY * maxIconTranslate;
+
+                if (container === icon) {
+                    icon.style.transform = `scale(${focusScale}) translate3d(${iconTranslateX}px, ${iconTranslateY}px, 0) rotateX(${iconRotateX}deg) rotateY(${iconRotateY}deg)`;
+                }
+            }
 
             requestAnimationFrame(tickMicroanimations);
         }
