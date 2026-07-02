@@ -586,6 +586,7 @@
             return vcSetting ? vcSetting.options[vcSetting.currentIndex] === true : true;
         }
 
+        // Display standard, non-overconfident connection notifications
         function checkViewCloudAccess(showPopup = true) {
             if (!isViewCloudEnabled()) {
                 if (showPopup) {
@@ -1684,15 +1685,20 @@
                 
                 let saved = null; 
                 try { saved = localStorage.getItem(`viewOS_resume_${STATE.activePlayingItemPath}`); } catch(err) {}
+                
                 if (saved) { 
                     try {
                         const progress = JSON.parse(saved); 
-                        video.currentTime = progress.current; 
-                        triggerSystemToast(`Resumed from ${formatTime(progress.current)}`); 
+                        // Set up event listener on metadata loaded to update duration context first, preventing InvalidStateError readyState exceptions.
+                        const onMetadata = () => {
+                            video.currentTime = progress.current; 
+                            triggerSystemToast(`Resumed from ${formatTime(progress.current)}`); 
+                        };
+                        video.addEventListener('loadedmetadata', onMetadata, { once: true });
                     } catch(e){}
                 }
                 
-                // Synchronously play inside user action call stack to satisfy security policies
+                // Synchronously play inside user action call stack to satisfy browser user gesture policies
                 video.play()
                     .then(() => {
                         updatePlayStateIcon('cinema');
@@ -2016,7 +2022,7 @@
             const down = gp.buttons[13]?.pressed || gp.axes[1] > 0.5;
             const left = gp.buttons[14]?.pressed || gp.axes[0] < -0.5;
             const right = gp.buttons[15]?.pressed || gp.axes[0] > 0.5;
-            const enter = gp.buttons[0]?.pressed;
+            const enter = gp.buttons[0]?.pressed || gp.buttons[8]?.pressed;
 
             if (STATE.inSleep) {
                 let input = gp.buttons.some(b => b.pressed) || gp.axes.some(a => Math.abs(a) > 0.5);
@@ -2040,7 +2046,7 @@
                 gpSquarePressed = false;
             }
 
-            // Handle Enter (Button 0 / A) immediately on press down (retains active user gesture context for browsers)
+            // Handle Enter (Button 0 / A, or Button 8 / Select) immediately on press down (retains active user gesture context for browsers)
             if (enter) { 
                 if (!gpEnterPressed) { 
                     gpEnterPressed = true; 
@@ -2158,6 +2164,349 @@
         }
 
         window.onload = initOS;
+    </script>
+</body>
+</html>
+--- END OF FILE viewos.html ---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>viewOS Boot</title>
+    <style>
+        @font-face {
+            font-family: 'Inter Tight';
+            src: url('SystemData/InterTight-VariableFont_wght.ttf') format('truetype');
+        }
+
+        * {
+            font-family: 'Inter Tight', -apple-system, sans-serif;
+            font-weight: 300 !important;
+            letter-spacing: -0.03em !important; 
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-font-smoothing: antialiased;
+            cursor: none !important;
+            margin: 0; padding: 0;
+        }
+
+        body, html {
+            width: 100vw; height: 100vh;
+            background-color: #000000;
+            color: #ffffff;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Pitch Black Boot Cover Overlay (No text) */
+        #boot-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #000000; z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Recovery Screen UI */
+        #recovery-screen {
+            display: none; flex-direction: column; align-items: center; text-align: center;
+            opacity: 0; transition: opacity 0.5s ease;
+            width: 90%; max-width: 600px; z-index: 500;
+        }
+
+        h1 { font-size: 2.8rem; margin-bottom: 15px; }
+        p { font-size: 1.4rem; color: #aaaaaa; margin-bottom: 40px; line-height: 1.4; }
+
+        .btn-container { display: flex; flex-direction: column; gap: 15px; width: 100%; align-items: center; }
+
+        .recovery-btn {
+            width: fit-content; min-width: 260px; padding: 18px 35px; font-size: 1.5rem;
+            color: #ffffff; background-color: transparent; border: none;
+            border-radius: 8px; text-align: center; outline: none;
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                        background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .recovery-btn.is-focused {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            transform: scale(1.08);
+        }
+
+        #status-text {
+            margin-top: 30px; font-size: 1.2rem; color: #ffcc00; 
+            min-height: 20px; opacity: 0; transition: opacity 0.3s ease; line-height: 1.5;
+            max-width: 90%; word-wrap: break-word; text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Pitch Black Screen Overlay (No Boot Logo text) -->
+    <div id="boot-screen"></div>
+
+    <!-- Recovery / Update Mode -->
+    <div id="recovery-screen">
+        <h1>viewOS Recovery</h1>
+        <p>No bootable operating system found or recovery forced.<br>Connect to View Cloud install viewOS.</p>
+        
+        <div class="btn-container">
+            <div class="recovery-btn is-focused" id="btn-boot">Boot viewOS</div>
+            <div class="recovery-btn" id="btn-update">Install viewOS</div>
+            <div class="recovery-btn" id="btn-reboot">Clear Data & Reboot</div>
+        </div>
+
+        <div id="status-text">Ready.</div>
+    </div>
+
+    <script>
+        // Wrapping everything in an IIFE to keep bootloader variables private
+        // and prevent scope collisions on document.write injection.
+        (function() {
+            const OS_STORAGE_KEY = 'viewOS_core_code';
+            const VIEW_CLOUD_URL = 'https://script.google.com/macros/s/AKfycbzR_BI7fcEi1B_ZGG0nlP7Xw6vVSJ9WCDnlrsBWN8jDKmUmUtfNTJz0uEzMZsoDFeOgEA/exec';
+            const CLIENT_VERSION = 1; // Hardcoded Client Identification
+            
+            let inRecovery = false;
+            let isDownloading = false;
+            let focusedIndex = 0;
+            let buttons;
+            let gpLastDir = null;
+            let gpEnterPressed = false;
+            
+            let forceRecovery = false;
+            let bootTimer = null;
+
+            function isValidOS(code) {
+                return code && code.includes('<html') && code.includes('initOS');
+            }
+
+            function handleBootKeys(e) {
+                if (e.key === 'x' || e.key === 'X') {
+                    forceRecovery = true;
+                    console.log("X pressed - Skipping OS boot to launch Recovery Menu");
+                }
+            }
+
+            window.addEventListener('keydown', handleBootKeys);
+
+            window.onload = () => {
+                // Wait 2 seconds in pitch black before making any decisions
+                bootTimer = setTimeout(() => {
+                    window.removeEventListener('keydown', handleBootKeys);
+
+                    const osCode = localStorage.getItem(OS_STORAGE_KEY);
+                    
+                    if (!forceRecovery && isValidOS(osCode)) {
+                        bootOS(osCode);
+                    } else {
+                        startRecoveryMode();
+                    }
+                }, 2000);
+            };
+
+            function bootOS(osCode) {
+                try {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(osCode, 'text/html');
+                    
+                    // 1. Wipe the bootloader markup and styles cleanly
+                    document.head.innerHTML = '';
+                    document.body.innerHTML = '';
+
+                    // 2. Clone any dynamic root metadata and styles
+                    Array.from(doc.documentElement.attributes).forEach(attr => {
+                        document.documentElement.setAttribute(attr.name, attr.value);
+                    });
+                    document.head.innerHTML = doc.head.innerHTML;
+                    document.body.innerHTML = doc.body.innerHTML;
+
+                    // 3. Extract and execute scripts in strict order
+                    const scripts = Array.from(doc.querySelectorAll('script'));
+                    let scriptIndex = 0;
+
+                    function loadNextScript() {
+                        if (scriptIndex >= scripts.length) {
+                            // Let the OS trigger its boot cycle organically once scripts are complete
+                            if (typeof window.onload === 'function') {
+                                window.onload();
+                            }
+                            return;
+                        }
+
+                        const oldScript = scripts[scriptIndex];
+                        scriptIndex++;
+
+                        const newScript = document.createElement('script');
+                        
+                        // Preserve all script attributes (src, defer, type, etc.)
+                        Array.from(oldScript.attributes).forEach(attr => {
+                            newScript.setAttribute(attr.name, attr.value);
+                        });
+
+                        // Copy inline scripts
+                        newScript.textContent = oldScript.textContent;
+
+                        if (oldScript.src) {
+                            // Ensure external assets resolve fully before running downstream code
+                            newScript.onload = loadNextScript;
+                            newScript.onerror = loadNextScript;
+                            document.head.appendChild(newScript);
+                        } else {
+                            document.head.appendChild(newScript);
+                            loadNextScript();
+                        }
+                    }
+
+                    loadNextScript();
+                } catch (e) {
+                    console.error("OS Loader failure: ", e);
+                    startRecoveryMode();
+                }
+            }
+
+            function startRecoveryMode() {
+                inRecovery = true;
+                document.getElementById('boot-screen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('boot-screen').style.display = 'none';
+                    const rec = document.getElementById('recovery-screen');
+                    rec.style.display = 'flex';
+                    setTimeout(() => rec.style.opacity = '1', 50);
+                    
+                    buttons = document.querySelectorAll('.recovery-btn');
+
+                    document.addEventListener('keydown', handleKeydown);
+                    requestAnimationFrame(pollGamepads);
+                }, 500);
+            }
+
+            function updateFocus() {
+                buttons.forEach((btn, i) => {
+                    if (i === focusedIndex) btn.classList.add('is-focused');
+                    else btn.classList.remove('is-focused');
+                });
+            }
+
+            function triggerAction() {
+                if (isDownloading) return;
+                if (focusedIndex === 0) {
+                    // Boot action: refreshes the page directly
+                    location.reload();
+                } else if (focusedIndex === 1) {
+                    fetchAndInstallOS();
+                } else if (focusedIndex === 2) {
+                    // Safely clear all data and start completely fresh
+                    localStorage.clear();
+                    location.reload();
+                }
+            }
+
+            function setStatus(text, color = "#ffcc00") {
+                const statusEl = document.getElementById('status-text');
+                statusEl.innerText = text;
+                statusEl.style.color = color;
+                statusEl.style.opacity = '1';
+            }
+
+            async function fetchAndInstallOS() {
+                isDownloading = true;
+                setStatus("Connecting to View Cloud", "#ffffff");
+
+                try {
+                    // Step 1: Check Client Compatibility first
+                    const infoResponse = await fetch(`${VIEW_CLOUD_URL}?action=getUpdateInfo`);
+                    if (!infoResponse.ok) throw new Error("Failed to check device compatibility.");
+                    
+                    const info = await infoResponse.json();
+                    
+                    const isSupported = info.supportedClientVersions && info.supportedClientVersions.some(v => v.toString().trim() === CLIENT_VERSION.toString());
+                    
+                    if (!isSupported) {
+                        throw new Error("Device out of date. Please contact support to install last supported version or purchase a new View Device.");
+                    }
+
+                    // Step 2: Fetch and install the actual OS code
+                    setStatus("Downloading latest viewOS", "#ffffff");
+                    const response = await fetch(`${VIEW_CLOUD_URL}?action=getOSCode`);
+                    if (!response.ok) throw new Error("Network request failed.");
+                    
+                    const code = await response.text();
+                    
+                    if (!isValidOS(code)) {
+                        if (code.includes('google-site-verification') || code.includes('github-logo')) {
+                            throw new Error("Received a webpage instead of raw code.\nEnsure GitHub link is 'Raw' and Apps Script is deployed to 'Anyone'.");
+                        } else {
+                            throw new Error("Invalid OS data received from server.");
+                        }
+                    }
+
+                    setStatus("Saving viewOS to local storage", "#ffffff");
+                    localStorage.setItem(OS_STORAGE_KEY, code);
+
+                    setStatus("Install complete. booting", "#ffffff");
+                    
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+
+                } catch (error) {
+                    setStatus(`${error.message}`, "#ff3b30");
+                    isDownloading = false;
+                }
+            }
+
+            function handleKeydown(e) {
+                if (!inRecovery || isDownloading) return;
+                if (e.key === 'ArrowDown') {
+                    focusedIndex = Math.min(focusedIndex + 1, buttons.length - 1);
+                    updateFocus();
+                } else if (e.key === 'ArrowUp') {
+                    focusedIndex = Math.max(focusedIndex - 1, 0);
+                    updateFocus();
+                } else if (e.key === 'Enter') {
+                    triggerAction();
+                }
+            }
+
+            // Gamepad controller listener loop (A/Select Mapping added)
+            function pollGamepads() {
+                if (!inRecovery) return;
+                const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+                for (let i = 0; i < gamepads.length; i++) {
+                    const gp = gamepads[i];
+                    if (!gp) continue;
+
+                    const up = gp.buttons[12]?.pressed || gp.axes[1] < -0.5;
+                    const down = gp.buttons[13]?.pressed || gp.axes[1] > 0.5;
+                    const enter = gp.buttons[0]?.pressed || gp.buttons[8]?.pressed;
+
+                    let dir = up ? 'up' : down ? 'down' : null;
+                    
+                    if (dir && gpLastDir !== dir) {
+                        gpLastDir = dir;
+                        if (dir === 'down') focusedIndex = Math.min(focusedIndex + 1, buttons.length - 1);
+                        if (dir === 'up') focusedIndex = Math.max(focusedIndex - 1, 0);
+                        updateFocus();
+                    } else if (!dir) {
+                        gpLastDir = null;
+                    }
+
+                    if (enter) {
+                        if (!gpEnterPressed) {
+                            gpEnterPressed = true;
+                            triggerAction();
+                        }
+                    } else {
+                        gpEnterPressed = false;
+                    }
+                    break;
+                }
+                requestAnimationFrame(pollGamepads);
+            }
+        })();
     </script>
 </body>
 </html>
