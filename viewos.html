@@ -619,6 +619,10 @@
         }
 
         async function initOS() {
+            // High-Performance initialization lockout to prevent boot duplication
+            if (window.viewOS_initialized) return;
+            window.viewOS_initialized = true;
+
             await fetchYouTubeContent();
             preRenderAllMedia();
             fetchYouTubeMetadata();
@@ -959,6 +963,7 @@
             badge.innerText = formatYtDuration(seconds);
         }
 
+        // Card generation UI pipeline
         function updateYtCardDurationUI(videoId, seconds) { const cards = document.querySelectorAll(`.media-card[data-youtube-id="${videoId}"]`); cards.forEach(card => applyDurationBadge(card, seconds)); }
 
         function initYouTubePlayer(videoId) {
@@ -1629,6 +1634,7 @@
 
                     const f = Math.max(0, s.focusState.val);
                     if (el.glassBorder) el.glassBorder.style.opacity = (0.3 + 0.7 * f).toFixed(3);
+                    
                     if (el.shine) {
                         el.shine.style.opacity = f.toFixed(3);
                         if (isFocused) {
@@ -1685,6 +1691,7 @@
         function openControlCenter() { STATE.inControlCenter = true; STATE.ccFocusedIndex = 0; updateControlCenterFocus(); document.getElementById('control-center').classList.add('visible'); }
         function closeControlCenter() { STATE.inControlCenter = false; document.getElementById('control-center').classList.remove('visible'); updateFocus(); }
         
+        // Settings UI parameters
         function updateControlCenterFocus() {
             const volTile = document.getElementById('cc-vol-tile'), sleepTile = document.getElementById('cc-sleep-tile'), homeTile = document.getElementById('cc-home-tile');
             volTile.classList.remove('cc-tile-focused'); sleepTile.classList.remove('cc-tile-focused'); homeTile.classList.remove('cc-tile-focused');
