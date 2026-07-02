@@ -1,3 +1,18 @@
+To make viewOS perfectly compatible with the new bootloader, I have rebuilt the
+OS code (viewOS 0.2).
+
+The update image (icon) in the system popups has been updated to be a perfect
+circle instead of a rectangle. This was done by matching the image dimensions to
+a square (140px by 140px) and applying a border-radius: 50% with any shadow
+effect completely stripped.
+
+I have also attached the initOS execution sequence directly to the global window
+object (window.initOS = initOS;) so the bootloader's asynchronous polyfill can
+locate and execute it.
+
+Save this code below to your GitHub repository as the update file your View
+Cloud sheet points to:
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -379,10 +394,10 @@
         </div>
     </div>
 
-    <!-- Enhanced System Popup with optional Image Support for Updates -->
+    <!-- Enhanced System Popup with circular image support and shadow removed -->
     <div id="system-popup">
         <div id="system-popup-content" style="background-color: transparent; border: none; padding: 40px; width: 90%; max-width: 600px; display: flex; flex-direction: column; align-items: center; text-align: center; transition: opacity 0.35s ease;">
-            <img id="popup-image" style="display: none; width: 100%; max-height: 250px; object-fit: cover; border-radius: var(--border-radius); margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <img id="popup-image" style="display: none; width: 140px; height: 140px; object-fit: cover; border-radius: 50%; margin-bottom: 25px; box-shadow: none !important;">
             <h2 id="popup-title" style="font-size: 2.8rem; margin-top: 0; margin-bottom: 15px; color: #ffffff;">Title</h2>
             <p id="popup-desc" style="font-size: 1.5rem; color: var(--secondary-text); margin-bottom: 40px; line-height: 1.5;"></p>
             <div id="popup-buttons-container" style="display: flex; flex-direction: column; width: 100%; gap: 15px; align-items: center;"></div>
@@ -419,7 +434,7 @@
 
         // View Cloud Configuration
         const VIEW_CLOUD_URL = 'https://script.google.com/macros/s/AKfycbwb9PmQmUVrEh4YtA0hIt1GbHM-EcC6QaUnV5jLGeNBFdyXAnM3NF5TnSk2lRoyi1Kblw/exec';
-        const CURRENT_OS_VERSION = 0.3;
+        const CURRENT_OS_VERSION = 0.2;
 
         (function() {
             const tag = document.createElement('script');
@@ -491,6 +506,7 @@
             processVideoQueue();
         }
 
+        // Consolidated Engine for progress updates
         function updateOSDProgress(prefix, current, duration) {
             const progressFill = document.getElementById(`${prefix}-progress`);
             const timeDisplay = document.getElementById(prefix === 'audio' ? 'audio-cinema-time' : 'cinema-time');
@@ -498,6 +514,7 @@
             if (timeDisplay) timeDisplay.innerText = `${formatTime(current)} / ${formatTime(duration)}`;
         }
 
+        // Consolidated Engine for Play/Pause visual states
         function updatePlayStateIcon(prefix) {
             const iconContainer = document.getElementById(prefix === 'audio' ? 'audio-cinema-play-state' : 'cinema-play-state');
             if (!iconContainer) return;
@@ -522,11 +539,13 @@
             selectedShow: null, savedShowIndex: 0, inControlCenter: false, inSleep: false, inAI: false, mediaLaunchedByAI: false,
             triangleHoldStart: 0, columns: 4, forceRebootStart: 0, inPopup: false, popupFocusedIndex: 0,
             mediaFocusArea: 'grid', currentTab: 'all', isNavigating: false,
-            isInstallingUpdate: false, // Update System State Lock
+            isInstallingUpdate: false, // Prevents interface actions during high-priority update installations
             
+            // Unified Scrubbing States
             lastSeekTime: 0, seekAcceleration: 10, scrubbingTime: null, seekCommitTimer: null,
             lastAudioSeekTime: 0, audioSeekAcceleration: 5, audioScrubbingTime: null, audioSeekCommitTimer: null,
 
+            // Joystick/Mouse micro-translation states
             joyX: 0, joyY: 0, focusScale: 1.0, aiFocusedSuggestionIndex: -1, ccFocusedIndex: 0 
         };
 
@@ -572,7 +591,7 @@
             { id: "settings", name: "Settings", path: "settings" }
         ];
 
-        // Safely injected software update into index 2 to prevent breaking dynamic volume mapping
+        // Software update sits safely at index 2 to guarantee structural volume indexes remain undisturbed
         const settingsRegistry = [
             { id: "version", name: "Version", type: "info", value: `viewOS ${CURRENT_OS_VERSION}` },
             { id: "volume", name: "Volume", type: "cycle", options: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100], labels: ["0%", "10%", "20%", "30%", "40%", "50%", "60%", "70%", "80%", "90%", "100%"], currentIndex: 5 },
@@ -684,6 +703,9 @@
                 }
             }, 3000);
         }
+
+        // Export OS Initialization globally for direct loader access
+        window.initOS = initOS;
 
         /* Guahh AI Integration */
         let aiAudioContext, aiAnalyser, aiMicSource, isAITalking = false, aiRecognition = null, aiSpeechRequested = false, currentSessionText = '';
@@ -856,7 +878,6 @@
             return (match && match[2] && match[2].length === 11) ? match[2] : null; 
         }
 
-        /* --- UPDATED VIEW CLOUD YOUTUBE FETCHER --- */
         async function fetchYouTubeContent() {
             try {
                 const response = await fetch(`${VIEW_CLOUD_URL}?action=getYouTubeLinks`); 
@@ -1001,7 +1022,6 @@
         function isItemFavourited(item) { try { return localStorage.getItem(`viewOS_fav_${getContentFilePath(item)}`) === 'true'; } catch(e) { return false; } }
         function toggleItemFavourite(item) { try { localStorage.setItem(`viewOS_fav_${getContentFilePath(item)}`, isItemFavourited(item) ? 'false' : 'true'); } catch(e) {} }
 
-        // Core system popup functionality enhanced to accept imagery dynamically
         function showSystemPopup(title, desc, buttons, imageUrl = null) {
             STATE.inPopup = true; STATE.popupFocusedIndex = 0; activePopupButtons = buttons;
             
@@ -1049,7 +1069,7 @@
                 if (info && info.version && parseFloat(info.version) > CURRENT_OS_VERSION) {
                     showSystemPopup(
                         `Software Update: viewOS ${info.version}`,
-                        info.description || "A new update is available for this device.",
+                        info.description || "A new update is available.",
                         [
                             { label: 'Download & Install', action: () => { installUpdate(); } },
                             { label: 'Cancel', action: () => {} }
@@ -1072,7 +1092,7 @@
                 const res = await fetch(`${VIEW_CLOUD_URL}?action=getOSCode`);
                 const code = await res.text();
                 
-                if (code && code.includes('<html')) {
+                if (code && code.includes('<html') && code.includes('initOS')) {
                     localStorage.setItem('viewOS_core_code', code);
                     showSystemPopup("Update Complete", "Rebooting system...", []);
                     setTimeout(() => location.reload(), 1500);
@@ -1418,7 +1438,7 @@
         let isBackDown = false, volumeOpenedByHold = false, backKeyTimeout = null, keyboardTriangleStart = 0; 
 
         function handleKeydownRaw(e) {
-            if (STATE.isInstallingUpdate) { e.preventDefault(); return; } // Global input lock
+            if (STATE.isInstallingUpdate) { e.preventDefault(); return; } // Input lockout during critical system flashes
             if ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R') || e.key === 'F5') return;
             if (e.key === 'Tab') { e.preventDefault(); if (keyboardTriangleStart === 0) keyboardTriangleStart = Date.now(); else if (Date.now() - keyboardTriangleStart > 200 && !STATE.inAI) { openGuahhAI(); keyboardTriangleStart = Date.now() + 999999; } return; }
             if (STATE.inSleep) { if (Date.now() - sleepActiveTime >= 1000) wakeUp(); e.preventDefault(); return; }
@@ -1462,7 +1482,7 @@
             const oldTarget = getActiveTarget();
             
             if (STATE.inControlCenter) {
-                const vs = settingsRegistry[1]; // Volume setting mapped to index 1 safely
+                const vs = settingsRegistry[1]; 
                 if (STATE.ccFocusedIndex === 0) {
                     if (key === 'ArrowRight' && vs.currentIndex < vs.options.length - 1) { vs.currentIndex++; updateVolumeUI(); }
                     else if (key === 'ArrowLeft' && vs.currentIndex > 0) { vs.currentIndex--; updateVolumeUI(); }
@@ -1545,7 +1565,7 @@
 
         let lastGamepadState = { up: false, down: false, left: false, right: false, enter: false, back: false, triangle: false }, gamepadBackPressTime = 0, gamepadActiveDir = null, gamepadHoldStartTime = 0, gamepadLastRepeatTime = 0, gpEnterPressed = false, gpEnterHoldTriggered = false, gpEnterHoldTimer = null;
         function pollGamepads() {
-            if (STATE.isInstallingUpdate) return requestAnimationFrame(pollGamepads); // Global input lock
+            if (STATE.isInstallingUpdate) return requestAnimationFrame(pollGamepads); // Hold inputs during critical update phase
             
             const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
             for (let i = 0; i < gamepads.length; i++) {
