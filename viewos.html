@@ -393,7 +393,7 @@
 
         // View Cloud Configuration & Local Version Parameters
         const VIEW_CLOUD_URL = 'https://script.google.com/macros/s/AKfycbzR_BI7fcEi1B_ZGG0nlP7Xw6vVSJ9WCDnlrsBWN8jDKmUmUtfNTJz0uEzMZsoDFeOgEA/exec';
-        const CURRENT_OS_VERSION = '0.8.2';
+        const CURRENT_OS_VERSION = '0.8.3';
         const CLIENT_VERSION = 1;
 
         (function() {
@@ -919,7 +919,7 @@
             
             function createPlayer() {
                 ytPlayer = new YT.Player('cinema-youtube', {
-                    videoId: videoId, playerVars: { 'autoplay': 1, 'controls': 0, 'disablekb': 1, 'rel': 0, 'showinfo': 0, 'modestbranding': 1, 'fs': 0, 'iv_load_policy': 3, 'autohide': 1, 'enablejsapi': 1 },
+                    videoId: videoId, playerVars: { 'autoplay': 1, 'controls': 0, 'disablekb': 1, 'rel': 0, 'showinfo': 0, 'modestbranding': 1, 'fs': 0, 'iv_load_policy': 3, 'autohide': 1, 'enablejsapi': 1, 'playsinline': 1, 'origin': window.location.origin },
                     events: {
                         'onReady': (e) => {
                             const iframe = document.getElementById('cinema-youtube');
@@ -1369,27 +1369,71 @@
             const isYT = !isAudio && STATE.activePlayingItemPath && STATE.activePlayingItemPath.includes('.yt');
             let duration = 0, current = 0;
 
-            if (isAudio) { if (!activeAudio || !activeAudio.duration) return; duration = activeAudio.duration; current = (STATE.audioScrubbingTime === null) ? activeAudio.currentTime : STATE.audioScrubbingTime; }
-            else if (isYT) { if (!ytPlayer || typeof ytPlayer.getDuration !== 'function') return; duration = ytPlayer.getDuration(); current = (STATE.scrubbingTime === null) ? ytPlayer.getCurrentTime() : STATE.scrubbingTime; }
-            else { duration = cv.duration; if (!duration) return; current = (STATE.scrubbingTime === null) ? cv.currentTime : STATE.scrubbingTime; }
+            if (isAudio) { 
+                if (!activeAudio || !activeAudio.duration) return; 
+                duration = activeAudio.duration; 
+                current = (STATE.audioScrubbingTime === null) ? activeAudio.currentTime : STATE.audioScrubbingTime; 
+            } else if (isYT) { 
+                if (!ytPlayer || typeof ytPlayer.getDuration !== 'function') return; 
+                duration = ytPlayer.getDuration(); 
+                current = (STATE.scrubbingTime === null) ? ytPlayer.getCurrentTime() : STATE.scrubbingTime; 
+            } else { 
+                duration = cv.duration; 
+                if (!duration) return; 
+                current = (STATE.scrubbingTime === null) ? cv.currentTime : STATE.scrubbingTime; 
+            }
 
-            const now = Date.now(), lastTime = isAudio ? STATE.lastAudioSeekTime : STATE.lastSeekTime;
+            const now = Date.now();
+            const lastTime = isAudio ? STATE.lastAudioSeekTime : STATE.lastSeekTime;
             let accel = isAudio ? STATE.audioSeekAcceleration : STATE.seekAcceleration;
-            accel = (now - lastTime < 600) ? Math.min(isAudio ? 60 : 90, accel + (isAudio ? 5 : 10)) : (isAudio ? 5 : 10);
-            if (isAudio) { STATE.lastAudioSeekTime = now; STATE.audioSeekAcceleration = accel; } else { STATE.lastSeekTime = now; STATE.seekAcceleration = accel; }
+            
+            // Accelerates the longer they hold the scrub button
+            accel = (now - lastTime < 350) ? Math.min(isAudio ? 45 : 75, accel + (isAudio ? 3 : 5)) : (isAudio ? 5 : 10);
+            
+            if (isAudio) { 
+                STATE.lastAudioSeekTime = now; 
+                STATE.audioSeekAcceleration = accel; 
+            } else { 
+                STATE.lastSeekTime = now; 
+                STATE.seekAcceleration = accel; 
+            }
 
             const targetTime = Math.max(0, Math.min(duration, direction === 'right' ? current + accel : current - accel));
-            if (isAudio) STATE.audioScrubbingTime = targetTime; else STATE.scrubbingTime = targetTime;
+            
+            if (isAudio) {
+                STATE.audioScrubbingTime = targetTime;
+            } else {
+                STATE.scrubbingTime = targetTime;
+            }
 
-            updateOSDProgress(prefix, targetTime, duration); if (!isAudio) triggerCinemaOSD();
-            if (isAudio) activeAudio.currentTime = targetTime; else if (isYT) ytPlayer.seekTo(targetTime, false); else cv.currentTime = targetTime;
+            // Instantly update UI progress bar and clock
+            updateOSDProgress(prefix, targetTime, duration); 
+            if (!isAudio) triggerCinemaOSD();
 
+            // Smoothly commit the seek after a brief pause of user input (debounce)
+            // This prevents the video decoder from choking while the user is rapidly clicking/holding the button.
             clearTimeout(isAudio ? STATE.audioSeekCommitTimer : STATE.seekCommitTimer);
-            const timer = setTimeout(() => {
-                if (!isAudio && isYT && ytPlayer && typeof ytPlayer.seekTo === 'function') ytPlayer.seekTo(STATE.scrubbingTime, true);
-                if (isAudio) STATE.audioScrubbingTime = null; else STATE.scrubbingTime = null;
-            }, 350);
-            if (isAudio) STATE.audioSeekCommitTimer = timer; else STATE.seekCommitTimer = timer;
+            
+            const commitTimer = setTimeout(() => {
+                if (isAudio) {
+                    activeAudio.currentTime = STATE.audioScrubbingTime;
+                    STATE.audioScrubbingTime = null;
+                } else if (isYT) {
+                    if (ytPlayer && typeof ytPlayer.seekTo === 'function') {
+                        ytPlayer.seekTo(STATE.scrubbingTime, true);
+                    }
+                    STATE.scrubbingTime = null;
+                } else {
+                    cv.currentTime = STATE.scrubbingTime;
+                    STATE.scrubbingTime = null;
+                }
+            }, 200); // 200ms debounce for buttery smooth scrubbing
+
+            if (isAudio) {
+                STATE.audioSeekCommitTimer = commitTimer;
+            } else {
+                STATE.seekCommitTimer = commitTimer;
+            }
         }
 
         function navigateScreen(fromEl, toEl, isForward = true) {
@@ -1537,7 +1581,7 @@
                 grid.innerHTML = `
                     <div id="store-loading" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 150px; gap: 25px;">
                         <div style="width: 80px; height: 80px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #fff; border-radius: 50%; animation: spin 0.5s linear infinite;"></div>
-                        <span style="font-size: 1.6rem; color: var(--secondary-text);">Connecting to View Cloud</span>
+                        <span style="font-size: 1.6rem; color: var(--secondary-text); ">Connecting to View Cloud</span>
                     </div>
                 `;
                 
@@ -1616,14 +1660,40 @@
             if (item.isYouTube) {
                 video.style.display = 'none'; try { video.pause(); } catch(e) {} initYouTubePlayer(item.videoId);
             } else {
-                video.style.display = 'block'; video.src = STATE.activePlayingItemPath; 
+                video.style.display = 'block'; 
+                video.src = STATE.activePlayingItemPath; 
                 
                 const volSetting = settingsRegistry.find(s => s.id === 'volume');
                 video.volume = volSetting.options[volSetting.currentIndex] / 100;
                 
-                let saved = null; try { saved = localStorage.getItem(`viewOS_resume_${STATE.activePlayingItemPath}`); } catch(err) {}
-                if (saved) { const progress = JSON.parse(saved); video.addEventListener('loadedmetadata', () => { video.currentTime = progress.current; triggerSystemToast(`Resumed from ${formatTime(progress.current)}`); }, { once: true }); }
-                video.play().catch(()=>{}); updatePlayStateIcon('cinema'); triggerCinemaOSD();
+                let saved = null; 
+                try { saved = localStorage.getItem(`viewOS_resume_${STATE.activePlayingItemPath}`); } catch(err) {}
+                
+                const handleVideoInit = () => {
+                    if (saved) {
+                        try {
+                            const progress = JSON.parse(saved);
+                            video.currentTime = progress.current;
+                            triggerSystemToast(`Resumed from ${formatTime(progress.current)}`);
+                        } catch(e){}
+                        saved = null; // Clear to prevent double seek
+                    }
+                    video.play()
+                        .then(() => {
+                            updatePlayStateIcon('cinema');
+                            triggerCinemaOSD();
+                        })
+                        .catch((err) => {
+                            console.warn("Autoplay was prevented or failed:", err);
+                            // Keep updating icon and keep OSD visible so user can interact
+                            updatePlayStateIcon('cinema');
+                            triggerCinemaOSD();
+                        });
+                };
+
+                // Wait until there is enough data to play smoothly
+                video.addEventListener('canplay', handleVideoInit, { once: true });
+                video.load(); // Forces resources stream initialization
             } navigateScreen(fromScreen, player, true);
         }
 
@@ -1803,15 +1873,26 @@
                 const cv = document.getElementById('cinema-video');
                 const isYT = STATE.activePlayingItemPath && STATE.activePlayingItemPath.includes('.yt');
                 if (key === 'Enter') {
-                    if (isYT && ytPlayer) {
+                    if (isYT && ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
                         try {
                             const state = ytPlayer.getPlayerState();
-                            const playingConstant = (window.YT && YT.PlayerState) ? YT.PlayerState.PLAYING : 1;
-                            if (state === playingConstant) ytPlayer.pauseVideo(); else ytPlayer.playVideo();
+                            if (state === 1 || state === 3) {
+                                ytPlayer.pauseVideo();
+                            } else {
+                                ytPlayer.playVideo();
+                            }
                         } catch(err) {
                             try { ytPlayer.playVideo(); } catch(e) {}
                         }
-                    } else { if (cv && cv.paused) cv.play(); else if (cv) cv.pause(); }
+                    } else { 
+                        if (cv) {
+                            if (cv.paused) {
+                                cv.play().catch(err => console.warn("Local play failed:", err));
+                            } else {
+                                cv.pause();
+                            }
+                        }
+                    }
                     triggerCinemaOSD();
                 }
                 else if (key === 'ArrowRight') performScrub('right', 'cinema'); 
