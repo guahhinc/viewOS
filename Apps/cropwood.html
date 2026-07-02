@@ -35,18 +35,18 @@
 
         html, body {
             width: 100vw; 
-            height: 100vh;
+            min-height: 100vh;
             background-color: var(--bg-color);
             color: var(--text-color);
             overflow-x: hidden;
-            overflow-y: auto; /* Enable standard vertical page scroll when needed */
+            overflow-y: auto; /* Enable unrestricted vertical page scrolling */
         }
 
         #app-root {
             position: relative;
             width: 100%; 
-            height: 100%;
-            padding: 40px 4vw 40px 4vw;
+            min-height: 100vh; /* Replaced fixed height to support scrolling */
+            padding: 40px 4vw;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -87,7 +87,7 @@
             font-size: 1.35rem; 
             color: var(--secondary-text); 
             margin-bottom: 20px; 
-            transition: color 0.25s ease;
+            transition: color 0.25s ease, font-weight 0.2s ease;
         }
 
         /* Flat, non-glowing HUD Header block */
@@ -314,28 +314,29 @@
             font-weight: 400 !important;
         }
 
-        /* Vertical Scrollable Action List container */
+        /* Scrollable Action List container */
         #detail-actions {
             display: flex; 
             flex-direction: column; 
             align-items: center; 
             justify-content: flex-start; 
             margin-bottom: 20px;
-            max-height: 550px; 
+            max-height: 420px; /* Reduced to guarantee full visual accessibility and scroll */
             overflow-y: auto;
             padding-right: 12px;
             width: 100%;
         }
 
+        /* Button styling: Smaller layout/padding, but larger text */
         .detail-action-btn {
             font-size: 1.65rem;
             color: #ffffff;
             background: rgba(255, 255, 255, 0.04);
             border: 1.5px solid rgba(255, 255, 255, 0.08);
-            padding: 16px 40px;
-            margin: 6px 0;
+            padding: 10px 30px; /* Reduced padding height to fit screen */
+            margin: 4px 0; /* Compact spacing */
             border-radius: var(--border-radius);
-            width: 580px;
+            width: 520px; /* Slimmed width */
             text-align: center;
             transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
             transform-style: preserve-3d;
@@ -350,43 +351,6 @@
         }
         .detail-action-btn.disabled {
             opacity: 0.3;
-        }
-
-        /* Sleep Summary Modal */
-        #night-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.97);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-        #night-overlay.visible {
-            display: flex;
-            opacity: 1;
-        }
-        #night-text {
-            font-size: 5.5rem;
-            color: #d1b3ff;
-            margin-bottom: 24px;
-            animation: pulse 2s infinite ease-in-out;
-            font-weight: 400 !important;
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.05); opacity: 1; }
-        }
-        #night-summary {
-            font-size: 2.0rem;
-            color: var(--secondary-text);
-            text-align: center;
-            max-width: 800px;
-            margin-bottom: 45px;
-            line-height: 1.7;
         }
 
         .grid-item.is-focused .card-title { color: #ffffff !important; }
@@ -417,10 +381,10 @@
                         <div class="hud-item"><span class="hud-label">DAY</span><span id="hud-day" class="hud-val">1</span></div>
                         <div class="hud-item" style="border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1); padding: 0 25px;"><span class="hud-label">GOLD</span><span id="hud-gold" class="hud-val" style="color:#ffd700;">150g</span></div>
                         <div class="hud-item" style="border-right: 1px solid rgba(255,255,255,0.1); padding-right: 25px;"><span class="hud-label">ENERGY</span><span id="hud-energy" class="hud-val" style="color:#00ffcc;">100/100</span></div>
-                        <div class="hud-item"><span class="hud-label">TIME LEFT</span><span id="hud-timer" class="hud-val" style="color:#ffcc00;">45s</span></div>
+                        <div class="hud-item"><span class="hud-label">TIME LEFT</span><span id="hud-timer" class="hud-val" style="color:#ffcc00;">50s</span></div>
                     </div>
 
-                    <!-- Dynamic Day progression track bar -->
+                    <!-- Day progression track bar -->
                     <div id="day-progress-container" style="width: 100%; max-width: 620px; height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; margin: 20px auto 0 auto; overflow: hidden; border: 1.5px solid rgba(255,255,255,0.04);">
                         <div id="day-progress-bar" style="width: 100%; height: 100%; background: linear-gradient(90deg, #ffd700, #ff8c00); transition: width 1s linear; border-radius: 4px;"></div>
                     </div>
@@ -464,13 +428,6 @@
     <div id="detail-view">
         <h2 id="detail-title">Facility Details</h2>
         <div id="detail-actions"></div>
-    </div>
-
-    <!-- Sleep Summary -->
-    <div id="night-overlay">
-        <div id="night-text">Zzz...</div>
-        <div id="night-summary"></div>
-        <div id="night-continue-btn" class="detail-action-btn">Wake Up (Auto in 5s)</div>
     </div>
 
     <script>
@@ -528,12 +485,12 @@
             // Row 4: Farm Hub Facilities
             { id: "shop", title: "Seed Shop", type: "facility" },
             { id: "coop", title: "Barn & Coop", type: "facility" },
-            { id: "kitchen", title: "Cooking & Kitchen", type: "facility" },
+            { id: "shipping", title: "Shipping Bin", type: "facility" }, // Replaced cooking and kitchen
             { id: "farmhouse", title: "Cozy Farmhouse", type: "facility" }
         ];
 
         const STATE = {
-            currentScreen: 'grid', // 'grid' | 'detail' | 'night'
+            currentScreen: 'grid', // 'grid' | 'detail'
             focusedIndex: 0,
             detailFocusedIndex: 0,
             columns: 4,
@@ -545,9 +502,9 @@
             energy: 100,
             maxEnergy: 100,
 
-            // Real-Time Day Configuration
-            dayDuration: 45, // seconds per day
-            dayTimer: 45,    // remaining seconds
+            // Real-Time Day Configuration - Locked at exactly 50 seconds
+            dayDuration: 50, 
+            dayTimer: 50,    
             
             seeds: { wheat: 2, potato: 2, carrot: 0, corn: 0, strawberry: 0, blueberry: 0, pumpkin: 0, starfruit: 0 },
             crops: { wheat: 0, potato: 0, carrot: 0, corn: 0, strawberry: 0, blueberry: 0, pumpkin: 0, starfruit: 0 },
@@ -584,7 +541,7 @@
                 firstHarvest: false,
                 tycoon: false,
                 animalLover: false,
-                masterChef: false,
+                masterShipper: false, // Updated cooking milestone to shipping
                 starPlanter: false
             }
         };
@@ -598,8 +555,6 @@
 
         let cachedElements = [];
         let springElements = [];
-        let nightAutoWakeTimer = null;
-        let nightSecondsLeft = 5;
 
         // Helper calculations
         function getTillingCost() { return [15, 8, 2][STATE.hoeLevel - 1]; }
@@ -736,10 +691,6 @@
                 const activeBtn = document.getElementById(`action-btn-${STATE.detailFocusedIndex}`);
                 if (activeBtn) return { container: activeBtn, icon: activeBtn };
             }
-            if (STATE.currentScreen === 'night') {
-                const continueBtn = document.getElementById('night-continue-btn');
-                return { container: continueBtn, icon: continueBtn };
-            }
             return null;
         }
 
@@ -848,9 +799,9 @@
                     bg = 'linear-gradient(135deg, #381a1a, #1a0c0c)';
                     graphic = '🐔';
                     badges += `<span style="position:absolute; top:6px; right:6px; font-size:0.9rem; background:rgba(255,100,100,0.25); border:1px solid rgba(255,100,100,0.4); padding:4px 10px; border-radius:12px; backdrop-filter:blur(4px); line-height:1; z-index:10;">🐔${STATE.chickens} 🐮${STATE.cows}</span>`;
-                } else if (item.id === 'kitchen') {
-                    bg = 'linear-gradient(135deg, #132b24, #081410)';
-                    graphic = '🍳';
+                } else if (item.id === 'shipping') {
+                    bg = 'linear-gradient(135deg, #5c3a21, #2e1a0c)';
+                    graphic = '📦';
                 } else if (item.id === 'farmhouse') {
                     bg = 'linear-gradient(135deg, #2a1b3d, #120b1c)';
                     graphic = '🏡';
@@ -938,6 +889,21 @@
                 headerP.innerText = originalText;
                 headerP.style.color = 'var(--secondary-text)';
             }, 1800);
+        }
+
+        // Non-intrusive HUD Day Progression Notification
+        function showDayNotificationBanner(message) {
+            const headerP = document.querySelector('#app-header p');
+            const originalText = "Cozy modular 2D farming estate. Navigate using Arrow Keys/D-pad, Select with Enter/A.";
+            headerP.innerText = message;
+            headerP.style.color = '#73ff83'; // soft green glow
+            headerP.style.fontWeight = '500';
+            
+            setTimeout(() => {
+                headerP.innerText = originalText;
+                headerP.style.color = 'var(--secondary-text)';
+                headerP.style.fontWeight = '350';
+            }, 4500);
         }
 
         // ==========================================================================
@@ -1030,33 +996,13 @@
                     });
                 }
             } else if (item.id === 'shop') {
+                // Pure seed purchasing hub
                 seedsConfig.forEach(cfg => {
                     const price = CROPS_DB[cfg.id].seedCost;
                     actions.push({
                         text: `Buy ${cfg.label} Seed (${price}g)`,
                         disabled: STATE.gold < price,
                         handler: () => buySeed(cfg.id, price)
-                    });
-                });
-
-                seedsConfig.forEach(cfg => {
-                    const price = CROPS_DB[cfg.id].cropSell;
-                    const amount = STATE.crops[cfg.id];
-                    actions.push({
-                        text: `Sell All ${cfg.label} (Have ${amount} | +${amount * price}g)`,
-                        disabled: amount <= 0,
-                        handler: () => sellItem('crops', cfg.id, price)
-                    });
-                });
-
-                otherConfig.forEach(cfg => {
-                    const prices = { egg: 40, milk: 90, bread: 65, cheese: 130, pie: 240, cornbread: 120, jam: 150, soup: 380, juice: 320 };
-                    const price = prices[cfg.id] || 50;
-                    const amount = STATE.other[cfg.id];
-                    actions.push({
-                        text: `Sell All ${cfg.label} (Have ${amount} | +${amount * price}g)`,
-                        disabled: amount <= 0,
-                        handler: () => sellItem('other', cfg.id, price)
                     });
                 });
                 
@@ -1071,6 +1017,31 @@
                 } else if (STATE.hoeLevel === 2) {
                     actions.push({ text: "Upgrade to Iridium Hoe (400g)", disabled: STATE.gold < 400, handler: () => { STATE.gold -= 400; STATE.hoeLevel = 3; notifySuccess(); } });
                 }
+            } else if (item.id === 'shipping') {
+                // Central crop and yield sales market
+                seedsConfig.forEach(cfg => {
+                    const price = CROPS_DB[cfg.id].cropSell;
+                    const amount = STATE.crops[cfg.id];
+                    actions.push({
+                        text: `Sell All ${cfg.label} (Have ${amount} | +${amount * price}g)`,
+                        disabled: amount <= 0,
+                        handler: () => sellItem('crops', cfg.id, price)
+                    });
+                });
+
+                const productConfigs = [
+                    { id: 'egg', label: 'Egg', price: 40 },
+                    { id: 'milk', label: 'Milk', price: 90 }
+                ];
+
+                productConfigs.forEach(cfg => {
+                    const amount = STATE.other[cfg.id] || 0;
+                    actions.push({
+                        text: `Sell All ${cfg.label}s (Have ${amount} | +${amount * cfg.price}g)`,
+                        disabled: amount <= 0,
+                        handler: () => sellItem('other', cfg.id, cfg.price)
+                    });
+                });
             } else if (item.id === 'coop') {
                 actions.push({
                     text: `Buy Chicken (120g | Have ${STATE.chickens}/4)`,
@@ -1117,48 +1088,12 @@
                         notifySuccess();
                     }
                 });
-            } else if (item.id === 'kitchen') {
-                actions.push({
-                    text: "Bake Crusty Bread (Uses 2 Wheat)",
-                    disabled: STATE.crops.wheat < 2,
-                    handler: () => { STATE.crops.wheat -= 2; STATE.other.bread++; notifySuccess(); }
-                });
-                actions.push({
-                    text: "Bake Strawberry Pie (Uses 2 Strawberry, 1 Egg)",
-                    disabled: STATE.crops.strawberry < 2 || STATE.other.egg < 1,
-                    handler: () => { STATE.crops.strawberry -= 2; STATE.other.egg -= 1; STATE.other.pie++; STATE.milestones.masterChef = true; notifySuccess(); }
-                });
-                actions.push({
-                    text: "Squeeze Starfruit Juice (Uses 1 Starfruit)",
-                    disabled: STATE.crops.starfruit < 1,
-                    handler: () => { STATE.crops.starfruit -= 1; STATE.other.juice++; notifySuccess(); }
-                });
-                actions.push({
-                    text: "Churn Cheese (Uses 1 Milk)",
-                    disabled: STATE.other.milk < 1,
-                    handler: () => { STATE.other.milk -= 1; STATE.other.cheese++; notifySuccess(); }
-                });
-                actions.push({
-                    text: "Bake Cornbread (Uses 1 Corn, 1 Egg)",
-                    disabled: STATE.crops.corn < 1 || STATE.other.egg < 1,
-                    handler: () => { STATE.crops.corn -= 1; STATE.other.egg -= 1; STATE.other.cornbread++; notifySuccess(); }
-                });
-                actions.push({
-                    text: "Simmer Blueberry Jam (Uses 2 Blueberries)",
-                    disabled: STATE.crops.blueberry < 2,
-                    handler: () => { STATE.crops.blueberry -= 2; STATE.other.jam++; notifySuccess(); }
-                });
-                actions.push({
-                    text: "Cook Pumpkin Soup (Uses 1 Pumpkin, 1 Milk)",
-                    disabled: STATE.crops.pumpkin < 1 || STATE.other.milk < 1,
-                    handler: () => { STATE.crops.pumpkin -= 1; STATE.other.milk -= 1; STATE.other.soup++; notifySuccess(); }
-                });
             } else if (item.id === 'farmhouse') {
                 if (STATE.viewingMilestones) {
                     actions.push({ text: `🌾 First Harvest: ${STATE.milestones.firstHarvest ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
                     actions.push({ text: `💰 Tycoon (1k gold balance): ${STATE.milestones.tycoon ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
                     actions.push({ text: `🐮 Animal Lover (4 livestock): ${STATE.milestones.animalLover ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
-                    actions.push({ text: `🥧 Master Chef (Strawberry Pie): ${STATE.milestones.masterChef ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
+                    actions.push({ text: `📦 Master Shipper (Use Shipping Bin): ${STATE.milestones.masterShipper ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
                     actions.push({ text: `✨ Star Planter (Starfruit): ${STATE.milestones.starPlanter ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
                     actions.push({
                         text: "Back",
@@ -1212,6 +1147,7 @@
             STATE.gold += amount * price;
             if (category === 'crops') STATE.crops[type] = 0;
             else STATE.other[type] = 0;
+            STATE.milestones.masterShipper = true; // Complete Milestone using Bin
             notifySuccess();
         }
 
@@ -1291,15 +1227,16 @@
         }
 
         // ==========================================================================
-        // Overnight Calendar Progression
+        // Seamless Automated Overnight Calculations (No Popups)
         // ==========================================================================
         function startNextDay() {
             STATE.day++;
             STATE.energy = STATE.maxEnergy;
-            
-            // Close active menus
+            STATE.dayTimer = STATE.dayDuration; // Reset to exactly 50 seconds
+
+            // Auto close sub menus
             if (STATE.currentScreen === 'detail') {
-                DOM_CACHE.detail.classList.remove('visible');
+                closeDetailView();
             }
 
             // Advance Crops growth
@@ -1339,46 +1276,21 @@
             
             saveGameState(); // Auto-save on day transition
             
-            STATE.currentScreen = 'night';
-            const nightSummary = document.getElementById('night-summary');
-            let log = `Day ${STATE.day - 1} ended safely.<br><br>`;
-            if (cropsGrown > 0) log += `🌱 ${cropsGrown} plots grew closer to harvest.<br>`;
-            if (eggsLaid > 0) log += `🥚 Your hens laid ${eggsLaid} egg(s).<br>`;
-            if (milkProduced > 0) log += `🥛 Your cows produced ${milkProduced} bucket(s) of milk.<br>`;
-            if ((STATE.chickens + STATE.cows > 0) && !STATE.animalsFed) log += `🐔 Your livestock went hungry! (Remember to buy feed)<br>`;
-            log += `<br>Energy fully restored.`;
+            // Non-intrusive status report banner in the header description
+            let summaryMsg = `☀️ Day ${STATE.day} started! `;
+            const eventsText = [];
+            if (cropsGrown > 0) eventsText.push(`🌱 ${cropsGrown} plots grew`);
+            if (eggsLaid > 0) eventsText.push(`🥚 ${eggsLaid} eggs laid`);
+            if (milkProduced > 0) eventsText.push(`🥛 ${milkProduced} milk produced`);
+            if ((STATE.chickens + STATE.cows > 0) && !STATE.animalsFed) eventsText.push(`🐔 Animals hungry`);
             
-            nightSummary.innerHTML = log;
-            document.getElementById('night-overlay').classList.add('visible');
-            
-            const wakeBtn = document.getElementById('night-continue-btn');
-            wakeBtn.classList.add('is-focused');
-            
-            // Set up automatic wake up timer
-            nightSecondsLeft = 5;
-            wakeBtn.innerText = `Wake Up (Auto in ${nightSecondsLeft}s)`;
-            
-            if (nightAutoWakeTimer) clearInterval(nightAutoWakeTimer);
-            nightAutoWakeTimer = setInterval(() => {
-                nightSecondsLeft--;
-                if (nightSecondsLeft <= 0) {
-                    wakeUp();
-                } else {
-                    wakeBtn.innerText = `Wake Up (Auto in ${nightSecondsLeft}s)`;
-                }
-            }, 1000);
-        }
-
-        function wakeUp() {
-            if (nightAutoWakeTimer) {
-                clearInterval(nightAutoWakeTimer);
-                nightAutoWakeTimer = null;
+            if (eventsText.length > 0) {
+                summaryMsg += eventsText.join(" | ");
+            } else {
+                summaryMsg += "Energy fully restored!";
             }
-            document.getElementById('night-overlay').classList.remove('visible');
-            STATE.currentScreen = 'grid';
-            STATE.dayTimer = STATE.dayDuration; // Reset day timer
-            updateHUD();
-            closeDetailView();
+
+            showDayNotificationBanner(summaryMsg);
         }
 
         // ==========================================================================
@@ -1400,16 +1312,12 @@
                 updateFocus(false);
             } else if (STATE.currentScreen === 'detail') {
                 executeDetailAction();
-            } else if (STATE.currentScreen === 'night') {
-                wakeUp();
             }
         }
 
         function handleSystemBack() {
             if (STATE.currentScreen === 'detail') {
                 closeDetailView();
-            } else if (STATE.currentScreen === 'night') {
-                wakeUp();
             } else {
                 window.parent.postMessage({ type: 'exitApp' }, '*');
             }
@@ -1569,21 +1477,16 @@
         }
 
         // ==========================================================================
-        // Automated Day Progression Interval Loop
+        // Automated Day Progression Interval Loop (Locked at exactly 50s)
         // ==========================================================================
         setInterval(() => {
-            if (STATE.currentScreen !== 'night') {
-                STATE.dayTimer--;
-                if (STATE.dayTimer <= 0) {
-                    STATE.dayTimer = STATE.dayDuration;
-                    startNextDay();
-                }
-                updateHUD();
+            STATE.dayTimer--;
+            if (STATE.dayTimer <= 0) {
+                STATE.dayTimer = STATE.dayDuration;
+                startNextDay();
             }
+            updateHUD();
         }, 1000);
-
-        // Bind clicking/touching the sleep continue button
-        document.getElementById('night-continue-btn').addEventListener('click', wakeUp);
 
         window.onload = initApp;
     </script>
