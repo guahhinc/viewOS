@@ -13,13 +13,13 @@
             --text-color: #ffffff;
             --secondary-text: #a0b0a5; /* Slate-green gray */
             
-            --card-width: 230px;
-            --card-height: calc(var(--card-width) * 0.625); /* 16:10 aspect ratio */
+            /* Symmetrical compact squares */
+            --card-width: 160px;
+            --card-height: 160px; 
             --border-radius: 12px;
         }
 
         * {
-            /* Standard system-ui typography stack replaces Inter Tight */
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             font-weight: 300 !important;
             letter-spacing: -0.02em !important;
@@ -38,14 +38,15 @@
             height: 100vh;
             background-color: var(--bg-color);
             color: var(--text-color);
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto; /* Enable standard vertical page scroll when needed */
         }
 
         #app-root {
             position: relative;
             width: 100%; 
             height: 100%;
-            padding: 30px 4vw 30px 4vw;
+            padding: 40px 4vw 40px 4vw;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -55,7 +56,7 @@
         #app-layout {
             display: flex;
             flex-direction: row;
-            gap: 30px;
+            gap: 35px;
             justify-content: center;
             align-items: flex-start;
             width: 100%;
@@ -72,21 +73,21 @@
 
         #app-header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         
         #app-header h1 { 
-            font-size: 3rem; 
+            font-size: 3.2rem; 
             font-weight: 400 !important; 
             margin-bottom: 6px; 
             color: #d1ffc4;
-            /* Glowing shadows completely removed */
         }
         
         #app-header p { 
-            font-size: 1.1rem; 
+            font-size: 1.15rem; 
             color: var(--secondary-text); 
             margin-bottom: 15px; 
+            transition: color 0.25s ease;
         }
 
         /* Flat, non-glowing HUD Header block */
@@ -98,7 +99,7 @@
             background: rgba(255, 255, 255, 0.03);
             border: 1.5px solid rgba(255, 255, 255, 0.08);
             border-radius: 14px;
-            padding: 10px 25px;
+            padding: 12px 28px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             margin: 0 auto;
         }
@@ -106,17 +107,17 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-width: 80px;
+            min-width: 85px;
         }
         .hud-label {
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             color: var(--secondary-text);
             text-transform: uppercase;
             letter-spacing: 0.05em;
             margin-bottom: 2px;
         }
         .hud-val {
-            font-size: 1.25rem;
+            font-size: 1.35rem;
             font-weight: 400 !important;
             color: #ffffff;
         }
@@ -162,9 +163,9 @@
         }
 
         .card-title {
-            font-size: 1.15rem;
+            font-size: 1rem;
             color: var(--secondary-text); 
-            margin-top: 10px;
+            margin-top: 8px;
             text-align: center; 
             white-space: nowrap; 
             overflow: hidden;
@@ -175,20 +176,20 @@
 
         /* Persistent Inventory & Backpack Sidebar */
         #inventory-sidebar {
-            width: 320px;
+            width: 330px;
             background: rgba(255, 255, 255, 0.02);
             border: 1.5px solid rgba(255, 255, 255, 0.06);
             border-radius: var(--border-radius);
-            padding: 18px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 16px;
             align-self: flex-start;
             margin-top: 10px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         .sidebar-title {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             font-weight: 400 !important;
             color: #d1ffc4;
             border-bottom: 1.5px solid rgba(255, 255, 255, 0.08);
@@ -403,7 +404,7 @@
     <div id="app-root">
         <div id="app-layout">
             
-            <!-- Left Side main grid column -->
+            <!-- Left Column Grid Area -->
             <div id="main-column">
                 <header id="app-header">
                     <h1>Cropwood</h1>
@@ -419,7 +420,7 @@
                 <main id="content-grid"></main>
             </div>
 
-            <!-- Right Side persistent visual backpack -->
+            <!-- Right Column Sidebar Portfolio -->
             <aside id="inventory-sidebar">
                 <h3 class="sidebar-title">Backpack & Tools</h3>
                 
@@ -456,7 +457,7 @@
         <div id="detail-actions"></div>
     </div>
 
-    <!-- Sleep summary -->
+    <!-- Sleep Summary -->
     <div id="night-overlay">
         <div id="night-text">Zzz...</div>
         <div id="night-summary"></div>
@@ -465,7 +466,7 @@
 
     <script>
         // ==========================================================================
-        // Game State Config and Crop database
+        // Game State Config & Crop Database
         // ==========================================================================
         const CROPS_DB = {
             wheat: { name: 'Wheat', seedCost: 10, cropSell: 25, maxAge: 2, emoji: '🌾', regrows: false },
@@ -502,7 +503,7 @@
         ];
 
         const appItems = [
-            // Row 1 & 2: Land Plots (Indices 0 - 7)
+            // Row 1, 2, & 3: Land Plots (12 total squares)
             { id: "plot-0", title: "Plot 1", type: "plot", plotIndex: 0 },
             { id: "plot-1", title: "Plot 2", type: "plot", plotIndex: 1 },
             { id: "plot-2", title: "Plot 3", type: "plot", plotIndex: 2 },
@@ -511,7 +512,11 @@
             { id: "plot-5", title: "Plot 6", type: "plot", plotIndex: 5 },
             { id: "plot-6", title: "Plot 7", type: "plot", plotIndex: 6 },
             { id: "plot-7", title: "Plot 8", type: "plot", plotIndex: 7 },
-            // Row 3: Farm Hub Facilities (Indices 8 - 11)
+            { id: "plot-8", title: "Plot 9", type: "plot", plotIndex: 8 },
+            { id: "plot-9", title: "Plot 10", type: "plot", plotIndex: 9 },
+            { id: "plot-10", title: "Plot 11", type: "plot", plotIndex: 10 },
+            { id: "plot-11", title: "Plot 12", type: "plot", plotIndex: 11 },
+            // Row 4: Farm Hub Facilities
             { id: "shop", title: "Seed Shop", type: "facility" },
             { id: "coop", title: "Barn & Coop", type: "facility" },
             { id: "kitchen", title: "Cooking & Kitchen", type: "facility" },
@@ -543,17 +548,21 @@
                 { status: 'soil', crop: null },
                 { status: 'soil', crop: null },
                 { status: 'soil', crop: null },
+                { status: 'soil', crop: null },
+                { status: 'soil', crop: null },
+                { status: 'soil', crop: null },
+                { status: 'soil', crop: null },
                 { status: 'soil', crop: null }
             ],
             
-            // Barn & Coop
+            // Livestock
             chickens: 0,
             cows: 0,
             animalsFed: false,
             eggsInCoop: 0,
             milkInBarn: 0,
             
-            // Facility Tool Levels
+            // Tool Upgrades
             waterCanLevel: 1, 
             hoeLevel: 1,      
             
@@ -581,6 +590,54 @@
         function getTillingCost() { return [15, 8, 2][STATE.hoeLevel - 1]; }
         function getWateringCost() { return [5, 3, 1][STATE.waterCanLevel - 1]; }
         function getCompletedMilestones() { return Object.values(STATE.milestones).filter(Boolean).length; }
+
+        // ==========================================================================
+        // Persistence Engine (Browser Storage)
+        // ==========================================================================
+        function saveGameState() {
+            localStorage.setItem('cropwood_save_v2', JSON.stringify({
+                gold: STATE.gold,
+                day: STATE.day,
+                energy: STATE.energy,
+                maxEnergy: STATE.maxEnergy,
+                seeds: STATE.seeds,
+                crops: STATE.crops,
+                other: STATE.other,
+                plots: STATE.plots,
+                chickens: STATE.chickens,
+                cows: STATE.cows,
+                animalsFed: STATE.animalsFed,
+                eggsInCoop: STATE.eggsInCoop,
+                milkInBarn: STATE.milkInBarn,
+                waterCanLevel: STATE.waterCanLevel,
+                hoeLevel: STATE.hoeLevel,
+                milestones: STATE.milestones
+            }));
+        }
+
+        function loadGameState() {
+            const saved = localStorage.getItem('cropwood_save_v2');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    for (const key in data) {
+                        if (key !== 'plots') {
+                            STATE[key] = data[key];
+                        }
+                    }
+                    // Safely reconstruct plot data sizes to prevent mismatch error crashes
+                    if (data.plots && Array.isArray(data.plots)) {
+                        for (let i = 0; i < STATE.plots.length; i++) {
+                            if (data.plots[i]) {
+                                STATE.plots[i] = data.plots[i];
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error("Failed to parse local storage profile state", e);
+                }
+            }
+        }
 
         // ==========================================================================
         // Physics Engine Implementation
@@ -624,6 +681,8 @@
         // Application Lifecycle Initializer
         // ==========================================================================
         function initApp() {
+            loadGameState(); // Load state before constructing DOM elements
+
             DOM_CACHE.grid.innerHTML = '';
             cachedElements = [];
             springElements = [];
@@ -698,6 +757,9 @@
             if (target && target.container && target.icon) {
                 target.container.classList.add('is-focused');
                 if (target.icon !== target.container) target.icon.classList.add('is-focused');
+                
+                // Automatically scroll layout window for visual tracking of grid rows
+                target.container.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
             }
         }
 
@@ -731,7 +793,7 @@
                     bg = 'linear-gradient(135deg, #1b2636, #0c121b)';
                     label = `Plot ${item.plotIndex + 1}: Wet Soil`;
                     graphic = `<div style="font-size: 2.8rem; margin-top: 15px;">🟫</div>`;
-                    badges += `<span style="position:absolute; top:10px; right:10px; font-size:0.85rem; background:rgba(0,150,255,0.4); border:1px solid rgba(0,200,255,0.6); padding:2px 8px; border-radius:12px; backdrop-filter:blur(4px); line-height:1; z-index:10;">💧 Wet</span>`;
+                    badges += `<span style="position:absolute; top:6px; right:6px; font-size:0.75rem; background:rgba(0,150,255,0.4); border:1px solid rgba(0,200,255,0.6); padding:2px 8px; border-radius:12px; backdrop-filter:blur(4px); line-height:1; z-index:10; font-weight:400 !important;">💧 Wet</span>`;
                 }
                 
                 if (plot.crop) {
@@ -747,7 +809,7 @@
                     }
                     
                     if (isReady) {
-                        badges += `<span style="position:absolute; bottom:10px; right:10px; font-size:0.8rem; font-weight:bold; background:rgba(255,200,0,0.45); border:1px solid rgba(255,230,0,0.6); padding:3px 8px; border-radius:12px; backdrop-filter:blur(4px); color:#fff; line-height:1; z-index:10; animation: bounce 1s infinite alternate;">✨ HARVEST</span>`;
+                        badges += `<span style="position:absolute; bottom:6px; right:6px; font-size:0.7rem; font-weight:bold; background:rgba(255,200,0,0.45); border:1px solid rgba(255,230,0,0.6); padding:3px 8px; border-radius:12px; backdrop-filter:blur(4px); color:#fff; line-height:1; z-index:10; animation: bounce 1s infinite alternate; font-weight:400 !important;">✨ HARVEST</span>`;
                     }
                     
                     graphic = `<div style="font-size: 3.2rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));">${cropEmoji}</div>`;
@@ -770,7 +832,7 @@
                 } else if (item.id === 'coop') {
                     bg = 'linear-gradient(135deg, #381a1a, #1a0c0c)';
                     graphic = '🐔';
-                    badges += `<span style="position:absolute; top:10px; right:10px; font-size:0.85rem; background:rgba(255,100,100,0.25); border:1px solid rgba(255,100,100,0.4); padding:2px 8px; border-radius:12px; backdrop-filter:blur(4px); line-height:1; z-index:10;">🐔${STATE.chickens} 🐮${STATE.cows}</span>`;
+                    badges += `<span style="position:absolute; top:6px; right:6px; font-size:0.75rem; background:rgba(255,100,100,0.25); border:1px solid rgba(255,100,100,0.4); padding:2px 8px; border-radius:12px; backdrop-filter:blur(4px); line-height:1; z-index:10;">🐔${STATE.chickens} 🐮${STATE.cows}</span>`;
                 } else if (item.id === 'kitchen') {
                     bg = 'linear-gradient(135deg, #132b24, #081410)';
                     graphic = '🍳';
@@ -778,7 +840,7 @@
                     bg = 'linear-gradient(135deg, #2a1b3d, #120b1c)';
                     graphic = '🏡';
                     if (STATE.energy < STATE.maxEnergy * 0.3) {
-                        badges += `<span style="position:absolute; top:10px; right:10px; font-size:0.85rem; background:rgba(255,150,0,0.3); border:1px solid rgba(255,150,0,0.5); padding:2px 8px; border-radius:12px; backdrop-filter:blur(4px); line-height:1; z-index:10; animation: blink 1s infinite alternate;">⚠️ Tired</span>`;
+                        badges += `<span style="position:absolute; top:6px; right:6px; font-size:0.75rem; background:rgba(255,150,0,0.3); border:1px solid rgba(255,150,0,0.5); padding:2px 8px; border-radius:12px; backdrop-filter:blur(4px); line-height:1; z-index:10; animation: blink 1s infinite alternate;">⚠️ Tired</span>`;
                     }
                 }
                 
@@ -839,6 +901,79 @@
             document.getElementById('hud-energy').innerText = STATE.energy + '/' + STATE.maxEnergy;
         }
 
+        // Action indicator feedback text
+        function showActionDeniedFeedback(message) {
+            const headerP = document.querySelector('#app-header p');
+            const originalText = "Cozy modular 2D farming estate. Navigate using Arrow Keys/D-pad, Select with Enter/A.";
+            headerP.innerText = `⚠️ ${message}`;
+            headerP.style.color = '#ff6b6b';
+            setTimeout(() => {
+                headerP.innerText = originalText;
+                headerP.style.color = 'var(--secondary-text)';
+            }, 1800);
+        }
+
+        // ==========================================================================
+        // Quick Contextual Interactions for Grid Clicks
+        // ==========================================================================
+        function handlePlotGridInteraction(plotIndex) {
+            const plot = STATE.plots[plotIndex];
+            
+            // 1. Instantly clear overgrown trees/brush
+            if (plot.status === 'wild') {
+                const cost = getTillingCost();
+                if (STATE.energy >= cost) {
+                    STATE.energy -= cost;
+                    plot.status = 'soil';
+                    notifySuccess();
+                } else {
+                    showActionDeniedFeedback("Need more energy to till!");
+                }
+                return true; 
+            }
+            
+            // 2. Instantly gather mature crops on grid clicks
+            if (plot.crop && plot.crop.age >= plot.crop.maxAge) {
+                if (STATE.energy >= 5) {
+                    STATE.energy -= 5;
+                    const multiplier = CROPS_DB[plot.crop.id].multiplier || 1;
+                    STATE.crops[plot.crop.id] += multiplier;
+                    STATE.milestones.firstHarvest = true;
+                    if (plot.crop.id === 'starfruit') STATE.milestones.starPlanter = true;
+                    
+                    if (CROPS_DB[plot.crop.id].regrows) {
+                        plot.crop.age = CROPS_DB[plot.crop.id].regrowAge;
+                    } else {
+                        plot.crop = null;
+                    }
+                    notifySuccess();
+                } else {
+                    showActionDeniedFeedback("Need more energy to harvest!");
+                }
+                return true; 
+            }
+            
+            // 3. Instantly water dry crops growing on tilled land
+            if (plot.crop && plot.status === 'soil') {
+                const cost = getWateringCost();
+                if (STATE.energy >= cost) {
+                    STATE.energy -= cost;
+                    plot.status = 'watered';
+                    notifySuccess();
+                } else {
+                    showActionDeniedFeedback("Need more energy to water!");
+                }
+                return true; 
+            }
+            
+            // 4. Return false to invoke the dynamic Seed selector if empty
+            if (plot.crop === null && (plot.status === 'soil' || plot.status === 'watered')) {
+                return false; 
+            }
+            
+            return true; 
+        }
+
         // ==========================================================================
         // Sub-navigation & Game Action Lists
         // ==========================================================================
@@ -847,78 +982,27 @@
             
             if (item.type === 'plot') {
                 const plot = STATE.plots[item.plotIndex];
-                if (plot.status === 'wild') {
-                    actions.push({
-                        text: `Clear Overgrowth (${getTillingCost()} Energy)`,
-                        disabled: STATE.energy < getTillingCost(),
-                        handler: () => {
-                            STATE.energy -= getTillingCost();
-                            plot.status = 'soil';
-                            notifySuccess();
-                        }
-                    });
-                } else {
-                    if (plot.crop === null) {
-                        seedsConfig.forEach(cfg => {
-                            actions.push({
-                                text: `Plant ${cfg.label} Seed (Have ${STATE.seeds[cfg.id]})`,
-                                disabled: STATE.seeds[cfg.id] <= 0,
-                                handler: () => {
-                                    STATE.seeds[cfg.id]--;
-                                    plot.crop = { 
-                                        id: cfg.id, 
-                                        name: cfg.label, 
-                                        age: 0, 
-                                        maxAge: CROPS_DB[cfg.id].maxAge 
-                                    };
-                                    notifySuccess();
-                                }
-                            });
-                        });
-                    } else {
-                        const isReady = plot.crop.age >= plot.crop.maxAge;
-                        if (isReady) {
-                            actions.push({
-                                text: `Harvest ${plot.crop.name} (5 Energy)`,
-                                disabled: STATE.energy < 5,
-                                handler: () => {
-                                    STATE.energy -= 5;
-                                    const multiplier = CROPS_DB[plot.crop.id].multiplier || 1;
-                                    STATE.crops[plot.crop.id] += multiplier;
-                                    STATE.milestones.firstHarvest = true;
-                                    if (plot.crop.id === 'starfruit') STATE.milestones.starPlanter = true;
-                                    
-                                    if (CROPS_DB[plot.crop.id].regrows) {
-                                        plot.crop.age = CROPS_DB[plot.crop.id].regrowAge;
-                                    } else {
-                                        plot.crop = null;
-                                    }
-                                    notifySuccess();
-                                }
-                            });
-                        } else {
-                            actions.push({
-                                text: `Crop growing: ${plot.crop.name} (${plot.crop.maxAge - plot.crop.age} days left)`,
-                                disabled: true,
-                                handler: () => {}
-                            });
-                        }
-                    }
-                    
-                    if (plot.status === 'soil') {
+                if (plot.crop === null && (plot.status === 'soil' || plot.status === 'watered')) {
+                    // Quick seed planter listings
+                    seedsConfig.forEach(cfg => {
                         actions.push({
-                            text: `Water Plot (${getWateringCost()} Energy)`,
-                            disabled: STATE.energy < getWateringCost(),
+                            text: `Plant ${cfg.label} Seed (Have ${STATE.seeds[cfg.id]})`,
+                            disabled: STATE.seeds[cfg.id] <= 0,
                             handler: () => {
-                                STATE.energy -= getWateringCost();
-                                plot.status = 'watered';
+                                STATE.seeds[cfg.id]--;
+                                plot.crop = { 
+                                    id: cfg.id, 
+                                    name: cfg.label, 
+                                    age: 0, 
+                                    maxAge: CROPS_DB[cfg.id].maxAge 
+                                };
                                 notifySuccess();
+                                closeDetailView();
                             }
                         });
-                    }
+                    });
                 }
             } else if (item.id === 'shop') {
-                // Buy seeds options
                 seedsConfig.forEach(cfg => {
                     const price = CROPS_DB[cfg.id].seedCost;
                     actions.push({
@@ -928,30 +1012,27 @@
                     });
                 });
 
-                // Sell crops options
                 seedsConfig.forEach(cfg => {
                     const price = CROPS_DB[cfg.id].cropSell;
                     const amount = STATE.crops[cfg.id];
                     actions.push({
-                        text: `Sell ${cfg.label} (Have ${amount} | +${amount * price}g)`,
+                        text: `Sell All ${cfg.label} (Have ${amount} | +${amount * price}g)`,
                         disabled: amount <= 0,
                         handler: () => sellItem('crops', cfg.id, price)
                     });
                 });
 
-                // Sell artisan options
                 otherConfig.forEach(cfg => {
                     const prices = { egg: 40, milk: 90, bread: 65, cheese: 130, pie: 240, cornbread: 120, jam: 150, soup: 380, juice: 320 };
                     const price = prices[cfg.id] || 50;
                     const amount = STATE.other[cfg.id];
                     actions.push({
-                        text: `Sell ${cfg.label} (Have ${amount} | +${amount * price}g)`,
+                        text: `Sell All ${cfg.label} (Have ${amount} | +${amount * price}g)`,
                         disabled: amount <= 0,
                         handler: () => sellItem('other', cfg.id, price)
                     });
                 });
                 
-                // Upgrade tool options
                 if (STATE.waterCanLevel === 1) {
                     actions.push({ text: "Upgrade to Copper Watering Can (150g)", disabled: STATE.gold < 150, handler: () => { STATE.gold -= 150; STATE.waterCanLevel = 2; notifySuccess(); } });
                 } else if (STATE.waterCanLevel === 2) {
@@ -1053,7 +1134,7 @@
                     actions.push({ text: `🥧 Master Chef (Strawberry Pie): ${STATE.milestones.masterChef ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
                     actions.push({ text: `✨ Star Planter (Starfruit): ${STATE.milestones.starPlanter ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
                     actions.push({
-                        text: "Back to House Options",
+                        text: "Back",
                         disabled: false,
                         handler: () => {
                             STATE.viewingMilestones = false;
@@ -1074,12 +1155,22 @@
                             renderDetailMenu();
                         }
                     });
+                    actions.push({
+                        text: "Reset Game Data (Wipes Save)",
+                        disabled: false,
+                        handler: () => {
+                            if (confirm("Are you sure you want to delete all saved data? This will reload the page.")) {
+                                localStorage.removeItem('cropwood_save_v2');
+                                window.location.reload();
+                            }
+                        }
+                    });
                 }
             }
             
             if (!STATE.viewingMilestones) {
                 actions.push({
-                    text: "Return to Farm Grid",
+                    text: "Back",
                     disabled: false,
                     handler: () => closeDetailView()
                 });
@@ -1107,7 +1198,10 @@
             updateHUD();
             updateInventorySidebar();
             renderCardContent(STATE.focusedIndex);
-            renderDetailMenu();
+            saveGameState(); // Auto-save all state changes to local storage
+            if (STATE.currentScreen === 'detail') {
+                renderDetailMenu();
+            }
         }
 
         // ==========================================================================
@@ -1139,7 +1233,7 @@
             const activeBtn = document.getElementById(`action-btn-${STATE.detailFocusedIndex}`);
             if (activeBtn) {
                 activeBtn.classList.add('is-focused');
-                // Ensure dynamic vertical scrolling for keyboard/gamepad navigate within the shop
+                // Ensure dynamic vertical scrolling for keyboard/gamepad navigation inside details overlay
                 activeBtn.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
             }
         }
@@ -1181,7 +1275,7 @@
             STATE.day++;
             STATE.energy = STATE.maxEnergy;
             
-            // Advance Crops age
+            // Advance Crops growth
             let cropsGrown = 0;
             STATE.plots.forEach((plot, index) => {
                 if (plot.crop) {
@@ -1195,7 +1289,7 @@
                 }
             });
             
-            // Collect Animal yields
+            // Animal production yields
             let eggsLaid = 0;
             let milkProduced = 0;
             if (STATE.chickens > 0 || STATE.cows > 0) {
@@ -1212,9 +1306,11 @@
             
             updateHUD();
             updateInventorySidebar();
-            for (let i = 0; i < 12; i++) {
+            for (let i = 0; i < 16; i++) {
                 renderCardContent(i);
             }
+            
+            saveGameState(); // Auto-save on day transition
             
             STATE.currentScreen = 'night';
             const nightSummary = document.getElementById('night-summary');
@@ -1244,6 +1340,14 @@
         // ==========================================================================
         function executeAction() {
             if (STATE.currentScreen === 'grid') {
+                const item = appItems[STATE.focusedIndex];
+                
+                // Direct context click validation checks
+                if (item.type === 'plot') {
+                    const resolvedInstantly = handlePlotGridInteraction(item.plotIndex);
+                    if (resolvedInstantly) return; // Action solved instantly without sub-menus
+                }
+                
                 STATE.currentScreen = 'detail';
                 DOM_CACHE.detail.classList.add('visible');
                 renderDetailMenu();
@@ -1394,7 +1498,7 @@
                 }
             });
 
-            // Handle dynamic selection shifts and non-spring overlays
+            // Handle non-spring elements inside sub-menus
             if (activeTarget && activeTarget.icon && activeTarget.container && !activeTarget.icon.springs) {
                 const container = activeTarget.container;
                 const icon = activeTarget.icon;
