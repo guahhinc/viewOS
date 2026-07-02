@@ -1424,7 +1424,7 @@
                     STATE.mediaFocusArea = 'grid'; updateColumns(); renderTopBar(); renderMediaGrid('store');
                     updateFocus(true);
                 }).catch(() => {
-                    grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; font-size: 1.6rem; color: #ff3b30; padding-top: 150px;">Store connection failed.<br><span style="font-size: 1.2rem; color: var(--secondary-text); margin-top: 10px; display: block;">Verify View Cloud Apps Script deployment permissions are set to "Anyone".</span></div>`;
+                    grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; font-size: 1.6rem; color: #ff3b30; padding-top: 150px;">Store connection failed.<br><span style="font-size: 1.2rem; color: var(--secondary-text); margin-top: 10px; display: block;">Failed to reach View Cloud, check internet connection.</span></div>`;
                 });
             } else {
                 STATE.currentScreen = 'media'; STATE.mediaFocusedIndex = 0; STATE.topBarFocusedIndex = 0; STATE.currentTab = 'all'; STATE.selectedShow = null; 
