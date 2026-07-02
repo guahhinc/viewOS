@@ -80,10 +80,10 @@
             width: 100vw; height: 100vh;
             background-color: var(--bg-color);
             overflow: hidden;
-            transition: opacity 0.4s ease;
             opacity: 0;
             pointer-events: none;
             display: none;
+            transform: scale(1);
         }
 
         .screen-visible {
@@ -96,7 +96,11 @@
         #audio-player-screen.transition-forward-entry-start,
         #audio-player-screen.transition-backward-entry-start { display: flex !important; }
 
-        .screen-transitioning { transition: opacity 0.4s ease !important; pointer-events: none !important; }
+        /* Decoupled transition handler prevents layout snaps on initialization */
+        .screen-transitioning { 
+            transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1), transform 0.5s cubic-bezier(0.25, 1, 0.5, 1) !important; 
+            pointer-events: none !important; 
+        }
         .transition-forward-exit { opacity: 0 !important; }
         .transition-forward-entry-start { opacity: 0 !important; display: block !important; }
         .transition-backward-exit { opacity: 0 !important; }
@@ -225,7 +229,10 @@
             color: var(--text-color); background-color: #000000; flex-shrink: 0;
         }
 
-        .settings-value { color: var(--secondary-text); font-size: 1.3rem; display: flex; align-items: center; gap: 10px; }
+        .settings-value { 
+            color: var(--secondary-text); font-size: 1.3rem; display: flex; align-items: center; gap: 10px; 
+            transition: color 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
 
         .popup-button {
             width: fit-content; min-width: 200px; padding: 16px 35px; font-size: 1.6rem;
@@ -278,13 +285,14 @@
         }
 
         .top-bar-tab, .settings-item, .popup-button {
-            transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), color 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transition: background-color 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), color 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             box-shadow: none !important;
         }
 
         .top-bar-tab.is-focused, .settings-item.is-focused, .popup-button.is-focused { background-color: #ffffff !important; color: #000000 !important; }
         .settings-item.is-focused .settings-value { color: #333333 !important; }
         .tilted-focus { transition: none !important; }
+        .tilted-focus:not(.top-bar-tab):not(.settings-item):not(.popup-button) { transition: none !important; }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
@@ -300,7 +308,7 @@
 
     <div id="focus-ring" style="display: none;"></div>
     <div id="sleep-environment" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #000000; z-index: 95000; display: none; opacity: 0; transition: opacity 0.5s ease;"></div>
-    <div id="resume-toast" style="position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background-color: rgba(20, 20, 20, 0.75); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px 30px; border-radius: var(--border-radius); font-size: 1.5rem; color: white; z-index: 9000; display: none; opacity: 0; transition: opacity 0.3s ease;">Resumed Playback</div>
+    <div id="resume-toast" style="position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background-color: rgba(20, 20, 20, 0.75); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px 30px; border-radius: var(--border-radius); font-size: 1.5rem; color: white; z-index: 9000; display: none; opacity: 0; transition: opacity 0.3s ease;">System Notice</div>
 
     <div id="control-center">
         <div id="cc-vol-tile" class="cc-tile" style="display: flex; flex-direction: column; gap: 14px; padding: 20px; border-radius: var(--border-radius); background-color: rgba(255, 255, 255, 0.05); cursor: pointer;">
@@ -331,10 +339,6 @@
 
     <!-- Sandboxed Executable Frame for Dynamic Applications -->
     <div id="custom-app-environment" class="app-panel" style="padding: 0; margin: 0; width: 100vw; height: 100vh; z-index: 5000; background: #000;">
-        <div id="app-loading-overlay" style="position: absolute; inset: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; transition: opacity 0.4s ease; gap: 20px;">
-            <div style="width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-            <span id="app-loading-text" style="font-size: 1.6rem; color: var(--secondary-text);">Launching Application...</span>
-        </div>
         <iframe id="custom-app-iframe" allow="gamepad *; autoplay *; fullscreen *" style="width: 100%; height: 100%; border: none; overflow: hidden; background: #000;"></iframe>
     </div>
 
@@ -366,9 +370,10 @@
         </div>
     </div>
 
+    <!-- Enhanced System Popup with standardized preview icon -->
     <div id="system-popup">
         <div id="system-popup-content" style="background-color: transparent; border: none; padding: 40px; width: 90%; max-width: 600px; display: flex; flex-direction: column; align-items: center; text-align: center; transition: opacity 0.35s ease;">
-            <img id="popup-image" style="display: none; width: 200px; height: 200px; object-fit: cover; border-radius: 20%; margin-bottom: 25px; box-shadow: none !important;">
+            <img id="popup-image" style="display: none; width: 240px; height: auto; max-height: 160px; object-fit: contain; border-radius: var(--border-radius); margin-bottom: 25px; box-shadow: none !important;">
             <h2 id="popup-title" style="font-size: 2.8rem; margin-top: 0; margin-bottom: 15px; color: #ffffff;">Title</h2>
             <p id="popup-desc" style="font-size: 1.5rem; color: var(--secondary-text); margin-bottom: 40px; line-height: 1.5;"></p>
             <div id="popup-buttons-container" style="display: flex; flex-direction: column; width: 100%; gap: 15px; align-items: center;"></div>
@@ -382,7 +387,7 @@
 
         // View Cloud Configuration & Local Version Parameters
         const VIEW_CLOUD_URL = 'https://script.google.com/macros/s/AKfycbzR_BI7fcEi1B_ZGG0nlP7Xw6vVSJ9WCDnlrsBWN8jDKmUmUtfNTJz0uEzMZsoDFeOgEA/exec';
-        const CURRENT_OS_VERSION = 0.4;
+        const CURRENT_OS_VERSION = 0.5;
         const CLIENT_VERSION = 1;
 
         (function() {
@@ -523,6 +528,10 @@
         function setupSpringPhysics(el) {
             if (el.springs) return;
             el.springs = { scale: new Spring(1.0, 0.15, 0.70), posX: new Spring(0, 0.08, 0.70), posY: new Spring(0, 0.08, 0.70), focusState: new Spring(0, 0.12, 0.80) };
+            
+            el.style.position = 'relative';
+            el.style.transformStyle = 'preserve-3d';
+            
             let shine = document.createElement('div'); shine.className = 'card-shine'; 
             let glassBorder = document.createElement('div'); glassBorder.className = 'card-glass-border'; 
             el.shine = shine; el.glassBorder = glassBorder;
@@ -586,7 +595,6 @@
             if (window.viewOS_initialized) return;
             window.viewOS_initialized = true;
 
-            // Global frame execution listener for installed sandbox apps
             window.addEventListener('message', (e) => {
                 if (e.data && e.data.type === 'exitApp') {
                     closeCustomApp();
@@ -650,8 +658,13 @@
             grid.innerHTML = '';
             DOM_CACHE.apps = [];
 
-            // Prune dead Spring references to keep calculations smooth
-            springElements = springElements.filter(el => document.body.contains(el));
+            // Prunes elements that are neither in active DOM nor part of cached dynamic asset maps
+            springElements = springElements.filter(el => {
+                return document.body.contains(el) || 
+                       Array.from(DB_ITEM_ELEMENTS.values()).some(itemEl => itemEl.contains(el)) || 
+                       Array.from(TV_SHOW_FOLDER_ELEMENTS.values()).some(obj => obj.element.contains(el)) ||
+                       Array.from(STORE_ITEM_ELEMENTS.values()).some(itemEl => itemEl.contains(el));
+            });
 
             let installedApps = [];
             try { installedApps = JSON.parse(localStorage.getItem('viewOS_installed_apps') || '[]'); } catch(e) {}
@@ -848,11 +861,13 @@
                 imgEl.src = '';
             }
 
-            document.getElementById('popup-title').innerText = title; document.getElementById('popup-desc').innerText = desc;
+            document.getElementById('popup-title').innerHTML = title; 
+            document.getElementById('popup-desc').innerHTML = desc;
             const container = document.getElementById('popup-buttons-container'); container.innerHTML = ''; activePopupElements = [];
             buttons.forEach((btn, index) => {
                 const btnEl = document.createElement('button'); btnEl.className = 'popup-button'; btnEl.id = `popup-btn-${index}`; btnEl.innerText = btn.label;
                 container.appendChild(btnEl); activePopupElements.push({ container: btnEl, icon: btnEl });
+                setupSpringPhysics(btnEl);
             });
             const popup = document.getElementById('system-popup'); popup.style.display = 'flex';
             setTimeout(() => { popup.style.opacity = '1'; popup.classList.add('visible'); updateFocus(false); }, 50);
@@ -906,15 +921,15 @@
                     );
                 } else {
                     showSystemPopup(
-                        "System Up to Date",
-                        "Your viewOS device is currently running the latest firmware version.",
+                        "System Up to Date", 
+                        "Your viewOS device is currently running the latest firmware version.", 
                         [{ label: 'OK', action: () => {} }]
                     );
                 }
             } catch(e) {
                 showSystemPopup(
-                    "Connection Error",
-                    "Could not reach View Cloud to perform update verification.",
+                    "Connection Error", 
+                    "Could not reach View Cloud to perform update verification.", 
                     [{ label: 'OK', action: () => {} }]
                 );
             }
@@ -1012,6 +1027,7 @@
                 const tabEl = document.createElement('div'); tabEl.className = 'top-bar-tab'; tabEl.id = `top-bar-tab-${index}`; tabEl.innerText = tab.label;
                 if (tab.id === STATE.currentTab) tabEl.classList.add('active');
                 topBar.appendChild(tabEl); activeTopBarElements.push({ container: tabEl, icon: tabEl });
+                setupSpringPhysics(tabEl);
             });
         }
 
@@ -1073,6 +1089,7 @@
                 let v = setting.type === 'info' ? setting.value : (setting.type === 'cycle' ? setting.labels[setting.currentIndex] : '');
                 el.innerHTML = `<span>${setting.name}</span><span class="settings-value">${v}</span>`;
                 list.appendChild(el); DOM_CACHE.settings.push({ container: el, icon: el });
+                setupSpringPhysics(el);
             });
         }
 
@@ -1110,6 +1127,13 @@
             else if (STATE.currentScreen === 'settings') wrapper = document.getElementById('settings-scroll-wrapper');
             if (!wrapper) return;
 
+            // Calculating vertical offsets using static layout boundaries to eliminate horizontally-triggered jitters
+            const container = target.container;
+            const containerTop = container.offsetTop;
+            const containerHeight = container.offsetHeight;
+
+            let translateY = Math.min(0, Math.max(-Math.max(0, wrapper.scrollHeight - window.innerHeight), (window.innerHeight / 2) - (containerTop + (containerHeight / 2))));
+            
             const rect = target.icon.getBoundingClientRect(); if (rect.width === 0 || rect.height === 0) return;
             const offset = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--focus-offset')), itemRadius = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--border-radius'));
             const wrapperRect = wrapper.getBoundingClientRect(), top = rect.top - wrapperRect.top, left = rect.left - wrapperRect.left;
@@ -1120,9 +1144,9 @@
                 ring.style.transform = `translate(${rect.left - offset}px, ${rect.top - offset}px)`; ring.style.borderRadius = `${itemRadius + offset}px`; return;
             }
 
-            let translateY = Math.min(0, Math.max(-Math.max(0, wrapper.scrollHeight - window.innerHeight), (window.innerHeight / 2) - (top + (rect.height / 2))));
             ring.style.width = `${rect.width + (offset * 2)}px`; ring.style.height = `${rect.height + (offset * 2)}px`;
             ring.style.transform = `translate(${left - offset}px, ${(top + translateY) - offset}px)`; ring.style.borderRadius = `${itemRadius + offset}px`;
+            
             wrapper.style.transform = `translateY(${translateY}px)`;
         }
 
@@ -1145,7 +1169,14 @@
             }
             
             if (target && target.icon && target.icon.springs) {
-                const s = target.icon.springs; s.scale.target = 1.15; s.focusState.target = 1.0;
+                const s = target.icon.springs;
+                let scaleTarget = 1.15;
+                if (target.icon.classList.contains('settings-item')) scaleTarget = 1.05;
+                else if (target.icon.classList.contains('top-bar-tab')) scaleTarget = 1.06;
+                else if (target.icon.classList.contains('popup-button')) scaleTarget = 1.08;
+                
+                s.scale.target = scaleTarget;
+                s.focusState.target = 1.0;
                 if (dx) s.posX.vel = dx * 28; if (dy) s.posY.vel = dy * 28; target.icon.style.zIndex = '50';
             }
             
@@ -1191,36 +1222,68 @@
             if (!toEl) return;
             STATE.isNavigating = true;
 
-            // Garbage collect inactive Spring instances to ensure loop iterations are fast and memory is clear
-            springElements = springElements.filter(el => document.body.contains(el));
-
-            document.querySelectorAll('.screen-transitioning').forEach(el => { el.classList.remove('screen-transitioning', 'transition-forward-exit', 'transition-backward-exit', 'transition-forward-entry-start', 'transition-backward-entry-start'); el.style.pointerEvents = ''; });
-            document.querySelectorAll('#home-screen, .app-panel, #audio-player-screen, #cinema-player').forEach(el => {
-                if (el !== fromEl && el !== toEl) { el.style.display = 'none'; el.classList.remove('screen-visible', 'screen-transitioning', 'transition-forward-exit', 'transition-backward-exit', 'transition-forward-entry-start', 'transition-backward-entry-start'); }
+            springElements = springElements.filter(el => {
+                return document.body.contains(el) || 
+                       Array.from(DB_ITEM_ELEMENTS.values()).some(itemEl => itemEl.contains(el)) || 
+                       Array.from(TV_SHOW_FOLDER_ELEMENTS.values()).some(obj => obj.element.contains(el)) ||
+                       Array.from(STORE_ITEM_ELEMENTS.values()).some(itemEl => itemEl.contains(el));
             });
 
             if (window.activeTransitionTimeout) { clearTimeout(window.activeTransitionTimeout); window.activeTransitionTimeout = null; }
-            const targetDisplay = (toEl.id === 'audio-player-screen') ? 'flex' : 'block'; toEl.style.display = targetDisplay;
+            const targetDisplay = (toEl.id === 'audio-player-screen') ? 'flex' : 'block';
 
-            if (!fromEl) { toEl.classList.add('screen-visible'); STATE.isNavigating = false; updateFocus(true); return; }
-
-            fromEl.style.pointerEvents = 'none'; toEl.style.pointerEvents = 'none';
-            fromEl.classList.add('screen-transitioning'); toEl.classList.add('screen-transitioning');
-
-            if (isForward) {
-                toEl.classList.remove('screen-visible'); toEl.classList.add('transition-forward-entry-start');
-                toEl.offsetHeight; 
-                fromEl.classList.add('transition-forward-exit'); toEl.classList.remove('transition-forward-entry-start'); toEl.classList.add('screen-visible');
-            } else {
-                toEl.classList.remove('screen-visible'); toEl.classList.add('transition-backward-entry-start');
-                toEl.offsetHeight; 
-                fromEl.classList.add('transition-backward-exit'); toEl.classList.remove('transition-backward-entry-start'); toEl.classList.add('screen-visible');
+            if (!fromEl) { 
+                toEl.style.transform = '';
+                toEl.style.opacity = '';
+                toEl.classList.add('screen-visible'); 
+                STATE.isNavigating = false; 
+                updateFocus(true); 
+                return; 
             }
 
+            fromEl.style.pointerEvents = 'none'; 
+            toEl.style.pointerEvents = 'none';
+
+            // Stage 1: Fade out the outgoing screen completely first over 200ms
+            fromEl.classList.add('screen-transitioning');
+            fromEl.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+            fromEl.style.opacity = '0';
+            fromEl.style.transform = isForward ? 'scale(1.4)' : 'scale(0.75)';
+
             window.activeTransitionTimeout = setTimeout(() => {
-                if (fromEl) { fromEl.style.display = 'none'; fromEl.classList.remove('screen-transitioning', 'transition-forward-exit', 'transition-backward-exit', 'screen-visible'); fromEl.style.pointerEvents = ''; }
-                toEl.classList.remove('screen-transitioning'); toEl.style.pointerEvents = ''; window.activeTransitionTimeout = null; STATE.isNavigating = false; updateFocus(false);
-            }, 400);
+                fromEl.style.display = 'none';
+                fromEl.classList.remove('screen-transitioning', 'screen-visible');
+                fromEl.style.transform = '';
+                fromEl.style.opacity = '';
+                fromEl.style.transition = '';
+                fromEl.style.pointerEvents = '';
+
+                // Stage 2: Scale up and fade in the target viewport screen over 400ms
+                toEl.style.display = targetDisplay;
+                toEl.style.opacity = '0';
+                toEl.style.transform = isForward ? 'scale(0.75)' : 'scale(1.4)';
+                toEl.offsetHeight; // force reflow
+
+                toEl.classList.add('screen-transitioning');
+                toEl.style.transition = 'opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
+                
+                toEl.style.opacity = '1';
+                toEl.style.transform = 'scale(1)';
+
+                window.activeTransitionTimeout = setTimeout(() => {
+                    toEl.classList.remove('screen-transitioning');
+                    toEl.classList.add('screen-visible');
+                    toEl.style.transform = '';
+                    toEl.style.opacity = '';
+                    toEl.style.transition = '';
+                    toEl.style.pointerEvents = '';
+                    
+                    window.activeTransitionTimeout = null;
+                    STATE.isNavigating = false;
+                    updateFocus(false);
+                }, 400);
+
+            }, 200);
         }
 
         function navigateInnerContent(wrapper, callback, isForward = true) {
@@ -1230,6 +1293,109 @@
                 callback(); wrapper.style.transition = 'none'; wrapper.offsetHeight; wrapper.style.transition = 'opacity 0.4s ease'; wrapper.style.opacity = '1';
                 setTimeout(() => { STATE.isNavigating = false; updateFocus(false); }, 400);
             }, 400);
+        }
+
+        // Expanded clean-exit handler to address active playing resources when direct navigating home
+        function triggerHomeFromControlCenter() {
+            closeControlCenter();
+            
+            let fromScreen = null;
+            
+            // 1. Terminate Cinema player video context or Youtube references safely
+            if (STATE.currentScreen === 'player') {
+                fromScreen = document.getElementById('cinema-player');
+                const video = document.getElementById('cinema-video');
+                stopYTProgressTracking();
+                
+                let elapsed = 0, duration = 0;
+                if (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
+                    elapsed = ytPlayer.getCurrentTime();
+                    duration = ytPlayer.getDuration();
+                    const ytDiv = document.getElementById('cinema-youtube');
+                    if (ytDiv) ytDiv.classList.remove('visible');
+                    try { ytPlayer.pauseVideo(); ytPlayer.destroy(); ytPlayer = null; } catch(e) {}
+                    if (ytDiv) ytDiv.remove();
+                } else {
+                    elapsed = video.currentTime || 0;
+                    duration = video.duration || 0;
+                    try { video.pause(); } catch (e) {}
+                }
+                
+                try {
+                    if (elapsed < 20 || (duration && (duration - elapsed) < 180)) {
+                        localStorage.removeItem(`viewOS_resume_${STATE.activePlayingItemPath}`);
+                    } else if (duration) {
+                        localStorage.setItem(`viewOS_resume_${STATE.activePlayingItemPath}`, JSON.stringify({ current: elapsed, duration: duration, timestamp: Date.now() }));
+                    }
+                } catch(e) {}
+                
+                setTimeout(() => {
+                    video.style.display = 'block';
+                    try { video.src = ''; video.load(); } catch (e) {}
+                }, 500);
+            } 
+            // 2. Clear native Audio Player instances 
+            else if (STATE.currentScreen === 'audio_player') {
+                fromScreen = document.getElementById('audio-player-screen');
+                try {
+                    activeAudio.pause();
+                    activeAudio.currentTime = 0;
+                    activeAudio.src = '';
+                } catch(e) {}
+                fromScreen.classList.remove('visible');
+            } 
+            // 3. Clear residual app panels 
+            else if (STATE.currentScreen === 'media') {
+                fromScreen = document.getElementById('media-environment');
+                if (STATE.activeApp === 'music') {
+                    try {
+                        activeAudio.pause();
+                        activeAudio.currentTime = 0;
+                        activeAudio.src = '';
+                    } catch(e) {}
+                }
+            } else if (STATE.currentScreen === 'settings') {
+                fromScreen = document.getElementById('settings-environment');
+            } else if (STATE.currentScreen === 'custom_app') {
+                fromScreen = document.getElementById('custom-app-environment');
+                const iframe = document.getElementById('custom-app-iframe');
+                setTimeout(() => { iframe.srcdoc = ''; }, 500);
+            }
+            
+            if (STATE.currentScreen === 'home') {
+                return;
+            }
+
+            // 4. Reset and enforce hidden DOM states of all potential viewport overlays
+            const panels = ['media-environment', 'settings-environment', 'custom-app-environment', 'cinema-player', 'audio-player-screen'];
+            panels.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && el !== fromScreen) {
+                    el.classList.remove('screen-visible');
+                    el.style.display = 'none';
+                    el.style.transform = '';
+                    el.style.opacity = '';
+                    el.style.pointerEvents = '';
+                }
+            });
+
+            // 5. Instantly force-reset transforms of scroll wraps to home offsets
+            document.querySelectorAll('.scroll-wrapper').forEach(w => {
+                w.style.transform = 'translateY(0px)';
+            });
+
+            // 6. Navigate directly to Home
+            STATE.currentScreen = 'home';
+            STATE.activeApp = null;
+            updateColumns();
+
+            const toScreen = document.getElementById('home-screen');
+            if (fromScreen && fromScreen !== toScreen) {
+                navigateScreen(fromScreen, toScreen, false);
+            } else {
+                toScreen.classList.add('screen-visible');
+                updateFocus(true);
+            }
         }
 
         function openAppPanel(appId) {
@@ -1244,20 +1410,29 @@
                 
                 const grid = document.getElementById('media-grid');
                 grid.innerHTML = `
-                    <div id="store-loading" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 150px; gap: 20px;">
-                        <div style="width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-                        <span style="font-size: 1.6rem; color: var(--secondary-text);">Connecting to View Cloud...</span>
+                    <div id="store-loading" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 150px; gap: 25px;">
+                        <div style="width: 80px; height: 80px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #fff; border-radius: 50%; animation: spin 0.5s linear infinite;"></div>
+                        <span style="font-size: 1.6rem; color: var(--secondary-text);">Connecting to View Cloud</span>
                     </div>
                 `;
                 
                 navigateScreen(fromScreen, toScreen, true);
 
-                fetch(`${VIEW_CLOUD_URL}?action=getAppList`).then(r => r.json()).then(d => {
-                    storeAppsList = d.apps.map(a => ({ id: `store-${a.name}`, app: 'store', name: a.name, art: a.icon, version: a.version, supportedClients: a.supportedClients }));
+                fetch(`${VIEW_CLOUD_URL}?action=getAppList`).then(r => {
+                    if (!r.ok) throw new Error("HTTP error " + r.status);
+                    return r.json();
+                }).then(d => {
+                    const apps = (d && Array.isArray(d.apps)) ? d.apps : [];
+                    storeAppsList = apps.map((a, idx) => ({ id: `store-${a.name || idx}`, app: 'store', name: a.name || 'Unnamed App', art: a.icon || '', version: a.version || '1.0', supportedClients: a.supportedClients || [] }));
                     STORE_ITEM_ELEMENTS.clear();
                     storeAppsList.forEach(app => {
                         const itemEl = document.createElement('div'); itemEl.className = 'media-item';
-                        const card = document.createElement('div'); card.className = 'media-card'; card.style.backgroundImage = `url('${app.art}')`;
+                        const card = document.createElement('div'); card.className = 'media-card';
+                        if (app.art) {
+                            card.style.backgroundImage = `url('${app.art}')`;
+                        } else {
+                            card.style.backgroundColor = '#111111';
+                        }
                         const title = document.createElement('div'); title.className = 'media-title'; title.innerText = app.name;
                         itemEl.appendChild(card); itemEl.appendChild(title); setupSpringPhysics(card); STORE_ITEM_ELEMENTS.set(app, itemEl);
                     });
@@ -1265,7 +1440,7 @@
                     STATE.mediaFocusArea = 'grid'; updateColumns(); renderTopBar(); renderMediaGrid('store');
                     updateFocus(true);
                 }).catch(() => {
-                    grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; font-size: 1.6rem; color: #ff3b30; padding-top: 150px;">Store offline. Connection failed.</div>`;
+                    grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; font-size: 1.6rem; color: #ff3b30; padding-top: 150px;">Store connection failed.<br><span style="font-size: 1.2rem; color: var(--secondary-text); margin-top: 10px; display: block;">Verify View Cloud Apps Script deployment permissions are set to "Anyone".</span></div>`;
                 });
             } else {
                 STATE.currentScreen = 'media'; STATE.mediaFocusedIndex = 0; STATE.topBarFocusedIndex = 0; STATE.currentTab = 'all'; STATE.selectedShow = null; 
@@ -1289,12 +1464,6 @@
             const code = localStorage.getItem(`viewOS_appcode_${appName}`);
             if (!code) { triggerSystemToast("App data corrupted. Reinstall from store."); return; }
             const iframe = document.getElementById('custom-app-iframe');
-            const overlay = document.getElementById('app-loading-overlay');
-            const loadingText = document.getElementById('app-loading-text');
-
-            overlay.style.opacity = '1';
-            overlay.style.display = 'flex';
-            loadingText.innerText = `Launching ${appName}...`;
 
             iframe.srcdoc = code;
             STATE.currentScreen = 'custom_app';
@@ -1303,11 +1472,6 @@
             if (STATE.inPopup) closeSystemPopup();
             
             navigateScreen(fromEl, document.getElementById('custom-app-environment'), true);
-            
-            iframe.onload = () => {
-                overlay.style.opacity = '0';
-                setTimeout(() => { overlay.style.display = 'none'; }, 400);
-            };
 
             setTimeout(() => iframe.focus(), 500);
         }
@@ -1388,12 +1552,11 @@
         function handleKeydownRaw(e) {
             if (STATE.isInstallingUpdate || STATE.isInstallingApp) { e.preventDefault(); return; }
             if (STATE.currentScreen === 'custom_app') {
-                // Secure Esc/Backspace fallback to return to system dashboard if sandbox freezes
                 if (e.key === 'Escape' || e.key === 'Backspace') {
                     if (!window.customAppExitTimeout) {
                         window.customAppExitTimeout = setTimeout(() => {
                             closeCustomApp();
-                            triggerSystemToast("App Closed");
+                            triggerSystemToast("Fallback App Exit Triggered");
                         }, 2000);
                     }
                 }
@@ -1460,7 +1623,9 @@
             }
             buttons.push({ label: 'Cancel', action: () => {} });
             
-            showSystemPopup(app.name, `Version ${app.version}`, buttons, app.art);
+            const popupTitle = `${app.name}<span style="display: block; font-size: 1.3rem; color: var(--secondary-text); margin-top: 6px;">v${app.version}</span>`;
+            const popupDesc = "Manage the installation state and parameters of this application on viewOS.";
+            showSystemPopup(popupTitle, popupDesc, buttons, app.art);
         }
 
         function processNavigation(key) {
@@ -1505,7 +1670,7 @@
                     if (isYT && ytPlayer && typeof ytPlayer.getPlayerState === 'function') { if (ytPlayer.getPlayerState() === YT.PlayerState.PLAYING) ytPlayer.pauseVideo(); else ytPlayer.playVideo(); } else { if (cv && cv.paused) cv.play(); else if (cv) cv.pause(); }
                     triggerCinemaOSD();
                 }
-                else if (key === 'ArrowRight') performScrub('right', 'cinema'); else if (key === 'ArrowLeft') performScrub('left', 'cinema'); return;
+                else if (key === 'ArrowRight' && !isYT) performScrub('right', 'cinema'); else if (key === 'ArrowLeft' && !isYT) performScrub('left', 'cinema'); return;
             }
             if (STATE.currentScreen === 'audio_player') {
                 if (key === 'Enter') { if (activeAudio.paused) activeAudio.play(); else activeAudio.pause(); updatePlayStateIcon('audio'); }
@@ -1571,15 +1736,17 @@
                 const gp = gamepads[i]; if (!gp) continue;
                 
                 const back = gp.buttons[1]?.pressed, square = gp.buttons[2]?.pressed; 
-                if (back && square) { if (STATE.forceRebootStart === 0) STATE.forceRebootStart = Date.now(); else if (Date.now() - STATE.forceRebootStart >= 3000) { location.reload(); return; } } else { STATE.forceRebootStart = 0; }
+                if (back && square) { if (STATE.forceRebootStart === 0) { STATE.forceRebootStart = Date.now(); } else if (Date.now() - STATE.forceRebootStart >= 3000) { location.reload(); return; } } else { STATE.forceRebootStart = 0; }
 
                 if (STATE.currentScreen === 'custom_app') {
-                    // Bypass system keyboard/controller listening to avoid input overlapping on local frames
                     requestAnimationFrame(pollGamepads);
                     return;
                 }
 
-                const up = gp.buttons[12]?.pressed || gp.axes[1] < -0.5, down = gp.buttons[13]?.pressed || gp.axes[1] > 0.5, left = gp.buttons[14]?.pressed || gp.axes[0] < -0.5, right = gp.buttons[15]?.pressed || gp.axes[0] > 0.5;
+                const up = gp.buttons[12]?.pressed || gp.axes[1] < -0.5;
+                const down = gp.buttons[13]?.pressed || gp.axes[1] > 0.5;
+                const left = gp.buttons[14]?.pressed || gp.axes[0] < -0.5;
+                const right = gp.buttons[15]?.pressed || gp.axes[0] > 0.5;
                 const enter = gp.buttons[0]?.pressed;
 
                 if (STATE.inSleep) {
@@ -1642,12 +1809,14 @@
                     if (container && (container.classList.contains('app-container') || container.classList.contains('media-item'))) { container.style.transform = `translate3d(${containerTranslateX.toFixed(2)}px, ${containerTranslateY.toFixed(2)}px, 0)`; container.classList.add('tilted-focus'); }
 
                     const f = Math.max(0, s.focusState.val);
-                    if (el.glassBorder) el.glassBorder.style.opacity = (0.3 + 0.7 * f).toFixed(3);
+                    if (el.glassBorder) el.glassBorder.style.opacity = f.toFixed(3);
                     if (el.shine) {
                         el.shine.style.opacity = f.toFixed(3);
-                        if (isFocused) {
-                            const idleX = Math.sin(Date.now() * 0.001) * 3; const idleY = Math.cos(Date.now() * 0.001) * 3;
-                            const shineX = 30 + (s.posX.val * 2.2) + idleX; const shineY = 30 + (s.posY.val * 2.2) + idleY;
+                        if (f > 0.01) {
+                            const idleX = isCurrent ? Math.sin(Date.now() * 0.001) * 3 : 0;
+                            const idleY = isCurrent ? Math.cos(Date.now() * 0.001) * 3 : 0;
+                            const shineX = 30 + (s.posX.val * 2.2) + idleX; 
+                            const shineY = 30 + (s.posY.val * 2.2) + idleY;
                             el.shine.style.background = `radial-gradient(circle at ${shineX.toFixed(1)}% ${shineY.toFixed(1)}%, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0) 100%)`;
                         }
                     }
@@ -1656,7 +1825,7 @@
 
             if (activeTarget && activeTarget.icon && activeTarget.container && !activeTarget.icon.springs) {
                 const container = activeTarget.container; const icon = activeTarget.icon;
-                if (icon !== lastTargetElement) { STATE.focusScale = 1.0; lastTargetElement = icon; }
+                if (icon !== lastTargetElement) { focusScale = 1.0; lastTargetElement = icon; }
                 let targetScale = 1.12; if (icon.classList.contains('settings-item')) { targetScale = 1.06; }
                 STATE.focusScale += (targetScale - STATE.focusScale) * 0.12; const currentScale = STATE.focusScale;
 
@@ -1689,8 +1858,6 @@
             if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') ytPlayer.pauseVideo();
             if (activeAudio && !activeAudio.paused) activeAudio.pause(); closeControlCenter(); startSleep();
         }
-        
-        function triggerHomeFromControlCenter() { closeControlCenter(); if (STATE.currentScreen === 'player') closeCinemaPlayer(); if (STATE.currentScreen === 'audio_player') closeAudioPlayer(); if (STATE.currentScreen === 'media' || STATE.currentScreen === 'settings' || STATE.currentScreen === 'custom_app') closeAppPanel(); STATE.currentScreen = 'home'; updateColumns(); updateFocus(true); }
         
         function updateVolumeUI() {
             const v = settingsRegistry[1], c = v.options[v.currentIndex]; 
