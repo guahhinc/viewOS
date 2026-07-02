@@ -17,7 +17,7 @@
            ========================================================================== */
 
         html {
-            font-size: 17px; /* Increased baseline from 16px to scale all rem-based text sizes up by 1px globally */
+            font-size: 17px; 
         }
 
         :root {
@@ -65,7 +65,6 @@
             overflow: hidden;
         }
 
-        /* Focus visual indicator is now handled via scale/background-color. Keep DOM node invisible for scrolling math. */
         #focus-ring {
             position: fixed;
             top: 0; left: 0;
@@ -76,7 +75,6 @@
 
         .no-transition { transition: none !important; }
 
-        /* Unified Cinematic Transition Screens (Clean fade transitions, no zoom effects) */
         #home-screen, .app-panel, #audio-player-screen, #cinema-player {
             position: fixed; top: 0; left: 0;
             width: 100vw; height: 100vh;
@@ -88,49 +86,21 @@
             display: none;
         }
 
-        /* Active screen overlay styles */
         .screen-visible {
             display: block !important;
             opacity: 1 !important;
             pointer-events: auto !important;
         }
 
-        /* Flex support override for audio screen when active */
-        #audio-player-screen.screen-visible {
-            display: flex !important;
-        }
+        #audio-player-screen.screen-visible { display: flex !important; }
         #audio-player-screen.transition-forward-entry-start,
-        #audio-player-screen.transition-backward-entry-start {
-            display: flex !important;
-        }
+        #audio-player-screen.transition-backward-entry-start { display: flex !important; }
 
-        /* CSS Transition Helpers for Smooth Fades */
-        .screen-transitioning {
-            transition: opacity 0.4s ease !important;
-            pointer-events: none !important;
-        }
-
-        /* Outgoing (Going Forward) */
-        .transition-forward-exit {
-            opacity: 0 !important;
-        }
-
-        /* Incoming (Going Forward) */
-        .transition-forward-entry-start {
-            opacity: 0 !important;
-            display: block !important;
-        }
-
-        /* Outgoing (Going Back) */
-        .transition-backward-exit {
-            opacity: 0 !important;
-        }
-
-        /* Incoming (Going Back) */
-        .transition-backward-entry-start {
-            opacity: 0 !important;
-            display: block !important;
-        }
+        .screen-transitioning { transition: opacity 0.4s ease !important; pointer-events: none !important; }
+        .transition-forward-exit { opacity: 0 !important; }
+        .transition-forward-entry-start { opacity: 0 !important; display: block !important; }
+        .transition-backward-exit { opacity: 0 !important; }
+        .transition-backward-entry-start { opacity: 0 !important; display: block !important; }
 
         .scroll-wrapper {
             width: 100%; min-height: 100vh;
@@ -156,11 +126,7 @@
             padding: 50px 2vw 25px 2vw; width: 100vw; z-index: 1000;
         }
 
-        .top-bar-tab {
-            font-size: 1.5rem; color: var(--secondary-text);
-            padding: 10px 24px; border-radius: var(--border-radius);
-        }
-
+        .top-bar-tab { font-size: 1.5rem; color: var(--secondary-text); padding: 10px 24px; border-radius: var(--border-radius); }
         .top-bar-tab.active { color: #ffffff; }
 
         #app-grid {
@@ -187,13 +153,10 @@
             will-change: transform;
             transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
-        .app-container.tilted-focus, .media-item.tilted-focus {
-            transition: none !important;
-        }
+        .app-container.tilted-focus, .media-item.tilted-focus { transition: none !important; }
         
         .app-container { display: flex; flex-direction: column; align-items: center; }
         
-        /* Adjusted layout boundaries to prevent title card overlaps from expanded margins */
         .media-item {
             display: flex; flex-direction: column; align-items: center;
             width: 100%; height: calc(var(--app-height) + clamp(80px, 10vw, 130px)); flex-shrink: 0;
@@ -202,7 +165,6 @@
         .media-grid.square-grid .media-item { height: calc(var(--square-size) + clamp(80px, 10vw, 130px)); }
         .media-grid.portrait-grid .media-item { height: calc(var(--portrait-height) + clamp(80px, 10vw, 130px)); }
 
-        /* Spring-animated card layout container settings (Removed shadow behind icons to prevent glitches) */
         .app-icon, .media-card {
             background-color: #111111; border-radius: var(--border-radius);
             background-size: cover; background-position: center;
@@ -219,7 +181,6 @@
         .media-grid.square-grid .media-card { width: var(--square-size); height: var(--square-size); }
         .media-grid.portrait-grid .media-card { width: var(--portrait-width); height: var(--portrait-height); }
 
-        /* Spring Animation Glow and Border layers */
         .card-shine {
             position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 11;
             mix-blend-mode: screen; opacity: 0; will-change: opacity; overflow: hidden;
@@ -231,7 +192,6 @@
             transform: translate3d(0, 0, 1px);
         }
 
-        /* Titles pushed further downwards for breathing space */
         .app-name, .media-title {
             font-size: 1.5rem; color: #ffffff; margin-top: 38px; 
             text-align: center; white-space: nowrap; overflow: hidden;
@@ -246,7 +206,6 @@
         }
         .progress-indicator-fill { height: 100%; background-color: #ffffff; }
 
-        /* Premium Glassmorphic YouTube Duration Badge */
         .yt-duration-badge {
             position: absolute; bottom: 12px; right: 12px;
             background-color: rgba(0, 0, 0, 0.65); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
@@ -274,81 +233,39 @@
             border-radius: var(--border-radius); text-align: center; outline: none;
         }
 
-        /* Base styling for scrubbing and volume tracks (OSD elements) - Height upscaled for a cleaner seek interaction */
-        .volume-bar-container {
-            height: 12px;
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            overflow: hidden;
-            position: relative;
-        }
+        .volume-bar-container { height: 12px; background-color: rgba(255, 255, 255, 0.2); border-radius: 6px; overflow: hidden; position: relative; }
+        .volume-bar-fill { height: 100%; background-color: #ffffff; width: 0%; border-radius: 6px; }
 
-        .volume-bar-fill {
-            height: 100%;
-            background-color: #ffffff;
-            width: 0%;
-            border-radius: 6px;
-        }
-
-        /* Expanded Top-Right Glassmorphic Control Center [1] - Upscaled panel coordinates */
         #control-center {
             position: fixed; top: -450px; right: 30px; width: 380px;
             background-color: rgba(20, 20, 20, 0.7); backdrop-filter: blur(35px); -webkit-backdrop-filter: blur(35px);
             border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 18px;
             padding: 30px; z-index: 1000000; display: flex; flex-direction: column; gap: 24px;
             transition: top 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-            opacity: 0; pointer-events: none;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            opacity: 0; pointer-events: none; box-shadow: 0 20px 50px rgba(0,0,0,0.6);
         }
-        #control-center.visible {
-            top: 30px;
-            opacity: 1;
-            pointer-events: auto;
-        }
+        #control-center.visible { top: 30px; opacity: 1; pointer-events: auto; }
 
-        /* Interactive Control Center Tiles [2, 3] */
-        .cc-tile {
-            transition: background-color 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-                        transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-                        color 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-        .cc-tile-focused {
-            background-color: #ffffff !important;
-            color: #000000 !important;
-            transform: scale(1.05) !important;
-        }
-        .cc-tile-focused * {
-            color: #000000 !important;
-        }
-        .cc-tile-focused .volume-bar-fill {
-            background-color: #000000 !important;
-        }
-        .cc-tile-focused .volume-bar-container {
-            background-color: rgba(0, 0, 0, 0.15) !important;
-        }
+        .cc-tile { transition: background-color 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), color 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .cc-tile-focused { background-color: #ffffff !important; color: #000000 !important; transform: scale(1.05) !important; }
+        .cc-tile-focused * { color: #000000 !important; }
+        .cc-tile-focused .volume-bar-fill { background-color: #000000 !important; }
+        .cc-tile-focused .volume-bar-container { background-color: rgba(0, 0, 0, 0.15) !important; }
 
         #audio-player-screen { flex-direction: column; align-items: center; justify-content: center; padding-top: 0; }
         #audio-playing-art { width: 260px; height: 260px; }
-
         #cinema-video { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; object-fit: contain; }
-
-        #cinema-youtube {
-            position: absolute !important; top: 0; left: 0; width: 100% !important; height: 100% !important;
-            z-index: 1; pointer-events: none !important; opacity: 0; transition: opacity 0.5s ease;
-        }
+        #cinema-youtube { position: absolute !important; top: 0; left: 0; width: 100% !important; height: 100% !important; z-index: 1; pointer-events: none !important; opacity: 0; transition: opacity 0.5s ease; }
         #cinema-youtube.visible { opacity: 1 !important; }
 
-        /* Unified style to layout OSD structural containers securely */
         .cinema-osd {
-            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
-            width: 92%; 
+            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 92%; 
             background-color: rgba(20, 20, 20, 0.4); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--border-radius);
             padding: 25px 40px; display: flex; align-items: center; gap: 25px;
             transition: opacity 0.4s ease, bottom 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); opacity: 0; z-index: 10;
         }
         .cinema-osd.visible { opacity: 1; }
-        /* Force White color on text elements without disrupting the flexbox structural components */
         .cinema-osd * { color: #ffffff !important; }
         .cinema-icon-container { display: flex; align-items: center; justify-content: center; }
         #cinema-time, #audio-cinema-time { width: 180px; text-align: right; flex-shrink: 0; }
@@ -362,94 +279,33 @@
 
         #ai-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: transparent !important; /* Retain full underlying grid layout visibility */
-            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            background: transparent !important; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             z-index: 2147483647; display: none; flex-direction: column; justify-content: flex-end; align-items: center;
             opacity: 0; transition: opacity 0.4s ease; pointer-events: none;
         }
 
-        /* ==========================================================================
-           SELECTION & FOCUS STATE RESTRUCTURE (WHITE BOX BEHIND TEXT BUTTONS)
-           ========================================================================== */
-        
         .top-bar-tab, .settings-item, .popup-button {
-            transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-                        background-color 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-                        color 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), color 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             box-shadow: none !important;
         }
 
-        /* Text Buttons focused styles: Black text with white background container */
-        .top-bar-tab.is-focused {
-            background-color: #ffffff !important;
-            color: #000000 !important;
-        }
-        .settings-item.is-focused {
-            background-color: #ffffff !important;
-            color: #000000 !important;
-        }
-        .settings-item.is-focused .settings-value {
-            color: #333333 !important;
-        }
-        .popup-button.is-focused {
-            background-color: #ffffff !important;
-            color: #000000 !important;
-        }
+        .top-bar-tab.is-focused, .settings-item.is-focused, .popup-button.is-focused { background-color: #ffffff !important; color: #000000 !important; }
+        .settings-item.is-focused .settings-value { color: #333333 !important; }
 
-        /* Focus override styles for dynamic AI show suggestions list */
         .suggestion-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 12px 15px;
-            border-radius: var(--border-radius);
-            background: rgba(255, 255, 255, 0.04);
-            cursor: pointer;
-            transition: background-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
-            width: 100%;
-            scroll-margin: 10px;
+            display: flex; align-items: center; gap: 15px; padding: 12px 15px; border-radius: var(--border-radius);
+            background: rgba(255, 255, 255, 0.04); cursor: pointer; transition: background-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
+            width: 100%; scroll-margin: 10px;
         }
-        .suggestion-item.is-focused {
-            background-color: #ffffff !important;
-            color: #000000 !important;
-            transform: scale(1.03);
-        }
-        .suggestion-item.is-focused * {
-            color: #000000 !important;
-        }
+        .suggestion-item.is-focused { background-color: #ffffff !important; color: #000000 !important; transform: scale(1.03); }
+        .suggestion-item.is-focused * { color: #000000 !important; }
+        .tilted-focus { transition: none !important; }
 
-        /* Active Tilt state to bypass dynamic transition judder */
-        .tilted-focus {
-            transition: none !important;
-        }
+        @keyframes blobOne { 0% { transform: translate(0px, 0px) scale(1); } 33% { transform: translate(25px, -35px) scale(1.15); } 66% { transform: translate(-30px, 20px) scale(0.85); } 100% { transform: translate(0px, 0px) scale(1); } }
+        @keyframes blobTwo { 0% { transform: translate(0px, 0px) scale(1); } 25% { transform: translate(-35px, 25px) scale(0.8); } 50% { transform: translate(20px, -45px) scale(1.25); } 75% { transform: translate(30px, 15px) scale(0.9); } 100% { transform: translate(0px, 0px) scale(1); } }
+        @keyframes blobThree { 0% { transform: translate(0px, 0px) scale(1.1); } 50% { transform: translate(35px, 30px) scale(0.8); } 100% { transform: translate(0px, 0px) scale(1.1); } }
+        @keyframes blobFour { 0% { transform: translate(0px, 0px) scale(0.9); } 40% { transform: translate(-20px, -30px) scale(1.2); } 80% { transform: translate(25px, -15px) scale(0.85); } 100% { transform: translate(0px, 0px) scale(0.9); } }
 
-        /* Chaotic Flowing Blobs - non-linear spatial path variations */
-        @keyframes blobOne {
-            0% { transform: translate(0px, 0px) scale(1); }
-            33% { transform: translate(25px, -35px) scale(1.15); }
-            66% { transform: translate(-30px, 20px) scale(0.85); }
-            100% { transform: translate(0px, 0px) scale(1); }
-        }
-        @keyframes blobTwo {
-            0% { transform: translate(0px, 0px) scale(1); }
-            25% { transform: translate(-35px, 25px) scale(0.8); }
-            50% { transform: translate(20px, -45px) scale(1.25); }
-            75% { transform: translate(30px, 15px) scale(0.9); }
-            100% { transform: translate(0px, 0px) scale(1); }
-        }
-        @keyframes blobThree {
-            0% { transform: translate(0px, 0px) scale(1.1); }
-            50% { transform: translate(35px, 30px) scale(0.8); }
-            100% { transform: translate(0px, 0px) scale(1.1); }
-        }
-        @keyframes blobFour {
-            0% { transform: translate(0px, 0px) scale(0.9); }
-            40% { transform: translate(-20px, -30px) scale(1.2); }
-            80% { transform: translate(25px, -15px) scale(0.85); }
-            100% { transform: translate(0px, 0px) scale(0.9); }
-        }
-
-        /* Faster swirl rate for blobs while speaking */
         #siri-orb.is-talking .siri-blob:nth-child(1) { animation-duration: 2.2s !important; }
         #siri-orb.is-talking .siri-blob:nth-child(2) { animation-duration: 2.8s !important; }
         #siri-orb.is-talking .siri-blob:nth-child(3) { animation-duration: 2.4s !important; }
@@ -468,9 +324,7 @@
     <div id="sleep-environment" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #000000; z-index: 95000; display: none; opacity: 0; transition: opacity 0.5s ease;"></div>
     <div id="resume-toast" style="position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background-color: rgba(20, 20, 20, 0.75); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px 30px; border-radius: var(--border-radius); font-size: 1.5rem; color: white; z-index: 9000; display: none; opacity: 0; transition: opacity 0.3s ease;">Resumed Playback</div>
 
-    <!-- Redesigned Glassmorphic Control Center Overlay [1] - Upscaled internal items for prominent visual layout -->
     <div id="control-center">
-        <!-- Volume Row (Tile index 0) -->
         <div id="cc-vol-tile" class="cc-tile" style="display: flex; flex-direction: column; gap: 14px; padding: 20px; border-radius: var(--border-radius); background-color: rgba(255, 255, 255, 0.05); cursor: pointer;">
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                 <span class="cc-label" style="font-size: 1.6rem; color: #ffffff;">Volume</span>
@@ -480,16 +334,9 @@
                 <div class="volume-bar-fill" id="volume-fill" style="height: 100%; background: #ffffff; width: 50%;"></div>
             </div>
         </div>
-        <!-- Multi-button Row [1, 2] -->
         <div style="display: flex; gap: 20px; width: 100%;">
-            <!-- Sleep Button (Tile index 1) -->
-            <div id="cc-sleep-tile" class="cc-tile" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; border-radius: var(--border-radius); background-color: rgba(255, 255, 255, 0.05); font-size: 1.6rem; color: #ffffff; cursor: pointer; text-align: center;">
-                Sleep
-            </div>
-            <!-- Home Button (Tile index 2) -->
-            <div id="cc-home-tile" class="cc-tile" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; border-radius: var(--border-radius); background-color: rgba(255, 255, 255, 0.05); font-size: 1.6rem; color: #ffffff; cursor: pointer; text-align: center;">
-                Home
-            </div>
+            <div id="cc-sleep-tile" class="cc-tile" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; border-radius: var(--border-radius); background-color: rgba(255, 255, 255, 0.05); font-size: 1.6rem; color: #ffffff; cursor: pointer; text-align: center;">Sleep</div>
+            <div id="cc-home-tile" class="cc-tile" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; border-radius: var(--border-radius); background-color: rgba(255, 255, 255, 0.05); font-size: 1.6rem; color: #ffffff; cursor: pointer; text-align: center;">Home</div>
         </div>
     </div>
 
@@ -532,41 +379,32 @@
         </div>
     </div>
 
+    <!-- Enhanced System Popup with optional Image Support for Updates -->
     <div id="system-popup">
         <div id="system-popup-content" style="background-color: transparent; border: none; padding: 40px; width: 90%; max-width: 600px; display: flex; flex-direction: column; align-items: center; text-align: center; transition: opacity 0.35s ease;">
+            <img id="popup-image" style="display: none; width: 100%; max-height: 250px; object-fit: cover; border-radius: var(--border-radius); margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
             <h2 id="popup-title" style="font-size: 2.8rem; margin-top: 0; margin-bottom: 15px; color: #ffffff;">Title</h2>
             <p id="popup-desc" style="font-size: 1.5rem; color: var(--secondary-text); margin-bottom: 40px; line-height: 1.5;"></p>
             <div id="popup-buttons-container" style="display: flex; flex-direction: column; width: 100%; gap: 15px; align-items: center;"></div>
         </div>
     </div>
 
-    <!-- Redesigned overlay containing Assistant Glassmorphic HUD elements -->
     <div id="ai-overlay">
         <div id="ai-container" style="position: absolute; bottom: 40px; right: 40px; display: flex; flex-direction: column; align-items: flex-end; gap: 20px; pointer-events: auto;">
-            <!-- Glassy Text Results Bubble (Edge shine borders removed completely) -->
             <div id="ai-text-bubble" style="background: rgba(15, 15, 15, 0.55); backdrop-filter: blur(35px) saturate(1.7); -webkit-backdrop-filter: blur(35px) saturate(1.7); border-radius: 20px; padding: 22px 28px; width: 380px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); opacity: 0; transition: opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); max-height: 400px; overflow-y: auto; border: none !important;">
                 <div id="ai-text" style="font-size: 1.6rem; color: #ffffff; text-align: left; line-height: 1.4; font-weight: 300;">Listening...</div>
-                
-                <!-- Scrollable Shows Suggestions List Menu Layout -->
                 <div id="ai-suggestions-container" style="display: none; flex-direction: column; margin-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 15px; width: 100%;">
                     <div style="font-size: 1.15rem; color: var(--secondary-text); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 400;">Suggested Shows</div>
                     <div id="ai-suggestions-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 210px; overflow-y: auto; scrollbar-width: none; padding-right: 2px; width: 100%;"></div>
                 </div>
             </div>
-            <!-- Glassy Orb containing yellow, pink, purple, blue swirling blobs with reduced green intensity -->
             <div id="siri-orb" style="position: relative; width: 110px; height: 110px; border-radius: 50%; background: #000000; overflow: hidden; opacity: 0; transition: opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6); border: none !important;">
                 <div style="position: absolute; width: 100%; height: 100%; filter: blur(14px); mix-blend-mode: screen;">
-                    <!-- Purple Blob -->
                     <div class="siri-blob" style="position: absolute; width: 105px; height: 105px; background: #af52de; border-radius: 50%; top: 0px; left: 0px; opacity: 0.9; animation: blobOne 5.5s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;"></div>
-                    <!-- Pink Blob -->
                     <div class="siri-blob" style="position: absolute; width: 100px; height: 100px; background: #ff2d55; border-radius: 50%; bottom: 0px; right: 0px; opacity: 0.9; animation: blobTwo 7.2s cubic-bezier(0.33, 1, 0.68, 1) infinite;"></div>
-                    <!-- Blue Blob -->
                     <div class="siri-blob" style="position: absolute; width: 95px; height: 95px; background: #007aff; border-radius: 50%; top: -5px; right: 0px; opacity: 0.9; animation: blobThree 6.1s ease-in-out infinite;"></div>
-                    <!-- Dark Blue Blob -->
                     <div class="siri-blob" style="position: absolute; width: 90px; height: 90px; background: #001340; border-radius: 50%; bottom: -5px; left: 0px; opacity: 0.85; animation: blobFour 8.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;"></div>
-                    <!-- Yellow Blob -->
                     <div class="siri-blob" style="position: absolute; width: 85px; height: 85px; background: #ffcc00; border-radius: 50%; top: 10px; left: 10px; opacity: 0.85; animation: blobOne 6.5s ease-in-out infinite;"></div>
-                    <!-- Extremely dim Green Blob (Way less prominent) -->
                     <div class="siri-blob" style="position: absolute; width: 10px; height: 10px; background: #4cd964; border-radius: 50%; bottom: 35px; right: 35px; opacity: 0.05; animation: blobTwo 9.0s ease-in-out infinite;"></div>
                 </div>
             </div>
@@ -578,6 +416,10 @@
 
     <script>
         const db = window.contentRegistry || [];
+
+        // View Cloud Configuration
+        const VIEW_CLOUD_URL = 'https://script.google.com/macros/s/AKfycbwb9PmQmUVrEh4YtA0hIt1GbHM-EcC6QaUnV5jLGeNBFdyXAnM3NF5TnSk2lRoyi1Kblw/exec';
+        const CURRENT_OS_VERSION = 0.3;
 
         (function() {
             const tag = document.createElement('script');
@@ -649,7 +491,6 @@
             processVideoQueue();
         }
 
-        // Consolidated Engine for progress updates
         function updateOSDProgress(prefix, current, duration) {
             const progressFill = document.getElementById(`${prefix}-progress`);
             const timeDisplay = document.getElementById(prefix === 'audio' ? 'audio-cinema-time' : 'cinema-time');
@@ -657,7 +498,6 @@
             if (timeDisplay) timeDisplay.innerText = `${formatTime(current)} / ${formatTime(duration)}`;
         }
 
-        // Consolidated Engine for Play/Pause visual states
         function updatePlayStateIcon(prefix) {
             const iconContainer = document.getElementById(prefix === 'audio' ? 'audio-cinema-play-state' : 'cinema-play-state');
             if (!iconContainer) return;
@@ -681,18 +521,13 @@
             currentScreen: 'home', activeApp: null, activePlayingItemPath: null,
             selectedShow: null, savedShowIndex: 0, inControlCenter: false, inSleep: false, inAI: false, mediaLaunchedByAI: false,
             triangleHoldStart: 0, columns: 4, forceRebootStart: 0, inPopup: false, popupFocusedIndex: 0,
-            mediaFocusArea: 'grid', currentTab: 'all',
-            isNavigating: false, // Prevents overlapping animations destroying elements when going back too fast
+            mediaFocusArea: 'grid', currentTab: 'all', isNavigating: false,
+            isInstallingUpdate: false, // Update System State Lock
             
-            // Unified Scrubbing States
             lastSeekTime: 0, seekAcceleration: 10, scrubbingTime: null, seekCommitTimer: null,
             lastAudioSeekTime: 0, audioSeekAcceleration: 5, audioScrubbingTime: null, audioSeekCommitTimer: null,
 
-            // Joystick/Mouse micro-translation states
-            joyX: 0, joyY: 0,
-            focusScale: 1.0, // Smooth scaling tracker
-            aiFocusedSuggestionIndex: -1, // Focused AI suggestion list tracking index
-            ccFocusedIndex: 0 // Control Center focused index (0: Vol, 1: Sleep, 2: Home) [2]
+            joyX: 0, joyY: 0, focusScale: 1.0, aiFocusedSuggestionIndex: -1, ccFocusedIndex: 0 
         };
 
         const DB_ITEM_ELEMENTS = new Map();
@@ -705,49 +540,28 @@
         const springElements = [];
 
         function Spring(val, stiffness, damping) {
-            this.val = val; 
-            this.target = val; 
-            this.vel = 0;
-            this.stiffness = stiffness || 0.12; 
-            this.damping = damping || 0.78;
+            this.val = val; this.target = val; this.vel = 0;
+            this.stiffness = stiffness || 0.12; this.damping = damping || 0.78;
         }
         Spring.prototype.update = function() {
             if (Math.abs(this.target - this.val) < 0.001 && Math.abs(this.vel) < 0.001) {
-                this.val = this.target; 
-                this.vel = 0;
-                return false;
+                this.val = this.target; this.vel = 0; return false;
             }
             var force = (this.target - this.val) * this.stiffness;
-            this.vel = (this.vel + force) * this.damping;
-            this.val += this.vel;
+            this.vel = (this.vel + force) * this.damping; this.val += this.vel;
             return true;
         };
 
         function setupSpringPhysics(el) {
             if (el.springs) return;
-            el.springs = {
-                scale: new Spring(1.0, 0.15, 0.70), 
-                posX: new Spring(0, 0.08, 0.70), 
-                posY: new Spring(0, 0.08, 0.70), 
-                focusState: new Spring(0, 0.12, 0.80)
-            };
-            
-            let shine = document.createElement('div'); 
-            shine.className = 'card-shine'; 
-            
-            let glassBorder = document.createElement('div'); 
-            glassBorder.className = 'card-glass-border'; 
-
-            el.shine = shine;
-            el.glassBorder = glassBorder;
-
-            el.appendChild(shine);
-            el.appendChild(glassBorder);
-            
+            el.springs = { scale: new Spring(1.0, 0.15, 0.70), posX: new Spring(0, 0.08, 0.70), posY: new Spring(0, 0.08, 0.70), focusState: new Spring(0, 0.12, 0.80) };
+            let shine = document.createElement('div'); shine.className = 'card-shine'; 
+            let glassBorder = document.createElement('div'); glassBorder.className = 'card-glass-border'; 
+            el.shine = shine; el.glassBorder = glassBorder;
+            el.appendChild(shine); el.appendChild(glassBorder);
             springElements.push(el);
         }
 
-        // Continue App placed at index 0 (Podcasts completely removed)
         const appRegistry = [
             { id: "continue", name: "Continue", path: "continue" },
             { id: "youtube", name: "YouTube", path: "youtube" },
@@ -758,9 +572,11 @@
             { id: "settings", name: "Settings", path: "settings" }
         ];
 
+        // Safely injected software update into index 2 to prevent breaking dynamic volume mapping
         const settingsRegistry = [
-            { id: "version", name: "Version", type: "info", value: "viewOS 0.2" },
+            { id: "version", name: "Version", type: "info", value: `viewOS ${CURRENT_OS_VERSION}` },
             { id: "volume", name: "Volume", type: "cycle", options: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100], labels: ["0%", "10%", "20%", "30%", "40%", "50%", "60%", "70%", "80%", "90%", "100%"], currentIndex: 5 },
+            { id: "software_update", name: "Software Update", type: "action" },
             { id: "sleep", name: "Sleep", type: "action" },
             { id: "reboot", name: "Reboot", type: "action" },
             { id: "clear_data", name: "Clear All Data", type: "action" }
@@ -769,25 +585,19 @@
         function preRenderAllMedia() {
             db.forEach(item => {
                 if (!item) return;
-                const itemEl = document.createElement('div');
-                itemEl.className = 'media-item';
-                const card = document.createElement('div');
-                card.className = 'media-card';
+                const itemEl = document.createElement('div'); itemEl.className = 'media-item';
+                const card = document.createElement('div'); card.className = 'media-card';
                 const artPath = getArtPath(item);
                 if (artPath) card.style.backgroundImage = `url('${artPath}')`;
                 else generateLocal10thFrame(getContentFilePath(item), card);
 
-                const title = document.createElement('div');
-                title.className = 'media-title';
+                const title = document.createElement('div'); title.className = 'media-title';
                 title.innerText = item.title || (item.file ? item.file.replace(/\.[^/.]+$/, "") : "Untitled"); 
-                itemEl.appendChild(card); itemEl.appendChild(title);
-                DB_ITEM_ELEMENTS.set(item, itemEl);
-                
+                itemEl.appendChild(card); itemEl.appendChild(title); DB_ITEM_ELEMENTS.set(item, itemEl);
                 setupSpringPhysics(card);
             });
 
-            const tvshows = db.filter(item => item && item.app === 'tvshows');
-            const showMap = {};
+            const tvshows = db.filter(item => item && item.app === 'tvshows'); const showMap = {};
             tvshows.forEach(item => { const showName = item.show || "YouTube"; if (!showMap[showName]) showMap[showName] = []; showMap[showName].push(item); });
 
             Object.keys(showMap).forEach(showName => {
@@ -799,9 +609,7 @@
                 else generateLocal10thFrame(getContentFilePath(folderItem), card);
 
                 const title = document.createElement('div'); title.className = 'media-title'; title.innerText = showName; 
-                itemEl.appendChild(card); itemEl.appendChild(title);
-                TV_SHOW_FOLDER_ELEMENTS.set(showName, { element: itemEl, item: folderItem });
-                
+                itemEl.appendChild(card); itemEl.appendChild(title); TV_SHOW_FOLDER_ELEMENTS.set(showName, { element: itemEl, item: folderItem });
                 setupSpringPhysics(card);
             });
         }
@@ -811,49 +619,36 @@
             preRenderAllMedia();
             fetchYouTubeMetadata();
 
-            const grid = document.getElementById('app-grid');
-            DOM_CACHE.apps = [];
+            const grid = document.getElementById('app-grid'); DOM_CACHE.apps = [];
 
             appRegistry.forEach((app, index) => {
-                const appEl = document.createElement('div');
-                appEl.className = 'app-container'; appEl.id = `app-${index}`;
-                const iconName = app.id === 'tvshows' ? 'Tv Shows' : app.name;
-                const iconUrl = `SystemData/${iconName}.png`;
+                const appEl = document.createElement('div'); appEl.className = 'app-container'; appEl.id = `app-${index}`;
+                const iconName = app.id === 'tvshows' ? 'Tv Shows' : app.name; const iconUrl = `SystemData/${iconName}.png`;
 
                 appEl.innerHTML = `<div class="app-icon" id="app-icon-${app.id}" style="background-image: url('${iconUrl}');"></div><div class="app-name">${app.name}</div>`;
-                grid.appendChild(appEl);
-                const iconNode = appEl.querySelector('.app-icon');
-                DOM_CACHE.apps.push({ container: appEl, icon: iconNode });
+                grid.appendChild(appEl); const iconNode = appEl.querySelector('.app-icon'); DOM_CACHE.apps.push({ container: appEl, icon: iconNode });
                 
                 setupSpringPhysics(iconNode);
-
-                const img = new Image();
-                img.onerror = () => {
+                const img = new Image(); img.onerror = () => {
                     if (iconNode) {
                         iconNode.style.cssText = `background-image: none; background-color: ${app.id === 'youtube' ? '#1e0e0e' : '#111'}; border: 1px solid ${app.id === 'youtube' ? 'rgba(255, 51, 51, 0.25)' : 'rgba(255, 255, 255, 0.05)'}; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: ${app.id === 'youtube' ? '#ff3333' : 'var(--secondary-text)'};`;
                         iconNode.innerText = app.name[0];
                     }
-                };
-                img.src = iconUrl;
+                }; img.src = iconUrl;
             });
 
-            let localVolIndex = null;
-            try { localVolIndex = localStorage.getItem('viewOS_volume_index'); } catch(e) {}
+            let localVolIndex = null; try { localVolIndex = localStorage.getItem('viewOS_volume_index'); } catch(e) {}
             if (localVolIndex !== null) settingsRegistry[1].currentIndex = parseInt(localVolIndex);
             renderSettingsList();
 
-            // Setup mouse/cursor listeners on Control Center Tiles
             document.getElementById('cc-vol-tile').addEventListener('click', () => { STATE.ccFocusedIndex = 0; updateControlCenterFocus(); });
             document.getElementById('cc-sleep-tile').addEventListener('click', () => { STATE.ccFocusedIndex = 1; updateControlCenterFocus(); triggerSleepFromControlCenter(); });
             document.getElementById('cc-home-tile').addEventListener('click', () => { STATE.ccFocusedIndex = 2; updateControlCenterFocus(); triggerHomeFromControlCenter(); });
 
-            document.addEventListener('keydown', handleKeydownRaw); document.addEventListener('keyup', handleKeyupRaw);
-            window.addEventListener('resize', () => updateFocus(false)); 
+            document.addEventListener('keydown', handleKeydownRaw); document.addEventListener('keyup', handleKeyupRaw); window.addEventListener('resize', () => updateFocus(false)); 
             ['mousemove','mousedown','wheel'].forEach(evt => document.addEventListener(evt, wakeUp));
 
-            activeAudio.addEventListener('timeupdate', () => {
-                if (activeAudio.duration && STATE.audioScrubbingTime === null) updateOSDProgress('audio', activeAudio.currentTime, activeAudio.duration);
-            });
+            activeAudio.addEventListener('timeupdate', () => { if (activeAudio.duration && STATE.audioScrubbingTime === null) updateOSDProgress('audio', activeAudio.currentTime, activeAudio.duration); });
             activeAudio.addEventListener('ended', closeAudioPlayer);
 
             const cv = document.getElementById('cinema-video');
@@ -861,9 +656,7 @@
                 if (cv.duration) {
                     if (STATE.scrubbingTime === null) updateOSDProgress('cinema', cv.currentTime, cv.duration);
                     if (cv.currentTime > 5 && cv.currentTime < cv.duration - 5) {
-                        try {
-                            localStorage.setItem(`viewOS_resume_${STATE.activePlayingItemPath}`, JSON.stringify({ current: cv.currentTime, duration: cv.duration, timestamp: Date.now() }));
-                        } catch(e) {}
+                        try { localStorage.setItem(`viewOS_resume_${STATE.activePlayingItemPath}`, JSON.stringify({ current: cv.currentTime, duration: cv.duration, timestamp: Date.now() })); } catch(e) {}
                     }
                 }
             });
@@ -872,12 +665,7 @@
             updateVolumeUI(); requestAnimationFrame(pollGamepads);
             if (window.speechSynthesis) { window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices(); }
 
-            // Double-safety: check if YouTube Player API has loaded from browser cache already
-            if (typeof YT !== 'undefined' && YT.Player) {
-                initDurationPlayer();
-            }
-
-            // Start hardware-accelerated dynamic microanimations loop
+            if (typeof YT !== 'undefined' && YT.Player) initDurationPlayer();
             requestAnimationFrame(tickMicroanimations);
 
             setTimeout(() => {
@@ -900,33 +688,23 @@
         /* Guahh AI Integration */
         let aiAudioContext, aiAnalyser, aiMicSource, isAITalking = false, aiRecognition = null, aiSpeechRequested = false, currentSessionText = '';
 
-        // Modulate gradient scale and vibration inside the colourful voice orb based on audio input
         function updateWaveframe() {
             if (!STATE.inAI) return;
             const orb = document.getElementById('siri-orb');
             if (orb) {
-                // Dynamically toggle is-talking class to speed up gradient swirls
                 orb.classList.toggle('is-talking', isAITalking);
-
                 let scale = 1.0;
-                if (isAITalking) { 
-                    // Pulsing animation gets significantly bigger when speaking
-                    scale = 1.45 + Math.sin(Date.now() / 70) * 0.15; 
-                } 
+                if (isAITalking) { scale = 1.45 + Math.sin(Date.now() / 70) * 0.15; } 
                 else if (aiAnalyser) {
-                    const array = new Uint8Array(aiAnalyser.frequencyBinCount); 
-                    aiAnalyser.getByteFrequencyData(array);
-                    let avg = array.reduce((a,b)=>a+b,0) / array.length;
-                    // React to voice input intensity
-                    scale = 1.0 + Math.max(0, avg / 110);
+                    const array = new Uint8Array(aiAnalyser.frequencyBinCount); aiAnalyser.getByteFrequencyData(array);
+                    let avg = array.reduce((a,b)=>a+b,0) / array.length; scale = 1.0 + Math.max(0, avg / 110);
                 }
                 orb.style.transform = `scale(${scale})`;
-            }
-            requestAnimationFrame(updateWaveframe);
+            } requestAnimationFrame(updateWaveframe);
         }
 
         async function openGuahhAI() {
-            if (STATE.inAI || !window.GuahhAI) return;
+            if (STATE.inAI || !window.GuahhAI || STATE.isInstallingUpdate) return;
             STATE.inAI = true; aiSpeechRequested = true; isAITalking = false; currentSessionText = '';
             
             const overlay = document.getElementById('ai-overlay'), textEl = document.getElementById('ai-text');
@@ -934,16 +712,11 @@
             document.getElementById('focus-ring').style.opacity = '0';
             
             if (STATE.currentScreen === 'player') {
-                const cv = document.getElementById('cinema-video');
-                if (cv && !cv.paused) cv.pause();
+                const cv = document.getElementById('cinema-video'); if (cv && !cv.paused) cv.pause();
                 if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') ytPlayer.pauseVideo();
             } else if (STATE.currentScreen === 'audio_player' && !activeAudio.paused) activeAudio.pause();
 
-            setTimeout(() => {
-                overlay.style.opacity = '1';
-                document.getElementById('siri-orb').style.opacity = '1';
-                document.getElementById('ai-text-bubble').style.opacity = '1';
-            }, 50);
+            setTimeout(() => { overlay.style.opacity = '1'; document.getElementById('siri-orb').style.opacity = '1'; document.getElementById('ai-text-bubble').style.opacity = '1'; }, 50);
             updateWaveframe();
 
             try {
@@ -982,13 +755,9 @@
             if (window.speechSynthesis) window.speechSynthesis.cancel();
 
             const overlay = document.getElementById('ai-overlay');
-            document.getElementById('siri-orb').style.opacity = '0';
-            document.getElementById('ai-text-bubble').style.opacity = '0';
+            document.getElementById('siri-orb').style.opacity = '0'; document.getElementById('ai-text-bubble').style.opacity = '0';
             overlay.style.opacity = '0';
-            
-            // Clean suggestions layout state
-            const suggestionsContainer = document.getElementById('ai-suggestions-container');
-            if (suggestionsContainer) suggestionsContainer.style.display = 'none';
+            const suggestionsContainer = document.getElementById('ai-suggestions-container'); if (suggestionsContainer) suggestionsContainer.style.display = 'none';
             
             setTimeout(() => {
                 overlay.style.display = 'none'; updateFocus(false);
@@ -1003,100 +772,50 @@
             const response = await window.GuahhAI.processQuery(transcript, { db: window.contentRegistry || [] });
             textEl.innerText = response.text; textEl.style.color = "var(--secondary-text)";
             
-            // Query & display matching show recommendations in the visual pop up bubble
             let suggestions = response.suggestions || response.recommendations || response.shows;
             if (!suggestions || suggestions.length === 0) {
                 const queryWords = transcript.toLowerCase().split(/\s+/).filter(w => w.length > 2);
                 if (queryWords.length > 0) {
-                    const tvshows = db.filter(item => item && item.app === 'tvshows');
-                    const showMap = {};
-                    tvshows.forEach(item => {
-                        const showName = item.show || "YouTube";
-                        if (!showMap[showName]) showMap[showName] = item;
-                    });
+                    const tvshows = db.filter(item => item && item.app === 'tvshows'); const showMap = {};
+                    tvshows.forEach(item => { const showName = item.show || "YouTube"; if (!showMap[showName]) showMap[showName] = item; });
                     const uniqueShows = Object.values(showMap);
-                    
-                    const matches = uniqueShows.filter(show => {
-                        const showNameLower = (show.show || '').toLowerCase();
-                        return queryWords.some(word => showNameLower.includes(word));
-                    });
-                    
-                    if (matches.length > 0) {
-                        suggestions = matches.map(m => ({
-                            title: m.show,
-                            art: m.art,
-                            genre: m.genre || 'Suggested TV Show'
-                        }));
-                    }
+                    const matches = uniqueShows.filter(show => { const showNameLower = (show.show || '').toLowerCase(); return queryWords.some(word => showNameLower.includes(word)); });
+                    if (matches.length > 0) suggestions = matches.map(m => ({ title: m.show, art: m.art, genre: m.genre || 'Suggested TV Show' }));
                 }
             }
-            if (suggestions && suggestions.length > 0) {
-                window.showAISuggestions(suggestions);
-            }
-
+            if (suggestions && suggestions.length > 0) window.showAISuggestions(suggestions);
             speakGuahhAIResponse(response.text, () => { if (response.actions) { executeGuahhAIActions(response.actions); closeGuahhAI(); } });
         }
 
-        // Standardized Free High-Quality Google Translate TTS + Local Speech Web API fallback engine
         function speakGuahhAIResponse(text, onComplete) {
             if (window.speechSynthesis) window.speechSynthesis.cancel();
-            
-            // Split sentences into character chunks to respect cloud character caps
-            const chunks = text.match(/.{1,100}(?=\s|$)/g) || [text];
-            let currentChunk = 0;
-
+            const chunks = text.match(/.{1,100}(?=\s|$)/g) || [text]; let currentChunk = 0;
             function playNextChunk() {
-                if (currentChunk >= chunks.length) {
-                    isAITalking = false;
-                    if (onComplete) onComplete();
-                    return;
-                }
-
+                if (currentChunk >= chunks.length) { isAITalking = false; if (onComplete) onComplete(); return; }
                 const t = chunks[currentChunk];
                 const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=en&client=tw-ob&q=${encodeURIComponent(t)}`;
-                const audio = new Audio(url);
-                audio.volume = settingsRegistry[1].options[settingsRegistry[1].currentIndex] / 100;
-
+                const audio = new Audio(url); audio.volume = settingsRegistry[1].options[settingsRegistry[1].currentIndex] / 100;
                 audio.onplay = () => { isAITalking = true; };
-                audio.onended = () => {
-                    currentChunk++;
-                    playNextChunk();
-                };
-                audio.onerror = () => {
-                    speakLocalFallback(text, onComplete);
-                };
-                audio.play().catch(() => {
-                    speakLocalFallback(text, onComplete);
-                });
-            }
-
-            playNextChunk();
+                audio.onended = () => { currentChunk++; playNextChunk(); };
+                audio.onerror = () => { speakLocalFallback(text, onComplete); };
+                audio.play().catch(() => { speakLocalFallback(text, onComplete); });
+            } playNextChunk();
         }
 
         function speakLocalFallback(text, onComplete) {
-            if (!window.speechSynthesis) {
-                if (onComplete) onComplete();
-                return;
-            }
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.volume = settingsRegistry[1].options[settingsRegistry[1].currentIndex] / 100;
+            if (!window.speechSynthesis) { if (onComplete) onComplete(); return; }
+            const utterance = new SpeechSynthesisUtterance(text); utterance.volume = settingsRegistry[1].options[settingsRegistry[1].currentIndex] / 100;
             const voices = window.speechSynthesis.getVoices();
             const premiumVoice = voices.find(v => v.name.includes("Natural") || v.name.includes("Google") || v.lang.startsWith("en"));
             if (premiumVoice) utterance.voice = premiumVoice;
-
-            utterance.onstart = () => { isAITalking = true; };
-            utterance.onend = utterance.onerror = () => {
-                isAITalking = false;
-                if (onComplete) onComplete();
-            };
+            utterance.onstart = () => { isAITalking = true; }; utterance.onend = utterance.onerror = () => { isAITalking = false; if (onComplete) onComplete(); };
             window.speechSynthesis.speak(utterance);
         }
 
         function executeGuahhAIActions(actions) {
             actions.forEach(action => {
                 switch(action.type) {
-                    case 'GO_HOME':
-                        if (STATE.currentScreen === 'player') { STATE.mediaLaunchedByAI = true; closeCinemaPlayer(); } else if (STATE.currentScreen === 'audio_player') { STATE.mediaLaunchedByAI = true; closeAudioPlayer(); } else closeAppPanel(); break;
+                    case 'GO_HOME': if (STATE.currentScreen === 'player') { STATE.mediaLaunchedByAI = true; closeCinemaPlayer(); } else if (STATE.currentScreen === 'audio_player') { STATE.mediaLaunchedByAI = true; closeAudioPlayer(); } else closeAppPanel(); break;
                     case 'OPEN_APP': openAppPanel(action.appId); break;
                     case 'PLAYBACK_CONTROL':
                         if (STATE.currentScreen === 'player') {
@@ -1111,11 +830,9 @@
                             else if (action.command === 'seek_forward') performScrub('right', 'audio');
                             else if (action.command === 'seek_backward') performScrub('left', 'audio');
                             updatePlayStateIcon('audio');
-                        }
-                        break;
+                        } break;
                     case 'ADJUST_VOLUME':
-                        const volSet = settingsRegistry[1];
-                        volSet.currentIndex = action.direction === 'up' ? Math.min(volSet.options.length - 1, volSet.currentIndex + 1) : Math.max(0, volSet.currentIndex - 1);
+                        const volSet = settingsRegistry[1]; volSet.currentIndex = action.direction === 'up' ? Math.min(volSet.options.length - 1, volSet.currentIndex + 1) : Math.max(0, volSet.currentIndex - 1);
                         updateVolumeUI(); triggerVolumeOverlay(); break;
                     case 'SET_VOLUME':
                         const exact = settingsRegistry[1]; let bIdx = 0, bDiff = 100;
@@ -1138,14 +855,19 @@
             const match = url.trim().match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/); 
             return (match && match[2] && match[2].length === 11) ? match[2] : null; 
         }
+
+        /* --- UPDATED VIEW CLOUD YOUTUBE FETCHER --- */
         async function fetchYouTubeContent() {
             try {
-                const response = await fetch('yt.txt'); if (!response.ok) return;
-                const lines = (await response.text()).split(/\r?\n/).map(l => l.trim()).filter(l => l !== '');
-                lines.forEach(url => {
-                    const videoId = getYouTubeId(url);
-                    if (videoId) db.push({ id: `yt-${videoId}`, app: 'youtube', file: `${videoId}.yt`, url: url, videoId: videoId, title: `Loading Video (${videoId})...`, art: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`, isYouTube: true });
-                });
+                const response = await fetch(`${VIEW_CLOUD_URL}?action=getYouTubeLinks`); 
+                if (!response.ok) return;
+                const data = await response.json();
+                if (data && data.links) {
+                    data.links.forEach(url => {
+                        const videoId = getYouTubeId(url);
+                        if (videoId) db.push({ id: `yt-${videoId}`, app: 'youtube', file: `${videoId}.yt`, url: url, videoId: videoId, title: `Loading Video (${videoId})...`, art: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`, isYouTube: true });
+                    });
+                }
             } catch (e) {}
         }
 
@@ -1164,43 +886,25 @@
             });
         }
 
-        /* Background YouTube Duration Fetcher Subsystem */
-        let durationPlayer = null;
-        let ytDurationQueue = [];
-        let isFetchingYtDuration = false;
-        let durationTimeout = null;
-        let currentDurationLoadingId = null;
-        let durationPlayerInitialized = false;
+        let durationPlayer = null, ytDurationQueue = [], isFetchingYtDuration = false, durationTimeout = null, currentDurationLoadingId = null, durationPlayerInitialized = false;
 
         function initDurationPlayer() {
-            if (durationPlayerInitialized) return;
-            if (typeof YT === 'undefined' || !YT.Player) return;
-            durationPlayerInitialized = true;
-            
+            if (durationPlayerInitialized) return; if (typeof YT === 'undefined' || !YT.Player) return; durationPlayerInitialized = true;
             let container = document.getElementById('temp-yt-player-container');
             if (!container) {
-                container = document.createElement('div');
-                container.id = 'temp-yt-player-container';
+                container = document.createElement('div'); container.id = 'temp-yt-player-container';
                 container.style.cssText = "position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;";
-                const inner = document.createElement('div');
-                inner.id = 'temp-yt-player';
-                container.appendChild(inner);
-                document.body.appendChild(container);
+                const inner = document.createElement('div'); inner.id = 'temp-yt-player'; container.appendChild(inner); document.body.appendChild(container);
             }
-
             durationPlayer = new YT.Player('temp-yt-player', {
-                height: '1', width: '1',
-                playerVars: { 'autoplay': 1, 'controls': 0, 'disablekb': 1, 'rel': 0, 'showinfo': 0, 'modestbranding': 1, 'mute': 1 },
+                height: '1', width: '1', playerVars: { 'autoplay': 1, 'controls': 0, 'disablekb': 1, 'rel': 0, 'showinfo': 0, 'modestbranding': 1, 'mute': 1 },
                 events: {
                     'onReady': () => { processNextYtDuration(); },
                     'onStateChange': (event) => {
-                        // Once state is PLAYING (1), getDuration is loaded and accurate!
                         if (event.data === 1 || (window.YT && YT.PlayerState && event.data === YT.PlayerState.PLAYING)) {
-                            const duration = durationPlayer.getDuration();
-                            if (duration > 0) saveYtDuration(currentDurationLoadingId, duration);
+                            const duration = durationPlayer.getDuration(); if (duration > 0) saveYtDuration(currentDurationLoadingId, duration);
                         }
-                    },
-                    'onError': () => { finishYtDurationLoad(); }
+                    }, 'onError': () => { finishYtDurationLoad(); }
                 }
             });
         }
@@ -1208,92 +912,48 @@
         function fetchYtDurations() {
             const ytItems = db.filter(item => item && item.isYouTube);
             ytItems.forEach(item => {
-                let cachedDur = null;
-                try { cachedDur = localStorage.getItem(`viewOS_ytdur_${item.videoId}`); } catch(e) {}
-                if (cachedDur) {
-                    item.duration = parseInt(cachedDur);
-                    updateYtCardDurationUI(item.videoId, item.duration);
-                    return;
-                }
-                if (!ytDurationQueue.some(q => q.videoId === item.videoId)) {
-                    ytDurationQueue.push({ videoId: item.videoId, item: item });
-                }
+                let cachedDur = null; try { cachedDur = localStorage.getItem(`viewOS_ytdur_${item.videoId}`); } catch(e) {}
+                if (cachedDur) { item.duration = parseInt(cachedDur); updateYtCardDurationUI(item.videoId, item.duration); return; }
+                if (!ytDurationQueue.some(q => q.videoId === item.videoId)) ytDurationQueue.push({ videoId: item.videoId, item: item });
             });
-
-            if (ytDurationQueue.length > 0 && !isFetchingYtDuration) {
-                processNextYtDuration();
-            }
+            if (ytDurationQueue.length > 0 && !isFetchingYtDuration) processNextYtDuration();
         }
 
-        // Global callback for YouTube script to hook into securely
         window.onYouTubeIframeAPIReady = function() {
             initDurationPlayer();
-            if (window.pendingYTLaunchVideoId && typeof window.createPendingYTPlayer === 'function') {
-                window.createPendingYTPlayer();
-            }
+            if (window.pendingYTLaunchVideoId && typeof window.createPendingYTPlayer === 'function') window.createPendingYTPlayer();
         };
 
         function processNextYtDuration() {
             if (!durationPlayer || typeof durationPlayer.loadVideoById !== 'function') return;
-            if (ytDurationQueue.length === 0) {
-                currentDurationLoadingId = null;
-                isFetchingYtDuration = false;
-                return;
-            }
-
-            isFetchingYtDuration = true;
-            const next = ytDurationQueue[0];
-            currentDurationLoadingId = next.videoId;
-
-            clearTimeout(durationTimeout);
-            durationTimeout = setTimeout(() => { finishYtDurationLoad(); }, 5000);
-
-            // Play briefly completely silent to trigger direct metadata load
-            try { durationPlayer.mute(); } catch(e) {}
-            durationPlayer.loadVideoById(next.videoId);
+            if (ytDurationQueue.length === 0) { currentDurationLoadingId = null; isFetchingYtDuration = false; return; }
+            isFetchingYtDuration = true; const next = ytDurationQueue[0]; currentDurationLoadingId = next.videoId;
+            clearTimeout(durationTimeout); durationTimeout = setTimeout(() => { finishYtDurationLoad(); }, 5000);
+            try { durationPlayer.mute(); } catch(e) {} durationPlayer.loadVideoById(next.videoId);
         }
 
         function saveYtDuration(videoId, seconds) {
-            clearTimeout(durationTimeout);
-            try { durationPlayer.stopVideo(); } catch(e) {}
-            
+            clearTimeout(durationTimeout); try { durationPlayer.stopVideo(); } catch(e) {}
             const dbItem = db.find(item => item && item.videoId === videoId);
-            if (dbItem) {
-                dbItem.duration = seconds;
-                try { localStorage.setItem(`viewOS_ytdur_${videoId}`, seconds); } catch(e) {}
-                updateYtCardDurationUI(videoId, seconds);
-            }
+            if (dbItem) { dbItem.duration = seconds; try { localStorage.setItem(`viewOS_ytdur_${videoId}`, seconds); } catch(e) {} updateYtCardDurationUI(videoId, seconds); }
             finishYtDurationLoad();
         }
 
-        function finishYtDurationLoad() {
-            ytDurationQueue.shift();
-            processNextYtDuration();
-        }
+        function finishYtDurationLoad() { ytDurationQueue.shift(); processNextYtDuration(); }
 
         function formatYtDuration(seconds) {
-            const hrs = Math.floor(seconds / 3600);
-            const mins = Math.floor((seconds % 3600) / 60);
-            const secs = Math.floor(seconds % 60);
-            if (hrs > 0) return `${hrs}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
-            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            const hrs = Math.floor(seconds / 3600), mins = Math.floor((seconds % 3600) / 60), secs = Math.floor(seconds % 60);
+            if (hrs > 0) return `${hrs}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`; return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
         }
 
         function applyDurationBadge(cardElement, seconds) {
             if (!cardElement) return;
             let badge = cardElement.querySelector('.yt-duration-badge');
-            if (!badge) {
-                badge = document.createElement('div');
-                badge.className = 'yt-duration-badge';
-                cardElement.appendChild(badge);
-            }
+            if (!badge) { badge = document.createElement('div'); badge.className = 'yt-duration-badge'; cardElement.appendChild(badge); }
             badge.innerText = formatYtDuration(seconds);
         }
 
-        function updateYtCardDurationUI(videoId, seconds) {
-            const cards = document.querySelectorAll(`.media-card[data-youtube-id="${videoId}"]`);
-            cards.forEach(card => applyDurationBadge(card, seconds));
-        }
+        function updateYtCardDurationUI(videoId, seconds) { const cards = document.querySelectorAll(`.media-card[data-youtube-id="${videoId}"]`); cards.forEach(card => applyDurationBadge(card, seconds)); }
 
         function initYouTubePlayer(videoId) {
             if (ytPlayer) { try { ytPlayer.destroy(); } catch(e) {} ytPlayer = null; }
@@ -1309,8 +969,7 @@
                     events: {
                         'onReady': (e) => {
                             e.target.setVolume(vol); e.target.playVideo();
-                            let saved = null;
-                            try { saved = localStorage.getItem(`viewOS_resume_${STATE.activePlayingItemPath}`); } catch(err) {}
+                            let saved = null; try { saved = localStorage.getItem(`viewOS_resume_${STATE.activePlayingItemPath}`); } catch(err) {}
                             if (saved) { const p = JSON.parse(saved); e.target.seekTo(p.current, true); triggerSystemToast(`Resumed from ${formatTime(p.current)}`); }
                             triggerCinemaOSD(); updatePlayStateIcon('cinema'); startYTProgressTracking();
                         },
@@ -1322,13 +981,7 @@
                     }
                 });
             }
-
-            if (typeof YT !== 'undefined' && YT.Player) {
-                createPlayer();
-            } else {
-                window.pendingYTLaunchVideoId = videoId;
-                window.createPendingYTPlayer = createPlayer;
-            }
+            if (typeof YT !== 'undefined' && YT.Player) createPlayer(); else { window.pendingYTLaunchVideoId = videoId; window.createPendingYTPlayer = createPlayer; }
         }
 
         function startYTProgressTracking() {
@@ -1338,32 +991,29 @@
                     const c = ytPlayer.getCurrentTime(), d = ytPlayer.getDuration();
                     if (d > 0) {
                         if (STATE.scrubbingTime === null) updateOSDProgress('cinema', c, d);
-                        if (c > 5 && c < d - 5) {
-                            try {
-                                localStorage.setItem(`viewOS_resume_${STATE.activePlayingItemPath}`, JSON.stringify({ current: c, duration: d, timestamp: Date.now() }));
-                            } catch(e) {}
-                        }
+                        if (c > 5 && c < d - 5) { try { localStorage.setItem(`viewOS_resume_${STATE.activePlayingItemPath}`, JSON.stringify({ current: c, duration: d, timestamp: Date.now() })); } catch(e) {} }
                     }
                 }
             }, 500);
         }
         function stopYTProgressTracking() { if (ytProgressInterval) { clearInterval(ytProgressInterval); ytProgressInterval = null; } }
 
-        function isItemFavourited(item) { 
-            try {
-                return localStorage.getItem(`viewOS_fav_${getContentFilePath(item)}`) === 'true'; 
-            } catch(e) {
-                return false;
-            }
-        }
-        function toggleItemFavourite(item) { 
-            try {
-                localStorage.setItem(`viewOS_fav_${getContentFilePath(item)}`, isItemFavourited(item) ? 'false' : 'true'); 
-            } catch(e) {}
-        }
+        function isItemFavourited(item) { try { return localStorage.getItem(`viewOS_fav_${getContentFilePath(item)}`) === 'true'; } catch(e) { return false; } }
+        function toggleItemFavourite(item) { try { localStorage.setItem(`viewOS_fav_${getContentFilePath(item)}`, isItemFavourited(item) ? 'false' : 'true'); } catch(e) {} }
 
-        function showSystemPopup(title, desc, buttons) {
+        // Core system popup functionality enhanced to accept imagery dynamically
+        function showSystemPopup(title, desc, buttons, imageUrl = null) {
             STATE.inPopup = true; STATE.popupFocusedIndex = 0; activePopupButtons = buttons;
+            
+            const imgEl = document.getElementById('popup-image');
+            if (imageUrl) {
+                imgEl.src = imageUrl;
+                imgEl.style.display = 'block';
+            } else {
+                imgEl.style.display = 'none';
+                imgEl.src = '';
+            }
+
             document.getElementById('popup-title').innerText = title; document.getElementById('popup-desc').innerText = desc;
             const container = document.getElementById('popup-buttons-container'); container.innerHTML = ''; activePopupElements = [];
             buttons.forEach((btn, index) => {
@@ -1373,6 +1023,7 @@
             const popup = document.getElementById('system-popup'); popup.style.display = 'flex';
             setTimeout(() => { popup.style.opacity = '1'; popup.classList.add('visible'); updateFocus(false); }, 50);
         }
+
         function closeSystemPopup() {
             const popup = document.getElementById('system-popup'); popup.style.opacity = '0'; popup.classList.remove('visible');
             setTimeout(() => { popup.style.display = 'none'; STATE.inPopup = false; updateFocus(false); }, 300);
@@ -1387,23 +1038,59 @@
             ]);
         }
 
+        /* --- OTA UPDATE SYSTEM: CORE LOGIC --- */
+        async function checkForUpdates() {
+            if (STATE.isInstallingUpdate) return;
+            triggerSystemToast("Checking for updates...");
+            try {
+                const res = await fetch(`${VIEW_CLOUD_URL}?action=getUpdateInfo`);
+                const info = await res.json();
+                
+                if (info && info.version && parseFloat(info.version) > CURRENT_OS_VERSION) {
+                    showSystemPopup(
+                        `Software Update: viewOS ${info.version}`,
+                        info.description || "A new update is available for this device.",
+                        [
+                            { label: 'Download & Install', action: () => { installUpdate(); } },
+                            { label: 'Cancel', action: () => {} }
+                        ],
+                        info.image
+                    );
+                } else {
+                    triggerSystemToast("viewOS is up to date.");
+                }
+            } catch(e) {
+                triggerSystemToast("Failed to connect to View Cloud.");
+            }
+        }
+
+        async function installUpdate() {
+            STATE.isInstallingUpdate = true;
+            showSystemPopup("Installing Update...", "Downloading viewOS core. Please do not turn off the system.", []);
+            
+            try {
+                const res = await fetch(`${VIEW_CLOUD_URL}?action=getOSCode`);
+                const code = await res.text();
+                
+                if (code && code.includes('<html')) {
+                    localStorage.setItem('viewOS_core_code', code);
+                    showSystemPopup("Update Complete", "Rebooting system...", []);
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    STATE.isInstallingUpdate = false;
+                    showSystemPopup("Update Failed", "Invalid code received from View Cloud.", [{ label: 'OK', action: () => {} }]);
+                }
+            } catch (e) {
+                STATE.isInstallingUpdate = false;
+                showSystemPopup("Update Failed", "Network error while downloading the update.", [{ label: 'OK', action: () => {} }]);
+            }
+        }
+
         function syncElementProgress(item, itemEl, isFolder = false) {
             if (!item || !itemEl) return;
-            const card = itemEl.querySelector('.media-card'); 
-            if (!card) return;
-            let pData = null;
+            const card = itemEl.querySelector('.media-card'); if (!card) return; let pData = null;
             try {
-                if (isFolder) { 
-                    if (item.episodes) {
-                        for (let ep of item.episodes) { 
-                            const s = localStorage.getItem(`viewOS_resume_${getContentFilePath(ep)}`); 
-                            if (s) { pData = JSON.parse(s); break; } 
-                        } 
-                    }
-                } else { 
-                    const s = localStorage.getItem(`viewOS_resume_${getContentFilePath(item)}`); 
-                    if (s) pData = JSON.parse(s); 
-                }
+                if (isFolder) { if (item.episodes) { for (let ep of item.episodes) { const s = localStorage.getItem(`viewOS_resume_${getContentFilePath(ep)}`); if (s) { pData = JSON.parse(s); break; } } } } else { const s = localStorage.getItem(`viewOS_resume_${getContentFilePath(item)}`); if (s) pData = JSON.parse(s); }
             } catch(e) {}
             const exist = card.querySelector('.progress-indicator');
             if (pData && pData.duration) {
@@ -1419,8 +1106,7 @@
             if (STATE.activeApp === 'tvshows' && STATE.selectedShow) appName = STATE.selectedShow;
             const tabs = [{ id: 'all', label: appName }];
             if (STATE.activeApp !== 'music') tabs.push({ id: 'continue', label: 'Continue Watching' });
-            tabs.push({ id: 'favourites', label: 'Favourites' });
-            return tabs;
+            tabs.push({ id: 'favourites', label: 'Favourites' }); return tabs;
         }
 
         function renderTopBar() {
@@ -1435,8 +1121,7 @@
 
         function renderMediaGrid(category) {
             const grid = document.getElementById('media-grid'), mHeader = document.getElementById('media-header'), fragment = document.createDocumentFragment();
-            if (!grid) return;
-            activeMediaElements = []; updateColumns();
+            if (!grid) return; activeMediaElements = []; updateColumns();
             
             let list = [];
             if (STATE.activeApp === 'continue') {
@@ -1445,8 +1130,7 @@
             } else if (STATE.activeApp === 'tvshows' && !STATE.selectedShow) {
                 TV_SHOW_FOLDER_ELEMENTS.forEach(folder => {
                     if (STATE.currentTab === 'favourites' && !folder.item.episodes.some(isItemFavourited)) return;
-                    if (STATE.currentTab === 'continue' && !folder.item.episodes.some(hasResumeData)) return;
-                    list.push(folder.item);
+                    if (STATE.currentTab === 'continue' && !folder.item.episodes.some(hasResumeData)) return; list.push(folder.item);
                 });
                 if (STATE.currentTab === 'continue') list.sort((a,b) => getLatestTimestamp(b.episodes) - getLatestTimestamp(a.episodes));
                 activeMediaList = list.filter(Boolean);
@@ -1456,49 +1140,30 @@
                 else if (STATE.currentTab === 'continue') {
                     let tmp = []; list.forEach(i => { const ts = getResumeTimestamp(i); if (ts > 0) tmp.push({ item: i, timestamp: ts }); });
                     tmp.sort((a,b) => b.timestamp - a.timestamp); list = tmp.map(e => e.item);
-                }
-                activeMediaList = list.filter(Boolean);
+                } activeMediaList = list.filter(Boolean);
             }
 
             if (activeMediaList.length > 0 && STATE.mediaFocusedIndex >= activeMediaList.length) STATE.mediaFocusedIndex = activeMediaList.length - 1;
 
             activeMediaList.forEach((item, index) => {
-                if (!item) return;
-                let itemEl = null;
-                if (item.id === 'show-folder') {
-                    const folderObj = TV_SHOW_FOLDER_ELEMENTS.get(item.name);
-                    itemEl = folderObj ? folderObj.element : null;
-                } else {
-                    itemEl = DB_ITEM_ELEMENTS.get(item);
-                }
-                
+                if (!item) return; let itemEl = null;
+                if (item.id === 'show-folder') { const folderObj = TV_SHOW_FOLDER_ELEMENTS.get(item.name); itemEl = folderObj ? folderObj.element : null; } else { itemEl = DB_ITEM_ELEMENTS.get(item); }
                 if (itemEl) {
                     const card = itemEl.querySelector('.media-card');
                     if (card) {
                         if (item.isYouTube) {
                             card.setAttribute('data-youtube-id', item.videoId);
-                            let cachedDur = null;
-                            try { cachedDur = item.duration || localStorage.getItem(`viewOS_ytdur_${item.videoId}`); } catch(e) {}
-                            if (cachedDur) {
-                                item.duration = parseInt(cachedDur);
-                                applyDurationBadge(card, item.duration);
-                            }
-                        }
-                        syncElementProgress(item, itemEl, item.id === 'show-folder'); 
+                            let cachedDur = null; try { cachedDur = item.duration || localStorage.getItem(`viewOS_ytdur_${item.videoId}`); } catch(e) {}
+                            if (cachedDur) { item.duration = parseInt(cachedDur); applyDurationBadge(card, item.duration); }
+                        } syncElementProgress(item, itemEl, item.id === 'show-folder'); 
                     }
-                    itemEl.id = `media-item-${index}`;
-                    fragment.appendChild(itemEl); activeMediaElements.push({ container: itemEl, icon: itemEl.querySelector('.media-card') });
+                    itemEl.id = `media-item-${index}`; fragment.appendChild(itemEl); activeMediaElements.push({ container: itemEl, icon: itemEl.querySelector('.media-card') });
                 }
             });
             
             grid.innerHTML = activeMediaList.length ? '' : `<div style="grid-column: 1 / -1; text-align: center; font-size: 1.4rem; color: var(--secondary-text); padding-top: 100px;">No content found.</div>`;
-            grid.appendChild(fragment);
-            if (mHeader) mHeader.innerText = STATE.selectedShow || appRegistry.find(a => a.id === STATE.activeApp)?.name || "Media";
-
-            // Trigger background duration scraping queue if YouTube videos exist on page
-            if (activeMediaList.some(item => item && item.isYouTube)) {
-                fetchYtDurations();
-            }
+            grid.appendChild(fragment); if (mHeader) mHeader.innerText = STATE.selectedShow || appRegistry.find(a => a.id === STATE.activeApp)?.name || "Media";
+            if (activeMediaList.some(item => item && item.isYouTube)) fetchYtDurations();
         }
 
         function renderSettingsList() {
@@ -1512,7 +1177,6 @@
             });
         }
 
-        // Standardized grid calculations
         function updateColumns() {
             const grid = document.getElementById('media-grid');
             if (STATE.currentScreen === 'home') STATE.columns = 4;
@@ -1533,8 +1197,7 @@
 
         function updateFocusRingPosition() {
             const ring = document.getElementById('focus-ring'); if (['player','audio_player'].includes(STATE.currentScreen) || STATE.inSleep || STATE.inAI) return;
-            const target = getActiveTarget(); if (!target || !target.icon) return;
-            let wrapper = null;
+            const target = getActiveTarget(); if (!target || !target.icon) return; let wrapper = null;
 
             if (STATE.inPopup) {
                 const rect = target.icon.getBoundingClientRect(), offset = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--focus-offset')), itemRadius = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--border-radius'));
@@ -1565,80 +1228,45 @@
 
         let lastActiveTarget = null;
         function updateFocus(isInitialLoad = false, dx = 0, dy = 0) {
-            // Remove previous active focus styles from all elements
             document.querySelectorAll('.is-focused').forEach(el => el.classList.remove('is-focused'));
-
             const ring = document.getElementById('focus-ring');
             if (['player','audio_player'].includes(STATE.currentScreen) || STATE.inSleep || STATE.inAI) { 
                 ring.style.opacity = '0'; 
                 if (lastActiveTarget && lastActiveTarget.icon && lastActiveTarget.icon.springs) {
-                    const s = lastActiveTarget.icon.springs;
-                    s.scale.target = 1.0;
-                    s.focusState.target = 0;
-                    s.posX.target = 0;
-                    s.posY.target = 0;
-                    lastActiveTarget.icon.style.zIndex = '1';
+                    const s = lastActiveTarget.icon.springs; s.scale.target = 1.0; s.focusState.target = 0; s.posX.target = 0; s.posY.target = 0; lastActiveTarget.icon.style.zIndex = '1';
                 }
-                lastActiveTarget = null;
-                return; 
+                lastActiveTarget = null; return; 
             }
             
             const target = getActiveTarget();
-
-            // --- SPRING PHYSICS FOCUS UPDATE ---
             if (lastActiveTarget && lastActiveTarget.icon && lastActiveTarget.icon.springs && lastActiveTarget !== target) {
-                const s = lastActiveTarget.icon.springs;
-                s.scale.target = 1.0;
-                s.focusState.target = 0;
-                s.posX.target = 0;
-                s.posY.target = 0;
-                if (dx) s.posX.vel = dx * 22;
-                if (dy) s.posY.vel = dy * 22;
-                lastActiveTarget.icon.style.zIndex = '1';
+                const s = lastActiveTarget.icon.springs; s.scale.target = 1.0; s.focusState.target = 0; s.posX.target = 0; s.posY.target = 0;
+                if (dx) s.posX.vel = dx * 22; if (dy) s.posY.vel = dy * 22; lastActiveTarget.icon.style.zIndex = '1';
             }
             
             if (target && target.icon && target.icon.springs) {
-                const s = target.icon.springs;
-                s.scale.target = 1.15; // Selected tiles scale slightly reduced from 1.22
-                s.focusState.target = 1.0;
-                if (dx) s.posX.vel = dx * 28;
-                if (dy) s.posY.vel = dy * 28;
-                target.icon.style.zIndex = '50';
+                const s = target.icon.springs; s.scale.target = 1.15; s.focusState.target = 1.0;
+                if (dx) s.posX.vel = dx * 28; if (dy) s.posY.vel = dy * 28; target.icon.style.zIndex = '50';
             }
             
             lastActiveTarget = target;
-            // -----------------------------------
-
             if (target && target.container && target.icon) {
-                // Apply selection class to containers and primary visual icons
-                target.container.classList.add('is-focused');
-                if (target.icon !== target.container) {
-                    target.icon.classList.add('is-focused');
-                }
-
+                target.container.classList.add('is-focused'); if (target.icon !== target.container) target.icon.classList.add('is-focused');
                 requestAnimationFrame(() => {
                     if (target.icon.getBoundingClientRect().width === 0) return;
-                    updateFocusRingPosition();
-                    if (isInitialLoad) setTimeout(() => ring.style.opacity = '1', 50); else ring.style.opacity = '1';
+                    updateFocusRingPosition(); if (isInitialLoad) setTimeout(() => ring.style.opacity = '1', 50); else ring.style.opacity = '1';
                 });
             } else ring.style.opacity = '0';
         }
 
-        // Unified High-Performance Scrubbing Engine
         function performScrub(direction, type) {
             const isAudio = (type === 'audio'), prefix = isAudio ? 'audio' : 'cinema', cv = document.getElementById('cinema-video');
             const isYT = !isAudio && STATE.activePlayingItemPath && STATE.activePlayingItemPath.includes('.yt');
             let duration = 0, current = 0;
 
-            if (isAudio) {
-                if (!activeAudio || !activeAudio.duration) return;
-                duration = activeAudio.duration; current = (STATE.audioScrubbingTime === null) ? activeAudio.currentTime : STATE.audioScrubbingTime;
-            } else if (isYT) {
-                if (!ytPlayer || typeof ytPlayer.getDuration !== 'function') return;
-                duration = ytPlayer.getDuration(); current = (STATE.scrubbingTime === null) ? ytPlayer.getCurrentTime() : STATE.scrubbingTime;
-            } else {
-                duration = cv.duration; if (!duration) return; current = (STATE.scrubbingTime === null) ? cv.currentTime : STATE.scrubbingTime;
-            }
+            if (isAudio) { if (!activeAudio || !activeAudio.duration) return; duration = activeAudio.duration; current = (STATE.audioScrubbingTime === null) ? activeAudio.currentTime : STATE.audioScrubbingTime; }
+            else if (isYT) { if (!ytPlayer || typeof ytPlayer.getDuration !== 'function') return; duration = ytPlayer.getDuration(); current = (STATE.scrubbingTime === null) ? ytPlayer.getCurrentTime() : STATE.scrubbingTime; }
+            else { duration = cv.duration; if (!duration) return; current = (STATE.scrubbingTime === null) ? cv.currentTime : STATE.scrubbingTime; }
 
             const now = Date.now(), lastTime = isAudio ? STATE.lastAudioSeekTime : STATE.lastSeekTime;
             let accel = isAudio ? STATE.audioSeekAcceleration : STATE.seekAcceleration;
@@ -1648,9 +1276,7 @@
             const targetTime = Math.max(0, Math.min(duration, direction === 'right' ? current + accel : current - accel));
             if (isAudio) STATE.audioScrubbingTime = targetTime; else STATE.scrubbingTime = targetTime;
 
-            updateOSDProgress(prefix, targetTime, duration);
-            if (!isAudio) triggerCinemaOSD();
-
+            updateOSDProgress(prefix, targetTime, duration); if (!isAudio) triggerCinemaOSD();
             if (isAudio) activeAudio.currentTime = targetTime; else if (isYT) ytPlayer.seekTo(targetTime, false); else cv.currentTime = targetTime;
 
             clearTimeout(isAudio ? STATE.audioSeekCommitTimer : STATE.seekCommitTimer);
@@ -1661,189 +1287,83 @@
             if (isAudio) STATE.audioSeekCommitTimer = timer; else STATE.seekCommitTimer = timer;
         }
 
-        /* ==========================================================================
-           HARDWARE-ACCELERATED SCREEN & INNER MENU NAVIGATION ANIMATOR MODULE
-           ========================================================================== */
-
         function navigateScreen(fromEl, toEl, isForward = true) {
             if (!toEl) return;
-            
             STATE.isNavigating = true;
 
-            // Strip transition locks instantly from any screens to prevent input freezes
-            document.querySelectorAll('.screen-transitioning').forEach(el => {
-                el.classList.remove('screen-transitioning', 'transition-forward-exit', 'transition-backward-exit', 'transition-forward-entry-start', 'transition-backward-entry-start');
-                el.style.pointerEvents = '';
-            });
-
-            // Ensure all screens are hidden if they aren't involved in THIS specific transition
+            document.querySelectorAll('.screen-transitioning').forEach(el => { el.classList.remove('screen-transitioning', 'transition-forward-exit', 'transition-backward-exit', 'transition-forward-entry-start', 'transition-backward-entry-start'); el.style.pointerEvents = ''; });
             document.querySelectorAll('#home-screen, .app-panel, #audio-player-screen, #cinema-player').forEach(el => {
-                if (el !== fromEl && el !== toEl) {
-                    el.style.display = 'none';
-                    el.classList.remove('screen-visible', 'screen-transitioning', 'transition-forward-exit', 'transition-backward-exit', 'transition-forward-entry-start', 'transition-backward-entry-start');
-                }
+                if (el !== fromEl && el !== toEl) { el.style.display = 'none'; el.classList.remove('screen-visible', 'screen-transitioning', 'transition-forward-exit', 'transition-backward-exit', 'transition-forward-entry-start', 'transition-backward-entry-start'); }
             });
 
-            // Cancel any active timeouts to prevent conflicts
-            if (window.activeTransitionTimeout) {
-                clearTimeout(window.activeTransitionTimeout);
-                window.activeTransitionTimeout = null;
-            }
+            if (window.activeTransitionTimeout) { clearTimeout(window.activeTransitionTimeout); window.activeTransitionTimeout = null; }
+            const targetDisplay = (toEl.id === 'audio-player-screen') ? 'flex' : 'block'; toEl.style.display = targetDisplay;
 
-            // Set proper display mode on target element so transition values register
-            const targetDisplay = (toEl.id === 'audio-player-screen') ? 'flex' : 'block';
-            toEl.style.display = targetDisplay;
+            if (!fromEl) { toEl.classList.add('screen-visible'); STATE.isNavigating = false; updateFocus(true); return; }
 
-            if (!fromEl) {
-                toEl.classList.add('screen-visible');
-                STATE.isNavigating = false;
-                updateFocus(true);
-                return;
-            }
-
-            fromEl.style.pointerEvents = 'none';
-            toEl.style.pointerEvents = 'none';
-
-            fromEl.classList.add('screen-transitioning');
-            toEl.classList.add('screen-transitioning');
+            fromEl.style.pointerEvents = 'none'; toEl.style.pointerEvents = 'none';
+            fromEl.classList.add('screen-transitioning'); toEl.classList.add('screen-transitioning');
 
             if (isForward) {
-                toEl.classList.remove('screen-visible');
-                toEl.classList.add('transition-forward-entry-start');
-                
-                toEl.offsetHeight; // Force DOM layout reflow
-
-                fromEl.classList.add('transition-forward-exit');
-                toEl.classList.remove('transition-forward-entry-start');
-                toEl.classList.add('screen-visible');
+                toEl.classList.remove('screen-visible'); toEl.classList.add('transition-forward-entry-start');
+                toEl.offsetHeight; 
+                fromEl.classList.add('transition-forward-exit'); toEl.classList.remove('transition-forward-entry-start'); toEl.classList.add('screen-visible');
             } else {
-                toEl.classList.remove('screen-visible');
-                toEl.classList.add('transition-backward-entry-start');
-
-                toEl.offsetHeight; // Force DOM layout reflow
-
-                fromEl.classList.add('transition-backward-exit');
-                toEl.classList.remove('transition-backward-entry-start');
-                toEl.classList.add('screen-visible');
+                toEl.classList.remove('screen-visible'); toEl.classList.add('transition-backward-entry-start');
+                toEl.offsetHeight; 
+                fromEl.classList.add('transition-backward-exit'); toEl.classList.remove('transition-backward-entry-start'); toEl.classList.add('screen-visible');
             }
 
-            // Timeout set to match transition duration (400ms)
             window.activeTransitionTimeout = setTimeout(() => {
-                if (fromEl) {
-                    fromEl.style.display = 'none';
-                    fromEl.classList.remove('screen-transitioning', 'transition-forward-exit', 'transition-backward-exit', 'screen-visible');
-                    fromEl.style.pointerEvents = '';
-                }
-                toEl.classList.remove('screen-transitioning');
-                toEl.style.pointerEvents = '';
-                window.activeTransitionTimeout = null;
-                STATE.isNavigating = false;
-                updateFocus(false);
+                if (fromEl) { fromEl.style.display = 'none'; fromEl.classList.remove('screen-transitioning', 'transition-forward-exit', 'transition-backward-exit', 'screen-visible'); fromEl.style.pointerEvents = ''; }
+                toEl.classList.remove('screen-transitioning'); toEl.style.pointerEvents = ''; window.activeTransitionTimeout = null; STATE.isNavigating = false; updateFocus(false);
             }, 400);
         }
 
         function navigateInnerContent(wrapper, callback, isForward = true) {
             if (!wrapper) { callback(); return; }
-            STATE.isNavigating = true;
-            wrapper.style.transition = 'opacity 0.4s ease';
-            
-            // Phase 1: Fade out
-            wrapper.style.opacity = '0';
-            
+            STATE.isNavigating = true; wrapper.style.transition = 'opacity 0.4s ease'; wrapper.style.opacity = '0';
             setTimeout(() => {
-                callback(); // Update layout DOM structure securely
-                
-                // Phase 2: Preset entrance coordinates without displaying transition
-                wrapper.style.transition = 'none';
-                
-                wrapper.offsetHeight; // Force layout calculation
-                
-                // Phase 3: Animate in cleanly
-                wrapper.style.transition = 'opacity 0.4s ease';
-                wrapper.style.opacity = '1';
-                
-                setTimeout(() => {
-                    STATE.isNavigating = false;
-                    updateFocus(false);
-                }, 400);
+                callback(); wrapper.style.transition = 'none'; wrapper.offsetHeight; wrapper.style.transition = 'opacity 0.4s ease'; wrapper.style.opacity = '1';
+                setTimeout(() => { STATE.isNavigating = false; updateFocus(false); }, 400);
             }, 400);
         }
 
         function openAppPanel(appId) {
-            STATE.activeApp = appId;
-            const fromScreen = document.getElementById('home-screen');
+            STATE.activeApp = appId; const fromScreen = document.getElementById('home-screen');
             if (appId === 'settings') {
-                STATE.currentScreen = 'settings'; STATE.settingsFocusedIndex = 0;
-                renderSettingsList();
-                const toScreen = document.getElementById('settings-environment');
-                navigateScreen(fromScreen, toScreen, true);
+                STATE.currentScreen = 'settings'; STATE.settingsFocusedIndex = 0; renderSettingsList();
+                const toScreen = document.getElementById('settings-environment'); navigateScreen(fromScreen, toScreen, true);
             } else {
                 STATE.currentScreen = 'media'; STATE.mediaFocusedIndex = 0; STATE.topBarFocusedIndex = 0; STATE.currentTab = 'all'; STATE.selectedShow = null; 
                 const topBar = document.getElementById('media-top-bar'); if (topBar) topBar.style.display = 'flex';
                 STATE.mediaFocusArea = 'grid'; updateColumns(); renderTopBar(); renderMediaGrid(appId);
-                const toScreen = document.getElementById('media-environment');
-                navigateScreen(fromScreen, toScreen, true);
+                const toScreen = document.getElementById('media-environment'); navigateScreen(fromScreen, toScreen, true);
             }
         }
 
         function closeAppPanel() {
             let elementId = STATE.currentScreen === 'settings' ? 'settings-environment' : 'media-environment';
             if (STATE.currentScreen === 'media' && STATE.activeApp === 'music') { activeAudio.pause(); activeAudio.currentTime = 0; activeAudio.src = ''; }
-            
-            const fromScreen = document.getElementById(elementId);
-            const toScreen = document.getElementById('home-screen');
-            
-            if (fromScreen) {
-                const w = fromScreen.querySelector('.scroll-wrapper');
-                if (w) w.style.transform = 'translateY(0px)';
-            }
-            const homeW = document.getElementById('home-scroll-wrapper');
-            if (homeW) homeW.style.transform = 'translateY(0px)';
-
-            STATE.currentScreen = 'home';
-            STATE.activeApp = null;
-            updateColumns();
-
-            if (fromScreen) {
-                navigateScreen(fromScreen, toScreen, false);
-            }
+            const fromScreen = document.getElementById(elementId); const toScreen = document.getElementById('home-screen');
+            if (fromScreen) { const w = fromScreen.querySelector('.scroll-wrapper'); if (w) w.style.transform = 'translateY(0px)'; }
+            const homeW = document.getElementById('home-scroll-wrapper'); if (homeW) homeW.style.transform = 'translateY(0px)';
+            STATE.currentScreen = 'home'; STATE.activeApp = null; updateColumns();
+            if (fromScreen) navigateScreen(fromScreen, toScreen, false);
         }
 
         function launchCinemaPlayer(item) {
             const player = document.getElementById('cinema-player'), video = document.getElementById('cinema-video');
             const fromScreen = document.getElementById(STATE.currentScreen === 'home' ? 'home-screen' : 'media-environment');
-            
-            STATE.currentScreen = 'player';
-            STATE.activePlayingItemPath = getContentFilePath(item);
-
+            STATE.currentScreen = 'player'; STATE.activePlayingItemPath = getContentFilePath(item);
             if (item.isYouTube) {
-                video.style.display = 'none'; try { video.pause(); } catch(e) {}
-                initYouTubePlayer(item.videoId);
+                video.style.display = 'none'; try { video.pause(); } catch(e) {} initYouTubePlayer(item.videoId);
             } else {
-                // Ensure the native video container is visible (reverts any youtube 'none' assignment)
-                video.style.display = 'block';
-                video.src = STATE.activePlayingItemPath;
-                video.volume = settingsRegistry[1].options[settingsRegistry[1].currentIndex] / 100;
-                
-                let saved = null;
-                try { saved = localStorage.getItem(`viewOS_resume_${STATE.activePlayingItemPath}`); } catch(err) {}
-                
-                if (saved) {
-                    const progress = JSON.parse(saved);
-                    // Safe Seek Strategy: Wait for loadedmetadata before setting currentTime.
-                    // This prevents modern browser media pipelines from freezing/playing sound only.
-                    const seekOnMetadata = () => {
-                        video.currentTime = progress.current;
-                        triggerSystemToast(`Resumed from ${formatTime(progress.current)}`);
-                    };
-                    video.addEventListener('loadedmetadata', seekOnMetadata, { once: true });
-                }
-                
-                video.play().catch(()=>{});
-                updatePlayStateIcon('cinema'); triggerCinemaOSD();
-            }
-
-            navigateScreen(fromScreen, player, true);
+                video.style.display = 'block'; video.src = STATE.activePlayingItemPath; video.volume = settingsRegistry[1].options[settingsRegistry[1].currentIndex] / 100;
+                let saved = null; try { saved = localStorage.getItem(`viewOS_resume_${STATE.activePlayingItemPath}`); } catch(err) {}
+                if (saved) { const progress = JSON.parse(saved); video.addEventListener('loadedmetadata', () => { video.currentTime = progress.current; triggerSystemToast(`Resumed from ${formatTime(progress.current)}`); }, { once: true }); }
+                video.play().catch(()=>{}); updatePlayStateIcon('cinema'); triggerCinemaOSD();
+            } navigateScreen(fromScreen, player, true);
         }
 
         function closeCinemaPlayer() {
@@ -1861,177 +1381,97 @@
             } catch(e) {}
 
             let toScreen;
-            if (STATE.mediaLaunchedByAI) {
-                STATE.mediaLaunchedByAI = false;
-                STATE.currentScreen = 'home';
-                STATE.activeApp = null;
-                updateColumns();
-                toScreen = document.getElementById('home-screen');
-            } else {
-                STATE.currentScreen = 'media';
-                renderMediaGrid(STATE.activeApp);
-                toScreen = document.getElementById('media-environment');
-            }
-
+            if (STATE.mediaLaunchedByAI) { STATE.mediaLaunchedByAI = false; STATE.currentScreen = 'home'; STATE.activeApp = null; updateColumns(); toScreen = document.getElementById('home-screen'); } 
+            else { STATE.currentScreen = 'media'; renderMediaGrid(STATE.activeApp); toScreen = document.getElementById('media-environment'); }
             navigateScreen(player, toScreen, false);
-
-            setTimeout(() => {
-                video.style.display = 'block';
-                try { video.src = ''; video.load(); } catch (e) {}
-            }, 500);
+            setTimeout(() => { video.style.display = 'block'; try { video.src = ''; video.load(); } catch (e) {} }, 500);
         }
 
         function playAudioTrack(track) {
             activeAudio.src = getContentFilePath(track); activeAudio.volume = settingsRegistry[1].options[settingsRegistry[1].currentIndex] / 100; activeAudio.play().catch(()=>{});
             const fromScreen = document.getElementById(STATE.currentScreen === 'home' ? 'home-screen' : 'media-environment');
-            
             STATE.currentScreen = 'audio_player';
             const artElement = document.getElementById('audio-playing-art'), artPath = getArtPath(track);
             artElement.style.backgroundImage = artPath ? `url('${artPath}')` : "url('SystemData/Music.png')"; 
             document.getElementById('audio-playing-title').innerText = track.file ? track.file.replace(/\.[^/.]+$/, "") : "Untitled"; 
             document.getElementById('audio-playing-artist').innerText = track.artist || 'Unknown Artist';
-            
-            const playerScreen = document.getElementById('audio-player-screen');
-            playerScreen.classList.add('visible');
-            updatePlayStateIcon('audio');
-
+            const playerScreen = document.getElementById('audio-player-screen'); playerScreen.classList.add('visible'); updatePlayStateIcon('audio');
             navigateScreen(fromScreen, playerScreen, true);
         }
 
         function closeAudioPlayer() {
             activeAudio.pause(); activeAudio.currentTime = 0; activeAudio.src = '';
-            const playerScreen = document.getElementById('audio-player-screen');
-            playerScreen.classList.remove('visible');
-
+            const playerScreen = document.getElementById('audio-player-screen'); playerScreen.classList.remove('visible');
             let toScreen;
-            if (STATE.mediaLaunchedByAI) {
-                STATE.mediaLaunchedByAI = false;
-                STATE.currentScreen = 'home';
-                STATE.activeApp = null;
-                updateColumns();
-                toScreen = document.getElementById('home-screen');
-            } else {
-                STATE.currentScreen = 'media';
-                const me = document.getElementById('media-environment');
-                toScreen = me;
-            }
-
+            if (STATE.mediaLaunchedByAI) { STATE.mediaLaunchedByAI = false; STATE.currentScreen = 'home'; STATE.activeApp = null; updateColumns(); toScreen = document.getElementById('home-screen'); } 
+            else { STATE.currentScreen = 'media'; const me = document.getElementById('media-environment'); toScreen = me; }
             navigateScreen(playerScreen, toScreen, false);
         }
 
-        function triggerCinemaOSD() {
-            const osd = document.getElementById('cinema-osd'); osd.classList.add('visible'); clearTimeout(osdTimer);
-            updatePlayStateIcon('cinema'); osdTimer = setTimeout(() => osd.classList.remove('visible'), 5000); // Extended Media Bar duration to 5 seconds
-        }
+        function triggerCinemaOSD() { const osd = document.getElementById('cinema-osd'); osd.classList.add('visible'); clearTimeout(osdTimer); updatePlayStateIcon('cinema'); osdTimer = setTimeout(() => osd.classList.remove('visible'), 5000); }
+        function triggerSystemToast(msg) { const toast = document.getElementById('resume-toast'); toast.innerText = msg; toast.style.display = 'block'; setTimeout(() => toast.style.opacity = '1', 50); setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.style.display = 'none', 300); }, 3000); }
 
-        function triggerSystemToast(msg) {
-            const toast = document.getElementById('resume-toast'); toast.innerText = msg; toast.style.display = 'block';
-            setTimeout(() => toast.style.opacity = '1', 50); setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.style.display = 'none', 300); }, 3000);
-        }
-
-        function startSleep() {
-            STATE.inSleep = true; sleepActiveTime = Date.now();
-            const env = document.getElementById('sleep-environment'); env.style.display = 'block'; document.getElementById('focus-ring').style.opacity = '0';
-            setTimeout(() => env.style.opacity = '1', 50);
-        }
-        function wakeUp() {
-            if (!STATE.inSleep || Date.now() - sleepActiveTime < 1000) return;
-            STATE.inSleep = false; const env = document.getElementById('sleep-environment'); env.style.opacity = '0';
-            setTimeout(() => { env.style.display = 'none'; updateFocus(false); }, 500);
-        }
+        function startSleep() { STATE.inSleep = true; sleepActiveTime = Date.now(); const env = document.getElementById('sleep-environment'); env.style.display = 'block'; document.getElementById('focus-ring').style.opacity = '0'; setTimeout(() => env.style.opacity = '1', 50); }
+        function wakeUp() { if (!STATE.inSleep || Date.now() - sleepActiveTime < 1000) return; STATE.inSleep = false; const env = document.getElementById('sleep-environment'); env.style.opacity = '0'; setTimeout(() => { env.style.display = 'none'; updateFocus(false); }, 500); }
 
         const INPUT = { enterPressed: false, enterHoldTimer: null, enterHoldTriggered: false };
         let isBackDown = false, volumeOpenedByHold = false, backKeyTimeout = null, keyboardTriangleStart = 0; 
 
         function handleKeydownRaw(e) {
+            if (STATE.isInstallingUpdate) { e.preventDefault(); return; } // Global input lock
             if ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R') || e.key === 'F5') return;
             if (e.key === 'Tab') { e.preventDefault(); if (keyboardTriangleStart === 0) keyboardTriangleStart = Date.now(); else if (Date.now() - keyboardTriangleStart > 200 && !STATE.inAI) { openGuahhAI(); keyboardTriangleStart = Date.now() + 999999; } return; }
             if (STATE.inSleep) { if (Date.now() - sleepActiveTime >= 1000) wakeUp(); e.preventDefault(); return; }
             if (STATE.inAI) { 
-                if (e.key === 'Escape' || e.key === 'Backspace') {
-                    closeGuahhAI(); 
-                } else {
-                    // Navigate within the AI suggested shows list if active
-                    const container = document.getElementById('ai-suggestions-container');
-                    if (container && container.style.display === 'flex') {
-                        processAISuggestionsNavigation(e.key);
-                        e.preventDefault();
-                    }
-                }
-                return; 
+                if (e.key === 'Escape' || e.key === 'Backspace') { closeGuahhAI(); } 
+                else { const container = document.getElementById('ai-suggestions-container'); if (container && container.style.display === 'flex') { processAISuggestionsNavigation(e.key); e.preventDefault(); } } return; 
             }
 
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                if (!INPUT.enterPressed) {
-                    INPUT.enterPressed = true; INPUT.enterHoldTriggered = false;
-                    if (STATE.currentScreen === 'media' && !STATE.inPopup && STATE.mediaFocusArea !== 'top-bar') INPUT.enterHoldTimer = setTimeout(() => { INPUT.enterHoldTriggered = true; triggerFavouritePopup(); }, 1700);
-                } return;
+                if (!INPUT.enterPressed) { INPUT.enterPressed = true; INPUT.enterHoldTriggered = false; if (STATE.currentScreen === 'media' && !STATE.inPopup && STATE.mediaFocusArea !== 'top-bar') INPUT.enterHoldTimer = setTimeout(() => { INPUT.enterHoldTriggered = true; triggerFavouritePopup(); }, 1700); } return;
             }
-            if (e.key === 'Escape' || e.key === 'Backspace') {
-                // Shortened hold timeout threshold from 500ms down to 400ms [1]
-                if (!isBackDown) { isBackDown = true; volumeOpenedByHold = false; backKeyTimeout = setTimeout(() => { volumeOpenedByHold = true; openControlCenter(); }, 400); } return; 
-            }
+            if (e.key === 'Escape' || e.key === 'Backspace') { if (!isBackDown) { isBackDown = true; volumeOpenedByHold = false; backKeyTimeout = setTimeout(() => { volumeOpenedByHold = true; openControlCenter(); }, 400); } return; }
             processNavigation(e.key);
         }
 
         function handleKeyupRaw(e) {
             if (e.key === 'Tab') { e.preventDefault(); if (keyboardTriangleStart > 0 && keyboardTriangleStart < Date.now() + 100000 && STATE.inAI) closeGuahhAI(); keyboardTriangleStart = 0; return; }
-            if (STATE.inAI) return;
-            if (e.key === 'Enter' || e.key === ' ') {
-                if (INPUT.enterPressed) { clearTimeout(INPUT.enterHoldTimer); INPUT.enterHoldTimer = null; if (!INPUT.enterHoldTriggered) processNavigation('Enter'); INPUT.enterPressed = false; INPUT.enterHoldTriggered = false; } return;
-            }
+            if (STATE.inAI || STATE.isInstallingUpdate) return;
+            if (e.key === 'Enter' || e.key === ' ') { if (INPUT.enterPressed) { clearTimeout(INPUT.enterHoldTimer); INPUT.enterHoldTimer = null; if (!INPUT.enterHoldTriggered) processNavigation('Enter'); INPUT.enterPressed = false; INPUT.enterHoldTriggered = false; } return; }
             if (e.key === 'Escape' || e.key === 'Backspace') { isBackDown = false; clearTimeout(backKeyTimeout); if (!volumeOpenedByHold) goBack(); }
         }
 
         function goBack() {
-            if (STATE.isNavigating) return;
+            if (STATE.isNavigating || STATE.isInstallingUpdate) return;
             if (STATE.inAI) closeGuahhAI(); 
             else if (STATE.inPopup) closeSystemPopup(); 
             else if (STATE.inControlCenter) closeControlCenter();
-            else if (STATE.currentScreen === 'player') {
-                const osd = document.getElementById('cinema-osd');
-                if (osd && osd.classList.contains('visible')) {
-                    osd.classList.remove('visible');
-                    clearTimeout(osdTimer);
-                } else {
-                    closeCinemaPlayer();
-                }
-            } else if (STATE.currentScreen === 'audio_player') closeAudioPlayer(); 
+            else if (STATE.currentScreen === 'player') { const osd = document.getElementById('cinema-osd'); if (osd && osd.classList.contains('visible')) { osd.classList.remove('visible'); clearTimeout(osdTimer); } else { closeCinemaPlayer(); } } 
+            else if (STATE.currentScreen === 'audio_player') closeAudioPlayer(); 
             else if (STATE.currentScreen === 'media' && STATE.activeApp === 'tvshows' && STATE.selectedShow !== null) { 
                 const wrapper = document.getElementById('media-scroll-wrapper');
-                navigateInnerContent(wrapper, () => {
-                    STATE.selectedShow = null; 
-                    STATE.mediaFocusedIndex = STATE.savedShowIndex; 
-                    renderTopBar(); 
-                    renderMediaGrid('tvshows'); 
-                }, false);
-            }
-            else if (STATE.currentScreen !== 'home') closeAppPanel();
+                navigateInnerContent(wrapper, () => { STATE.selectedShow = null; STATE.mediaFocusedIndex = STATE.savedShowIndex; renderTopBar(); renderMediaGrid('tvshows'); }, false);
+            } else if (STATE.currentScreen !== 'home') closeAppPanel();
         }
 
         function processNavigation(key) {
-            if (STATE.isNavigating) return;
+            if (STATE.isNavigating || STATE.isInstallingUpdate) return;
             let dx = 0, dy = 0;
-            if (key === 'ArrowRight') dx = 1;
-            if (key === 'ArrowLeft') dx = -1;
-            if (key === 'ArrowDown') dy = 1;
-            if (key === 'ArrowUp') dy = -1;
-            
+            if (key === 'ArrowRight') dx = 1; if (key === 'ArrowLeft') dx = -1; if (key === 'ArrowDown') dy = 1; if (key === 'ArrowUp') dy = -1;
             const oldTarget = getActiveTarget();
             
-            // --- CONTROL CENTER INTERACTIVE COMPONENT NAVIGATION [2, 3] ---
             if (STATE.inControlCenter) {
-                const vs = settingsRegistry[1];
-                if (STATE.ccFocusedIndex === 0) { // Volume Focused
+                const vs = settingsRegistry[1]; // Volume setting mapped to index 1 safely
+                if (STATE.ccFocusedIndex === 0) {
                     if (key === 'ArrowRight' && vs.currentIndex < vs.options.length - 1) { vs.currentIndex++; updateVolumeUI(); }
                     else if (key === 'ArrowLeft' && vs.currentIndex > 0) { vs.currentIndex--; updateVolumeUI(); }
                     else if (key === 'ArrowDown') { STATE.ccFocusedIndex = 1; updateControlCenterFocus(); }
-                } else if (STATE.ccFocusedIndex === 1) { // Sleep Button Focused
+                } else if (STATE.ccFocusedIndex === 1) {
                     if (key === 'ArrowUp') { STATE.ccFocusedIndex = 0; updateControlCenterFocus(); }
                     else if (key === 'ArrowRight') { STATE.ccFocusedIndex = 2; updateControlCenterFocus(); }
                     else if (key === 'Enter') { triggerSleepFromControlCenter(); }
-                } else if (STATE.ccFocusedIndex === 2) { // Home Button Focused
+                } else if (STATE.ccFocusedIndex === 2) {
                     if (key === 'ArrowUp') { STATE.ccFocusedIndex = 0; updateControlCenterFocus(); }
                     else if (key === 'ArrowLeft') { STATE.ccFocusedIndex = 1; updateControlCenterFocus(); }
                     else if (key === 'Enter') { triggerHomeFromControlCenter(); }
@@ -2043,8 +1483,7 @@
                 if (key === 'ArrowDown' && STATE.popupFocusedIndex < activePopupButtons.length - 1) STATE.popupFocusedIndex++;
                 else if (key === 'ArrowUp' && STATE.popupFocusedIndex > 0) STATE.popupFocusedIndex--;
                 else if (key === 'Enter') { const btn = activePopupButtons[STATE.popupFocusedIndex]; closeSystemPopup(); if (btn && btn.action) btn.action(); }
-                const changed = (oldTarget !== getActiveTarget());
-                updateFocus(false, changed ? dx : 0, changed ? dy : 0); return;
+                const changed = (oldTarget !== getActiveTarget()); updateFocus(false, changed ? dx : 0, changed ? dy : 0); return;
             }
             if (STATE.currentScreen === 'player') {
                 if (key === 'Enter') {
@@ -2061,18 +1500,10 @@
 
             if (STATE.currentScreen === 'home') {
                 const c = STATE.columns, t = appRegistry.length;
-                if (key === 'ArrowRight' && (STATE.focusedIndex + 1) % c !== 0 && STATE.focusedIndex + 1 < t) {
-                    STATE.focusedIndex++;
-                }
-                else if (key === 'ArrowLeft' && STATE.focusedIndex % c !== 0) {
-                    STATE.focusedIndex--;
-                }
-                else if (key === 'ArrowDown' && STATE.focusedIndex + c < t) {
-                    STATE.focusedIndex += c;
-                }
-                else if (key === 'ArrowUp' && STATE.focusedIndex - c >= 0) {
-                    STATE.focusedIndex -= c;
-                }
+                if (key === 'ArrowRight' && (STATE.focusedIndex + 1) % c !== 0 && STATE.focusedIndex + 1 < t) STATE.focusedIndex++;
+                else if (key === 'ArrowLeft' && STATE.focusedIndex % c !== 0) STATE.focusedIndex--;
+                else if (key === 'ArrowDown' && STATE.focusedIndex + c < t) STATE.focusedIndex += c;
+                else if (key === 'ArrowUp' && STATE.focusedIndex - c >= 0) STATE.focusedIndex -= c;
                 else if (key === 'Enter') openAppPanel(appRegistry[STATE.focusedIndex].id);
             } else if (STATE.currentScreen === 'media') {
                 const tabs = getAvailableTabs();
@@ -2090,15 +1521,8 @@
                         const sel = activeMediaList[STATE.mediaFocusedIndex];
                         if (sel && sel.id === 'show-folder') {
                             const wrapper = document.getElementById('media-scroll-wrapper');
-                            navigateInnerContent(wrapper, () => {
-                                STATE.selectedShow = sel.name; 
-                                STATE.savedShowIndex = STATE.mediaFocusedIndex; 
-                                STATE.mediaFocusedIndex = 0; 
-                                renderTopBar(); 
-                                renderMediaGrid('tvshows'); 
-                            }, true);
-                        }
-                        else if (sel && STATE.activeApp === 'music') playAudioTrack(sel); else if (sel) launchCinemaPlayer(sel);
+                            navigateInnerContent(wrapper, () => { STATE.selectedShow = sel.name; STATE.savedShowIndex = STATE.mediaFocusedIndex; STATE.mediaFocusedIndex = 0; renderTopBar(); renderMediaGrid('tvshows'); }, true);
+                        } else if (sel && STATE.activeApp === 'music') playAudioTrack(sel); else if (sel) launchCinemaPlayer(sel);
                     }
                 }
             } else if (STATE.currentScreen === 'settings') {
@@ -2107,41 +1531,28 @@
                 else if (['ArrowLeft','ArrowRight','Enter'].includes(key)) {
                     const set = settingsRegistry[STATE.settingsFocusedIndex];
                     if (set.type === 'cycle') { set.currentIndex = (set.currentIndex + (key === 'ArrowLeft' ? -1 : 1) + set.options.length) % set.options.length; if (set.id === 'volume') updateVolumeUI(); renderSettingsList(); }
-                    else if (set.id === 'sleep' && key === 'Enter') startSleep(); else if (set.id === 'reboot' && key === 'Enter') location.reload();
+                    else if (set.id === 'software_update' && key === 'Enter') checkForUpdates();
+                    else if (set.id === 'sleep' && key === 'Enter') startSleep(); 
+                    else if (set.id === 'reboot' && key === 'Enter') location.reload();
                     else if (set.id === 'clear_data' && key === 'Enter') showSystemPopup("Erase All Data?", "All data other than the content in apps will be deleted are you sure?", [
-                        { label: 'Continue', action: () => { 
-                            try { localStorage.clear(); } catch(e) {}
-                            settingsRegistry[1].currentIndex = 5; updateVolumeUI(); renderSettingsList(); triggerSystemToast("All Data Cleared"); 
-                        } }, { label: 'Cancel', action: () => {} }
+                        { label: 'Continue', action: () => { try { localStorage.clear(); } catch(e) {} settingsRegistry[1].currentIndex = 5; updateVolumeUI(); renderSettingsList(); triggerSystemToast("All Data Cleared"); } }, 
+                        { label: 'Cancel', action: () => {} }
                     ]);
                 }
             }
-            
-            // Unify rubber band prevention: Only kick posX/posY if active focus targets actually changed
-            const changed = (oldTarget !== getActiveTarget());
-            updateFocus(false, changed ? dx : 0, changed ? dy : 0);
+            const changed = (oldTarget !== getActiveTarget()); updateFocus(false, changed ? dx : 0, changed ? dy : 0);
         }
 
         let lastGamepadState = { up: false, down: false, left: false, right: false, enter: false, back: false, triangle: false }, gamepadBackPressTime = 0, gamepadActiveDir = null, gamepadHoldStartTime = 0, gamepadLastRepeatTime = 0, gpEnterPressed = false, gpEnterHoldTriggered = false, gpEnterHoldTimer = null;
         function pollGamepads() {
+            if (STATE.isInstallingUpdate) return requestAnimationFrame(pollGamepads); // Global input lock
+            
             const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
             for (let i = 0; i < gamepads.length; i++) {
                 const gp = gamepads[i]; if (!gp) continue;
                 
-                const back = gp.buttons[1]?.pressed;  
-                const square = gp.buttons[2]?.pressed; 
-
-                // FORCE REBOOT CHECK (First priority, overrides all states, including sleep & AI)
-                if (back && square) {
-                    if (STATE.forceRebootStart === 0) {
-                        STATE.forceRebootStart = Date.now();
-                    } else if (Date.now() - STATE.forceRebootStart >= 3000) {
-                        location.reload();
-                        return;
-                    }
-                } else {
-                    STATE.forceRebootStart = 0;
-                }
+                const back = gp.buttons[1]?.pressed, square = gp.buttons[2]?.pressed; 
+                if (back && square) { if (STATE.forceRebootStart === 0) STATE.forceRebootStart = Date.now(); else if (Date.now() - STATE.forceRebootStart >= 3000) { location.reload(); return; } } else { STATE.forceRebootStart = 0; }
 
                 const up = gp.buttons[12]?.pressed || gp.axes[1] < -0.5, down = gp.buttons[13]?.pressed || gp.axes[1] > 0.5, left = gp.buttons[14]?.pressed || gp.axes[0] < -0.5, right = gp.buttons[15]?.pressed || gp.axes[0] > 0.5;
                 const enter = gp.buttons[0]?.pressed, triangle = gp.buttons[3]?.pressed;
@@ -2151,395 +1562,145 @@
                 if (STATE.inSleep) {
                     let input = gp.buttons.some(b => b.pressed) || gp.axes.some(a => Math.abs(a) > 0.5);
                     if (input && !(back && square) && Date.now() - sleepActiveTime >= 1000) wakeUp(); 
-                    lastGamepadState = { up, down, left, right, enter, back, triangle };
-                    break; 
+                    lastGamepadState = { up, down, left, right, enter, back, triangle }; break; 
                 }
                 if (STATE.inAI) { 
-                    if (back && !lastGamepadState.back) {
-                        closeGuahhAI(); 
-                    } else {
-                        // Pass gamepad directional inputs to process AI suggestions menu navigation
-                        const container = document.getElementById('ai-suggestions-container');
-                        if (container && container.style.display === 'flex') {
-                            let dir = null;
-                            if (up && !lastGamepadState.up) dir = 'ArrowUp';
-                            else if (down && !lastGamepadState.down) dir = 'ArrowDown';
-                            else if (enter && !lastGamepadState.enter) dir = 'Enter';
-
-                            if (dir) {
-                                processAISuggestionsNavigation(dir);
-                            }
-                        }
-                    }
-                    lastGamepadState = { up, down, left, right, enter, back, triangle }; 
-                    break; 
+                    if (back && !lastGamepadState.back) { closeGuahhAI(); } else { const container = document.getElementById('ai-suggestions-container'); if (container && container.style.display === 'flex') { let dir = null; if (up && !lastGamepadState.up) dir = 'ArrowUp'; else if (down && !lastGamepadState.down) dir = 'ArrowDown'; else if (enter && !lastGamepadState.enter) dir = 'Enter'; if (dir) processAISuggestionsNavigation(dir); } }
+                    lastGamepadState = { up, down, left, right, enter, back, triangle }; break; 
                 }
 
                 let dir = up ? 'up' : down ? 'down' : left ? 'left' : right ? 'right' : null;
-                if (dir) {
-                    if (gamepadActiveDir !== dir) { gamepadActiveDir = dir; gamepadHoldStartTime = Date.now(); gamepadLastRepeatTime = Date.now(); processNavigation({ up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[dir]); }
-                    else if (Date.now() - gamepadHoldStartTime > 350 && Date.now() - gamepadLastRepeatTime > 80) { processNavigation({ up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[dir]); gamepadLastRepeatTime = Date.now(); }
-                } else gamepadActiveDir = null; 
+                if (dir) { if (gamepadActiveDir !== dir) { gamepadActiveDir = dir; gamepadHoldStartTime = Date.now(); gamepadLastRepeatTime = Date.now(); processNavigation({ up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[dir]); } else if (Date.now() - gamepadHoldStartTime > 350 && Date.now() - gamepadLastRepeatTime > 80) { processNavigation({ up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[dir]); gamepadLastRepeatTime = Date.now(); } } else gamepadActiveDir = null; 
 
-                if (enter) { if (!gpEnterPressed) { gpEnterPressed = true; gpEnterHoldTriggered = false; if (STATE.currentScreen === 'media' && !STATE.inPopup && STATE.mediaFocusArea !== 'top-bar') gpEnterHoldTimer = setTimeout(() => { gpEnterHoldTriggered = true; triggerFavouritePopup(); }, 1700); } }
-                else { if (gpEnterPressed) { clearTimeout(gpEnterHoldTimer); gpEnterHoldTimer = null; if (!gpEnterHoldTriggered) processNavigation('Enter'); gpEnterPressed = false; gpEnterHoldTriggered = false; } }
-                // Gamepad hold back duration reduced to 400ms [1]
+                if (enter) { if (!gpEnterPressed) { gpEnterPressed = true; gpEnterHoldTriggered = false; if (STATE.currentScreen === 'media' && !STATE.inPopup && STATE.mediaFocusArea !== 'top-bar') gpEnterHoldTimer = setTimeout(() => { gpEnterHoldTriggered = true; triggerFavouritePopup(); }, 1700); } } else { if (gpEnterPressed) { clearTimeout(gpEnterHoldTimer); gpEnterHoldTimer = null; if (!gpEnterHoldTriggered) processNavigation('Enter'); gpEnterPressed = false; gpEnterHoldTriggered = false; } }
                 if (back && !lastGamepadState.back) { gamepadBackPressTime = Date.now(); volumeOpenedByHold = false; } else if (back && lastGamepadState.back) { if (!volumeOpenedByHold && (Date.now() - gamepadBackPressTime > 400)) { volumeOpenedByHold = true; openControlCenter(); } } else if (!back && lastGamepadState.back) { if (!volumeOpenedByHold) goBack(); }
 
                 lastGamepadState = { up, down, left, right, enter, back, triangle }; break; 
             } requestAnimationFrame(pollGamepads);
         }
 
-        /* ==========================================================================
-           MICRO-TILT & PARALLAX RENDERING LOOP (JOYSTICK-ONLY TRACKING)
-           ========================================================================== */
-
         let lastTargetElement = null;
-
         function tickMicroanimations() {
-            let targetX = 0;
-            let targetY = 0;
-            let gpActive = false;
-
+            let targetX = 0; let targetY = 0; let gpActive = false;
             const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
             for (let i = 0; i < gamepads.length; i++) {
-                const gp = gamepads[i];
-                if (!gp) continue;
-                let x = gp.axes[0] || 0;
-                let y = gp.axes[1] || 0;
-                // Evaluate Right Stick values if Left Stick sits centered
+                const gp = gamepads[i]; if (!gp) continue;
+                let x = gp.axes[0] || 0; let y = gp.axes[1] || 0;
                 if (gp.axes[2] && Math.abs(gp.axes[2]) > Math.abs(x)) x = gp.axes[2];
                 if (gp.axes[3] && Math.abs(gp.axes[3]) > Math.abs(y)) y = gp.axes[3];
-                
-                if (Math.abs(x) > 0.05 || Math.abs(y) > 0.05) {
-                    targetX = x;
-                    targetY = y;
-                    gpActive = true;
-                    break;
-                }
+                if (Math.abs(x) > 0.05 || Math.abs(y) > 0.05) { targetX = x; targetY = y; gpActive = true; break; }
             }
+            if (!gpActive) { targetX = 0; targetY = 0; }
 
-            // Mouse coordinates are completely ignored. Static resting center when gamepad is inactive.
-            if (!gpActive) {
-                targetX = 0;
-                targetY = 0;
-            }
+            STATE.joyX += (targetX - STATE.joyX) * 0.15; STATE.joyY += (targetY - STATE.joyY) * 0.15;
+            const activeTarget = getActiveTarget(); const currentElement = activeTarget ? activeTarget.icon : null; const currentContainer = activeTarget ? activeTarget.container : null;
 
-            // Low-pass linear interpolation filter for natural input lag
-            STATE.joyX += (targetX - STATE.joyX) * 0.15;
-            STATE.joyY += (targetY - STATE.joyY) * 0.15;
-
-            const activeTarget = getActiveTarget();
-            const currentElement = activeTarget ? activeTarget.icon : null;
-            const currentContainer = activeTarget ? activeTarget.container : null;
-
-            // 1. Reset 'tilted-focus' on any elements that are no longer focused
             const tiltedElements = document.querySelectorAll('.tilted-focus');
             tiltedElements.forEach(el => {
                 if (el !== currentElement && el !== currentContainer) {
-                    // Only reset transform if it's not a spring element OR if its springs have finished animating
-                    if (!el.springs) {
-                        el.style.transform = '';
-                        el.classList.remove('tilted-focus');
-                    } else {
-                        // For spring elements, we let the loop handle setting transforms until decay completes,
-                        // but we can remove tilted-focus and transform from its parent container so it slides back.
-                        if (el.classList.contains('app-icon') || el.classList.contains('media-card')) {
-                            const parent = el.parentElement;
-                            if (parent && parent !== currentContainer) {
-                                parent.style.transform = '';
-                                parent.classList.remove('tilted-focus');
-                            }
-                        }
+                    if (!el.springs) { el.style.transform = ''; el.classList.remove('tilted-focus'); } else {
+                        if (el.classList.contains('app-icon') || el.classList.contains('media-card')) { const parent = el.parentElement; if (parent && parent !== currentContainer) { parent.style.transform = ''; parent.classList.remove('tilted-focus'); } }
                     }
                 }
             });
 
-            // 2. Process Spring Physics for Grid Cards (App Icons & Media Cards)
             springElements.forEach(el => {
-                if (!el.isConnected) return; // Skip detached
-                
-                const s = el.springs;
-                let changed = false;
-                if (s.scale.update()) changed = true;
-                if (s.posX.update()) changed = true;
-                if (s.posY.update()) changed = true;
-                if (s.focusState.update()) changed = true;
-
-                const isFocused = s.focusState.val > 0.01;
-                const isCurrent = (el === currentElement);
+                if (!el.isConnected) return;
+                const s = el.springs; let changed = false;
+                if (s.scale.update()) changed = true; if (s.posX.update()) changed = true; if (s.posY.update()) changed = true; if (s.focusState.update()) changed = true;
+                const isFocused = s.focusState.val > 0.01; const isCurrent = (el === currentElement);
 
                 if (changed || isFocused || isCurrent) {
-                    const cardMoveScale = 0.48;
-                    const springX = s.posX.val * cardMoveScale;
-                    const springY = s.posY.val * cardMoveScale;
+                    const cardMoveScale = 0.48; const springX = s.posX.val * cardMoveScale; const springY = s.posY.val * cardMoveScale;
+                    const jX = isCurrent ? STATE.joyX : 0; const jY = isCurrent ? STATE.joyY : 0;
+                    const maxIconRotate = 8; const maxIconTranslate = 6;
+                    const containerTranslateX = jX * 14; const containerTranslateY = jY * 14;
+                    const iconRotateY = jX * maxIconRotate; const iconRotateX = -jY * maxIconRotate; const iconTranslateX = jX * maxIconTranslate; const iconTranslateY = jY * maxIconTranslate;
+                    const totalTranslateX = springX + iconTranslateX; const totalTranslateY = springY + iconTranslateY;
 
-                    // 3D Parallax Tilt Calculation
-                    const jX = isCurrent ? STATE.joyX : 0;
-                    const jY = isCurrent ? STATE.joyY : 0;
-
-                    const maxIconRotate = 8; // degrees
-                    const maxIconTranslate = 6; // pixels
-                    
-                    const containerTranslateX = jX * 14;
-                    const containerTranslateY = jY * 14;
-
-                    const iconRotateY = jX * maxIconRotate;
-                    const iconRotateX = -jY * maxIconRotate;
-                    const iconTranslateX = jX * maxIconTranslate;
-                    const iconTranslateY = jY * maxIconTranslate;
-
-                    const totalTranslateX = springX + iconTranslateX;
-                    const totalTranslateY = springY + iconTranslateY;
-
-                    // Apply card transform
-                    el.style.transform = `scale(${s.scale.val.toFixed(3)}) translate3d(${totalTranslateX.toFixed(2)}px, ${totalTranslateY.toFixed(2)}px, 0) rotateX(${iconRotateX.toFixed(2)}deg) rotateY(${iconRotateY.toFixed(2)}deg)`;
-                    el.classList.add('tilted-focus');
-
-                    // Apply container transform
+                    el.style.transform = `scale(${s.scale.val.toFixed(3)}) translate3d(${totalTranslateX.toFixed(2)}px, ${totalTranslateY.toFixed(2)}px, 0) rotateX(${iconRotateX.toFixed(2)}deg) rotateY(${iconRotateY.toFixed(2)}deg)`; el.classList.add('tilted-focus');
                     const container = el.parentElement;
-                    if (container && (container.classList.contains('app-container') || container.classList.contains('media-item'))) {
-                        container.style.transform = `translate3d(${containerTranslateX.toFixed(2)}px, ${containerTranslateY.toFixed(2)}px, 0)`;
-                        container.classList.add('tilted-focus');
-                    }
+                    if (container && (container.classList.contains('app-container') || container.classList.contains('media-item'))) { container.style.transform = `translate3d(${containerTranslateX.toFixed(2)}px, ${containerTranslateY.toFixed(2)}px, 0)`; container.classList.add('tilted-focus'); }
 
-                    // Glass border & glow intensity update (Icon shadows removed)
                     const f = Math.max(0, s.focusState.val);
                     if (el.glassBorder) el.glassBorder.style.opacity = (0.3 + 0.7 * f).toFixed(3);
-                    
                     if (el.shine) {
                         el.shine.style.opacity = f.toFixed(3);
                         if (isFocused) {
-                            const idleX = Math.sin(Date.now() * 0.001) * 3; 
-                            const idleY = Math.cos(Date.now() * 0.001) * 3;
-                            const shineX = 30 + (s.posX.val * 2.2) + idleX; 
-                            const shineY = 30 + (s.posY.val * 2.2) + idleY;
+                            const idleX = Math.sin(Date.now() * 0.001) * 3; const idleY = Math.cos(Date.now() * 0.001) * 3;
+                            const shineX = 30 + (s.posX.val * 2.2) + idleX; const shineY = 30 + (s.posY.val * 2.2) + idleY;
                             el.shine.style.background = `radial-gradient(circle at ${shineX.toFixed(1)}% ${shineY.toFixed(1)}%, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0) 100%)`;
                         }
                     }
                 }
             });
 
-            // 3. Process Legacy Microanimations for Non-Spring UI Elements (Settings, Top Bar, Popups)
             if (activeTarget && activeTarget.icon && activeTarget.container && !activeTarget.icon.springs) {
-                const container = activeTarget.container;
-                const icon = activeTarget.icon;
+                const container = activeTarget.container; const icon = activeTarget.icon;
+                if (icon !== lastTargetElement) { STATE.focusScale = 1.0; lastTargetElement = icon; }
+                let targetScale = 1.12; if (icon.classList.contains('settings-item')) { targetScale = 1.06; }
+                STATE.focusScale += (targetScale - STATE.focusScale) * 0.12; const currentScale = STATE.focusScale;
 
-                // Track selection swap to safely slide focus zoom scale from 1.0 (smooth zoom, no snap)
-                if (icon !== lastTargetElement) {
-                    STATE.focusScale = 1.0;
-                    lastTargetElement = icon;
+                container.classList.add('tilted-focus'); icon.classList.add('tilted-focus');
+                const maxContainerTranslate = 14; const containerTranslateX = STATE.joyX * maxContainerTranslate; const containerTranslateY = STATE.joyY * maxContainerTranslate;
+                const maxIconRotate = 8; const maxIconTranslate = 6; const iconRotateY = STATE.joyX * maxIconRotate; const iconRotateX = -STATE.joyY * maxIconRotate; const iconTranslateX = STATE.joyX * maxIconTranslate; const iconTranslateY = STATE.joyY * maxIconTranslate;
+
+                if (container.parentElement && !container.parentElement.style.perspective) { container.parentElement.style.perspective = '1000px'; }
+                if (icon.parentElement && !icon.parentElement.style.perspective) { icon.parentElement.style.perspective = '1000px'; }
+
+                if (container === icon) { icon.style.transform = `scale(${currentScale}) translate3d(${containerTranslateX}px, ${containerTranslateY}px, 0) rotateX(${iconRotateX}deg) rotateY(${iconRotateY}deg)`; } else {
+                    container.style.transform = `translate3d(${containerTranslateX}px, ${containerTranslateY}px, 0)`; icon.style.transform = `scale(${currentScale}) translate3d(${iconTranslateX}px, ${iconTranslateY}px, 0) rotateX(${iconRotateX}deg) rotateY(${iconRotateY}deg)`;
                 }
-
-                // Increased scale thresholds for prominent selection layout
-                let targetScale = 1.12; 
-                if (icon.classList.contains('settings-item')) {
-                    targetScale = 1.06;
-                }
-
-                // Interpolate focus scaling seamlessly over frames to eradicate layout snap
-                STATE.focusScale += (targetScale - STATE.focusScale) * 0.12;
-                const currentScale = STATE.focusScale;
-
-                container.classList.add('tilted-focus');
-                icon.classList.add('tilted-focus');
-
-                // Parallax shift offsets: Whole tile moves together while inner element tilts independently
-                const maxContainerTranslate = 14; 
-                const containerTranslateX = STATE.joyX * maxContainerTranslate;
-                const containerTranslateY = STATE.joyY * maxContainerTranslate;
-
-                const maxIconRotate = 8; 
-                const maxIconTranslate = 6; 
-                const iconRotateY = STATE.joyX * maxIconRotate;
-                const iconRotateX = -STATE.joyY * maxIconRotate;
-                const iconTranslateX = STATE.joyX * maxIconTranslate;
-                const iconTranslateY = STATE.joyY * maxIconTranslate;
-
-                // Enable parent perspective values for clean depth rendering
-                if (container.parentElement && !container.parentElement.style.perspective) {
-                    container.parentElement.style.perspective = '1000px';
-                }
-                if (icon.parentElement && !icon.parentElement.style.perspective) {
-                    icon.parentElement.style.perspective = '1000px';
-                }
-
-                if (container === icon) {
-                    // Text button layout: translate and scale node together safely
-                    icon.style.transform = `scale(${currentScale}) translate3d(${containerTranslateX}px, ${containerTranslateY}px, 0) rotateX(${iconRotateX}deg) rotateY(${iconRotateY}deg)`;
-                } else {
-                    // Grid items: separate translations on parent vs child nodes to craft deep visual depth
-                    container.style.transform = `translate3d(${containerTranslateX}px, ${containerTranslateY}px, 0)`;
-                    icon.style.transform = `scale(${currentScale}) translate3d(${iconTranslateX}px, ${iconTranslateY}px, 0) rotateX(${iconRotateX}deg) rotateY(${iconRotateY}deg)`;
-                }
-            }
-
-            requestAnimationFrame(tickMicroanimations);
+            } requestAnimationFrame(tickMicroanimations);
         }
 
-        /* ==========================================================================
-           DYNAMIC SHOW SUGGESTION ENGINE (FOR PROGRAMMATIC EXTERNAL INJECTION)
-           ========================================================================== */
-
         window.showAISuggestions = function(shows) {
-            const container = document.getElementById('ai-suggestions-container');
-            const list = document.getElementById('ai-suggestions-list');
-            if (!container || !list) return;
-
-            list.innerHTML = '';
-            STATE.aiFocusedSuggestionIndex = -1;
-
-            if (!shows || shows.length === 0) {
-                container.style.display = 'none';
-                return;
-            }
+            const container = document.getElementById('ai-suggestions-container'), list = document.getElementById('ai-suggestions-list');
+            if (!container || !list) return; list.innerHTML = ''; STATE.aiFocusedSuggestionIndex = -1;
+            if (!shows || shows.length === 0) { container.style.display = 'none'; return; }
 
             shows.forEach((show, index) => {
                 if (!show) return;
-                const item = document.createElement('div');
-                item.className = 'suggestion-item';
-                
-                // Art pathing checks to handle both absolute urls and local directories
+                const item = document.createElement('div'); item.className = 'suggestion-item';
                 const imgUrl = show.art ? (show.art.startsWith('http') ? show.art : `Content/${show.art}`) : 'SystemData/Tv Shows.png';
-                
-                item.innerHTML = `
-                    <img src="${imgUrl}" style="width: 45px; height: 65px; object-fit: cover; border-radius: 6px; flex-shrink: 0;" onerror="this.src='SystemData/Tv Shows.png';" />
-                    <div style="display: flex; flex-direction: column; overflow: hidden; width: 100%;">
-                        <div style="font-size: 1.3rem; font-weight: 300; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #ffffff;">${show.title || 'Untitled'}</div>
-                        <div style="font-size: 1.05rem; color: var(--secondary-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 4px;">${show.genre || show.description || 'Suggested TV Show'}</div>
-                    </div>
-                `;
-
-                item.addEventListener('click', () => {
-                    closeGuahhAI();
-                    setTimeout(() => {
-                        // Open the designated TV Show folder directly
-                        STATE.selectedShow = show.title;
-                        STATE.savedShowIndex = 0;
-                        openAppPanel('tvshows');
-                    }, 500);
-                });
-
+                item.innerHTML = `<img src="${imgUrl}" style="width: 45px; height: 65px; object-fit: cover; border-radius: 6px; flex-shrink: 0;" onerror="this.src='SystemData/Tv Shows.png';" /><div style="display: flex; flex-direction: column; overflow: hidden; width: 100%;"><div style="font-size: 1.3rem; font-weight: 300; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #ffffff;">${show.title || 'Untitled'}</div><div style="font-size: 1.05rem; color: var(--secondary-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 4px;">${show.genre || show.description || 'Suggested TV Show'}</div></div>`;
+                item.addEventListener('click', () => { closeGuahhAI(); setTimeout(() => { STATE.selectedShow = show.title; STATE.savedShowIndex = 0; openAppPanel('tvshows'); }, 500); });
                 list.appendChild(item);
-            });
-
-            container.style.display = 'flex';
-            
-            // Set initial selection highlight
-            setTimeout(() => {
-                processAISuggestionsNavigation('ArrowDown');
-            }, 100);
+            }); container.style.display = 'flex'; setTimeout(() => { processAISuggestionsNavigation('ArrowDown'); }, 100);
         };
 
         function processAISuggestionsNavigation(key) {
-            const items = document.querySelectorAll('#ai-suggestions-list .suggestion-item');
-            if (items.length === 0) return;
-
-            if (key === 'ArrowDown') {
-                STATE.aiFocusedSuggestionIndex = Math.min(items.length - 1, STATE.aiFocusedSuggestionIndex + 1);
-            } else if (key === 'ArrowUp') {
-                STATE.aiFocusedSuggestionIndex = Math.max(0, STATE.aiFocusedSuggestionIndex - 1);
-            } else if (key === 'Enter') {
-                if (STATE.aiFocusedSuggestionIndex >= 0 && STATE.aiFocusedSuggestionIndex < items.length) {
-                    items[STATE.aiFocusedSuggestionIndex].click();
-                }
-                return;
-            } else {
-                return;
-            }
-
-            // Sync visual styles and scroll selection smoothly into focus
-            items.forEach((item, idx) => {
-                if (idx === STATE.aiFocusedSuggestionIndex) {
-                    item.classList.add('is-focused');
-                    item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-                } else {
-                    item.classList.remove('is-focused');
-                }
-            });
+            const items = document.querySelectorAll('#ai-suggestions-list .suggestion-item'); if (items.length === 0) return;
+            if (key === 'ArrowDown') { STATE.aiFocusedSuggestionIndex = Math.min(items.length - 1, STATE.aiFocusedSuggestionIndex + 1); } else if (key === 'ArrowUp') { STATE.aiFocusedSuggestionIndex = Math.max(0, STATE.aiFocusedSuggestionIndex - 1); } else if (key === 'Enter') { if (STATE.aiFocusedSuggestionIndex >= 0 && STATE.aiFocusedSuggestionIndex < items.length) { items[STATE.aiFocusedSuggestionIndex].click(); } return; } else { return; }
+            items.forEach((item, idx) => { if (idx === STATE.aiFocusedSuggestionIndex) { item.classList.add('is-focused'); item.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } else { item.classList.remove('is-focused'); } });
         }
 
-        /* --- CONTROL CENTER FUNCTIONAL MODULES [1, 2] --- */
         let volumeOverlayTimer = null;
-        
-        function triggerVolumeOverlay() { 
-            if (STATE.inSleep) return; 
-            const o = document.getElementById('control-center'); 
-            o.classList.add('visible'); 
-            clearTimeout(volumeOverlayTimer); 
-            volumeOverlayTimer = setTimeout(() => { 
-                if (!STATE.inControlCenter) o.classList.remove('visible'); 
-            }, 2000); 
-        }
-        
-        function openControlCenter() { 
-            STATE.inControlCenter = true; 
-            STATE.ccFocusedIndex = 0; 
-            updateControlCenterFocus(); 
-            document.getElementById('control-center').classList.add('visible'); 
-        }
-        
-        function closeControlCenter() { 
-            STATE.inControlCenter = false; 
-            document.getElementById('control-center').classList.remove('visible'); 
-            updateFocus(); 
-        }
+        function triggerVolumeOverlay() { if (STATE.inSleep) return; const o = document.getElementById('control-center'); o.classList.add('visible'); clearTimeout(volumeOverlayTimer); volumeOverlayTimer = setTimeout(() => { if (!STATE.inControlCenter) o.classList.remove('visible'); }, 2000); }
+        function openControlCenter() { STATE.inControlCenter = true; STATE.ccFocusedIndex = 0; updateControlCenterFocus(); document.getElementById('control-center').classList.add('visible'); }
+        function closeControlCenter() { STATE.inControlCenter = false; document.getElementById('control-center').classList.remove('visible'); updateFocus(); }
         
         function updateControlCenterFocus() {
-            const volTile = document.getElementById('cc-vol-tile');
-            const sleepTile = document.getElementById('cc-sleep-tile');
-            const homeTile = document.getElementById('cc-home-tile');
-            
-            volTile.classList.remove('cc-tile-focused');
-            sleepTile.classList.remove('cc-tile-focused');
-            homeTile.classList.remove('cc-tile-focused');
-            
-            if (STATE.ccFocusedIndex === 0) volTile.classList.add('cc-tile-focused');
-            else if (STATE.ccFocusedIndex === 1) sleepTile.classList.add('cc-tile-focused');
-            else if (STATE.ccFocusedIndex === 2) homeTile.classList.add('cc-tile-focused');
+            const volTile = document.getElementById('cc-vol-tile'), sleepTile = document.getElementById('cc-sleep-tile'), homeTile = document.getElementById('cc-home-tile');
+            volTile.classList.remove('cc-tile-focused'); sleepTile.classList.remove('cc-tile-focused'); homeTile.classList.remove('cc-tile-focused');
+            if (STATE.ccFocusedIndex === 0) volTile.classList.add('cc-tile-focused'); else if (STATE.ccFocusedIndex === 1) sleepTile.classList.add('cc-tile-focused'); else if (STATE.ccFocusedIndex === 2) homeTile.classList.add('cc-tile-focused');
         }
         
         function triggerSleepFromControlCenter() {
-            // Pause any active local/YT playback
-            const cv = document.getElementById('cinema-video');
-            if (cv && !cv.paused) cv.pause();
+            const cv = document.getElementById('cinema-video'); if (cv && !cv.paused) cv.pause();
             if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') ytPlayer.pauseVideo();
-            
-            // Pause active audio session
-            if (activeAudio && !activeAudio.paused) activeAudio.pause();
-            
-            closeControlCenter();
-            startSleep();
+            if (activeAudio && !activeAudio.paused) activeAudio.pause(); closeControlCenter(); startSleep();
         }
         
-        function triggerHomeFromControlCenter() {
-            closeControlCenter();
-            
-            if (STATE.currentScreen === 'player') {
-                closeCinemaPlayer();
-            }
-            if (STATE.currentScreen === 'audio_player') {
-                closeAudioPlayer();
-            }
-            if (STATE.currentScreen === 'media' || STATE.currentScreen === 'settings') {
-                closeAppPanel();
-            }
-            
-            STATE.currentScreen = 'home';
-            updateColumns();
-            updateFocus(true);
-        }
+        function triggerHomeFromControlCenter() { closeControlCenter(); if (STATE.currentScreen === 'player') closeCinemaPlayer(); if (STATE.currentScreen === 'audio_player') closeAudioPlayer(); if (STATE.currentScreen === 'media' || STATE.currentScreen === 'settings') closeAppPanel(); STATE.currentScreen = 'home'; updateColumns(); updateFocus(true); }
         
         function updateVolumeUI() {
             const v = settingsRegistry[1], c = v.options[v.currentIndex]; 
-            document.getElementById('volume-fill').style.width = `${c}%`; 
-            document.getElementById('volume-text').innerText = `${c}%`;
+            document.getElementById('volume-fill').style.width = `${c}%`; document.getElementById('volume-text').innerText = `${c}%`;
             const f = c / 100; activeAudio.volume = f; 
-            const cv = document.getElementById('cinema-video');
-            if (cv) cv.volume = f; 
+            const cv = document.getElementById('cinema-video'); if (cv) cv.volume = f; 
             if (ytPlayer && typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(c);
-            try { localStorage.setItem('viewOS_volume_index', v.currentIndex); } catch(e) {}
-            renderSettingsList(); 
+            try { localStorage.setItem('viewOS_volume_index', v.currentIndex); } catch(e) {} renderSettingsList(); 
         }
 
         window.onload = initOS;
