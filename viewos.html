@@ -1,18 +1,3 @@
-To make viewOS perfectly compatible with the new bootloader, I have rebuilt the
-OS code (viewOS 0.2).
-
-The update image (icon) in the system popups has been updated to be a perfect
-circle instead of a rectangle. This was done by matching the image dimensions to
-a square (140px by 140px) and applying a border-radius: 50% with any shadow
-effect completely stripped.
-
-I have also attached the initOS execution sequence directly to the global window
-object (window.initOS = initOS;) so the bootloader's asynchronous polyfill can
-locate and execute it.
-
-Save this code below to your GitHub repository as the update file your View
-Cloud sheet points to:
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
