@@ -3,31 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>viewOS Cyber Drive</title>
+    <title>DRIFT - viewOS</title>
     <style>
         /* ==========================================================================
            viewOS System Typography & Layout Constants
            ========================================================================== */
-        @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;700&display=swap');
 
         :root {
-            --bg-color: #06020d;
+            --bg-color: #0c0c0e;
             --text-color: #ffffff;
-            --secondary-text: #a0a0a5;
+            --secondary-text: #8e8e93;
             --card-width: 320px;
             --card-height: calc(var(--card-width) * 0.625); /* 16:10 aspect ratio */
-            --border-radius: 12px;
+            --border-radius: 8px;
         }
 
         * {
             font-family: 'Inter Tight', -apple-system, sans-serif;
             font-weight: 300 !important;
-            letter-spacing: -0.03em !important;
+            letter-spacing: -0.02em !important;
             line-height: 1.25;
             box-sizing: border-box;
             user-select: none;
             -webkit-font-smoothing: antialiased;
-            cursor: none !important; /* Gamepad/TV navigation paradigm */
+            cursor: none !important; /* Managed by gamepad/system interface */
             margin: 0; 
             padding: 0;
         }
@@ -61,16 +61,13 @@
             font-weight: 700 !important; 
             margin-bottom: 16px; 
             text-transform: uppercase;
-            letter-spacing: 0.05em !important;
-            background: linear-gradient(90deg, #ff0055, #00ffff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.1em !important;
         }
-        #app-header p { font-size: 1.6rem; color: var(--secondary-text); max-width: 800px; margin: 0 auto; }
+        #app-header p { font-size: 1.5rem; color: var(--secondary-text); max-width: 800px; margin: 0 auto; }
 
         #content-grid {
             display: grid;
-            grid-template-columns: repeat(4, var(--card-width));
+            grid-template-columns: repeat(3, var(--card-width));
             gap: 45px;
             justify-content: center;
             perspective: 1200px;
@@ -88,7 +85,6 @@
         .card-visual {
             width: var(--card-width); 
             height: var(--card-height);
-            background-color: #110e1a; 
             border-radius: var(--border-radius);
             position: relative; 
             z-index: 1; 
@@ -99,13 +95,13 @@
         }
 
         .grid-item.is-focused .card-visual {
-            border-color: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.35);
         }
 
         .card-title {
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             color: var(--secondary-text); 
-            margin-top: 28px;
+            margin-top: 24px;
             text-align: center; 
             white-space: nowrap; 
             overflow: hidden;
@@ -134,7 +130,7 @@
             border-radius: inherit; 
             pointer-events: none; 
             z-index: 12;
-            border: 1.5px solid rgba(255, 255, 255, 0.3); 
+            border: 1.5px solid rgba(255, 255, 255, 0.2); 
             opacity: 0; 
             will-change: opacity;
             transform: translate3d(0, 0, 1px);
@@ -157,53 +153,42 @@
         }
         #detail-view.visible { display: flex; opacity: 1; }
 
-        /* Custom Specificity overrides to avoid CSS clashing when focused */
         .grid-item.is-focused .card-title { color: #ffffff !important; }
         .tilted-focus { transition: none !important; }
 
         /* ==========================================================================
-           Cyber Drive HUD & Game State Overlay Styling
+           Minimalist HUD & Game State Overlays (Standard Theme)
            ========================================================================== */
-        .hud-box {
-            background: rgba(8, 4, 15, 0.8) !important;
-            border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
-            padding: 18px 30px !important;
-            border-radius: 12px !important;
-            min-width: 250px !important;
+        .hud-panel {
+            background: rgba(18, 18, 20, 0.9) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            padding: 16px 24px !important;
+            border-radius: var(--border-radius) !important;
+            min-width: 240px !important;
             backdrop-filter: blur(12px) !important;
         }
         .hud-label {
-            font-size: 0.9rem !important;
-            color: var(--secondary-text) !important;
+            font-size: 0.8rem !important;
+            color: #8e8e93 !important;
             text-transform: uppercase !important;
-            letter-spacing: 0.08em !important;
-            margin-bottom: 6px !important;
+            letter-spacing: 0.05em !important;
+            margin-bottom: 4px !important;
         }
         .hud-value {
-            font-size: 2.2rem !important;
-            font-weight: 700 !important;
-            letter-spacing: -0.02em !important;
+            font-size: 1.8rem !important;
+            font-weight: 400 !important;
+            color: #ffffff !important;
         }
-        .progress-container {
-            width: 100%;
-            height: 4px;
-            background: rgba(255,255,255,0.1);
-            margin-top: 8px;
-            border-radius: 2px;
-            overflow: hidden;
-        }
-        .progress-bar {
-            width: 0%;
-            height: 100%;
-            background: #ff0055;
-            box-shadow: 0 0 8px #ff0055;
+        .hud-small-text {
+            font-size: 0.75rem !important;
+            color: #8e8e93 !important;
+            margin-top: 4px;
         }
         .overlay-btn {
-            font-size: 1.6rem !important; 
+            font-size: 1.5rem !important; 
             color: #ffffff; 
             background: rgba(255, 255, 255, 0.08);
-            padding: 20px 50px !important; 
+            padding: 16px 40px !important; 
             border-radius: var(--border-radius);
             transform-style: preserve-3d; 
             transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
@@ -214,14 +199,16 @@
             transform: scale(1.05);
         }
     </style>
+    <!-- Import Three.js Library for True 3D Rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
     <!-- Main Navigation / Launcher Root -->
     <div id="app-root">
         <header id="app-header">
-            <h1>Cyber Drive</h1>
-            <p>A tactile 3D vector simulation. Steer along retro cyber matrices, secure energy nodes, and push velocity boundaries. Optimized for gamepads and keyboards.</p>
+            <h1>Drift</h1>
+            <p>A minimalist 3D driving simulator. Push the joystick forward to accelerate, steer into curves, and beat your best record on each circuit.</p>
         </header>
 
         <!-- Dynamic Level Selection Grid -->
@@ -232,33 +219,30 @@
     <div id="detail-view">
         <canvas id="game-canvas" style="position:absolute; inset:0; width:100%; height:100%; z-index:1000;"></canvas>
         
-        <!-- Live HUD Interface -->
-        <div id="game-hud" style="display:none; position:absolute; top:40px; left:40px; right:40px; height:80px; pointer-events:none; display:flex; justify-content:space-between; align-items:center; z-index:1100;">
-            <div class="hud-box">
-                <div class="hud-label">SIMULATION</div>
-                <div id="hud-track" class="hud-value">NEON VALLEY</div>
-                <div class="progress-container"><div id="hud-progress-bar" class="progress-bar"></div></div>
+        <!-- Standard HUD Overlay -->
+        <div id="game-hud" style="display:none; position:absolute; top:40px; left:40px; right:40px; pointer-events:none; display:flex; justify-content:space-between; align-items:center; z-index:1100;">
+            <div class="hud-panel">
+                <div class="hud-label">Circuit</div>
+                <div id="hud-track-name" class="hud-value">URBAN CIRCUIT</div>
             </div>
-            <div class="hud-box" style="text-align:center;">
-                <div class="hud-label">VELOCITY</div>
-                <div id="hud-speed" class="hud-value" style="font-size: 2.8rem !important; color:#00ffff; font-family: monospace !important;">0 KM/H</div>
-                <div id="hud-boost-container" style="width: 150px; height: 6px; background: rgba(255,255,255,0.1); border-radius:3px; margin:5px auto 0 auto; overflow:hidden;">
-                    <div id="hud-boost-bar" style="width:100%; height:100%; background: #00ffff; box-shadow: 0 0 8px #00ffff;"></div>
-                </div>
+            <div class="hud-panel" style="text-align:center;">
+                <div class="hud-label">Velocity</div>
+                <div id="hud-speed" class="hud-value" style="font-family: monospace !important;">0 KM/H</div>
+                <div class="hud-small-text">PUSH STICK UP TO ACCELERATE</div>
             </div>
-            <div class="hud-box" style="text-align:right;">
-                <div class="hud-label">SCORE</div>
-                <div id="hud-score" class="hud-value" style="color:#ffea00; font-family: monospace !important;">000000</div>
-                <div id="hud-shields" style="margin-top:5px; color:#ff0055; font-size:1.2rem; letter-spacing: 2px;">▲ ▲ ▲</div>
+            <div class="hud-panel" style="text-align:right;">
+                <div class="hud-label">Record</div>
+                <div id="hud-record" class="hud-value" style="color: #a0a0a5; font-family: monospace !important;">000,000</div>
+                <div class="hud-small-text">SCORE: <span id="hud-score" style="color:#ffffff;">0</span></div>
             </div>
         </div>
 
         <!-- Terminal Pause / End Overlays -->
         <div id="game-overlay" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.85); z-index:1200; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
-            <h2 id="overlay-title" style="font-size:4.5rem; color:#ff0055; text-transform:uppercase; margin-bottom:16px; font-weight:700 !important; text-shadow: 0 0 20px rgba(255,0,85,0.6);">SIMULATION HALTED</h2>
-            <p id="overlay-subtitle" style="font-size:1.8rem; color:var(--secondary-text); margin-bottom:48px; max-width:600px;">SYSTEM INTEGRITY COMPROMISED. SHIELDS EXHAUSTED.</p>
-            <div id="overlay-buttons" style="display:flex; gap:30px;">
-                <div id="game-retry-btn" class="overlay-btn is-focused">Restart Drive</div>
+            <h2 id="overlay-title" style="font-size:3.5rem; text-transform:uppercase; margin-bottom:16px; font-weight:700 !important;">SIMULATION PAUSED</h2>
+            <p id="overlay-subtitle" style="font-size:1.4rem; color:var(--secondary-text); margin-bottom:48px; max-width:600px;">SYSTEM HALTED.</p>
+            <div id="overlay-buttons" style="display:flex; gap:24px;">
+                <div id="game-retry-btn" class="overlay-btn is-focused">Resume Drive</div>
                 <div id="game-exit-btn" class="overlay-btn">Return to Menu</div>
             </div>
         </div>
@@ -266,22 +250,21 @@
 
     <script>
         // ==========================================================================
-        // Developer Configuration & Custom Procedural Track Profiles
+        // Track Lists & State Variables
         // ==========================================================================
         const appItems = [
-            { id: 0, title: "Neon Valley", color: "#ff0055", trackLength: 1500, speedLimit: 120, obstacleDensity: 0.12, roadCurve: 1.2, difficulty: "Easy", skyColor: '#11001c', roadColor1: '#200138', roadColor2: '#120021' },
-            { id: 1, title: "Synth City", color: "#00ffff", trackLength: 2200, speedLimit: 140, obstacleDensity: 0.16, roadCurve: 1.8, difficulty: "Medium", skyColor: '#00111a', roadColor1: '#002233', roadColor2: '#00111a' },
-            { id: 2, title: "Quantum Void", color: "#39ff14", trackLength: 2800, speedLimit: 160, obstacleDensity: 0.22, roadCurve: 2.5, difficulty: "Hard", skyColor: '#020f02', roadColor1: '#0a210a', roadColor2: '#040d04' },
-            { id: 3, title: "Cyber Sunset", color: "#ffea00", trackLength: 3500, speedLimit: 150, obstacleDensity: 0.18, roadCurve: 2.0, difficulty: "Medium", skyColor: '#1a0f00', roadColor1: '#331a00', roadColor2: '#1a0d00' }
+            { id: 0, title: "Urban Circuit", color: "#1c2541", length: 120, curveScale: 0.8, obstacleDensity: 0.12, difficulty: "Easy" },
+            { id: 1, title: "Desert Highway", color: "#328cc1", length: 180, curveScale: 1.5, obstacleDensity: 0.16, difficulty: "Medium" },
+            { id: 2, title: "Alpine Drift", color: "#1f1a3a", length: 240, curveScale: 2.2, obstacleDensity: 0.20, difficulty: "Hard" }
         ];
 
         const STATE = {
             currentScreen: 'grid', // 'grid' | 'game'
             focusedIndex: 0,
             overlayFocusedIndex: 0,
-            columns: 4,
+            columns: 3,
             joyX: 0, joyY: 0,
-            highScores: {}
+            highScores: { 0: 0, 1: 0, 2: 0 }
         };
 
         const DOM_CACHE = {
@@ -293,7 +276,7 @@
         let springElements = [];
 
         // ==========================================================================
-        // Physics Engine Implementation
+        // Physics Engine Implementation (Selection System)
         // ==========================================================================
         function Spring(val, stiffness = 0.12, damping = 0.78) {
             this.val = val; 
@@ -336,11 +319,9 @@
         function initApp() {
             buildGridMenu();
 
-            // Setup input events
             document.addEventListener('keydown', handleKeydown);
             document.addEventListener('keyup', handleKeyup);
             
-            // Start tick loops
             requestAnimationFrame(pollGamepads);
             requestAnimationFrame(tickMicroanimations);
         }
@@ -355,15 +336,15 @@
                 itemEl.id = `item-${index}`;
                 
                 let scoreText = '';
-                if (STATE.highScores[item.id]) {
-                    scoreText = `<div style="position:absolute; top:20px; right:20px; font-size:1.1rem; color:#ffea00; font-family:monospace; font-weight:700 !important; text-shadow:0 0 5px rgba(255,234,0,0.5);">HI: ${STATE.highScores[item.id].toLocaleString()}</div>`;
+                if (STATE.highScores[item.id] > 0) {
+                    scoreText = `<div style="position:absolute; top:20px; right:20px; font-size:1rem; color:#ffea00; font-family:monospace; font-weight:700 !important;">RECORD: ${STATE.highScores[item.id].toLocaleString()}</div>`;
                 }
 
                 itemEl.innerHTML = `
-                    <div class="card-visual" style="background: linear-gradient(135deg, ${item.color}bb, #05050a 80%);">
+                    <div class="card-visual" style="background: linear-gradient(135deg, ${item.color}bb, #0c0c0e 85%);">
                         ${scoreText}
-                        <div style="position:absolute; bottom:20px; left:20px; font-size:1.1rem; color: #ffffffbb; letter-spacing: 0.05em !important; text-transform: uppercase; font-weight:700 !important;">
-                            ${item.difficulty} • ${Math.round(item.trackLength * 200 / 1000)}KM
+                        <div style="position:absolute; bottom:20px; left:20px; font-size:1rem; color: #8e8e93; letter-spacing: 0.05em !important; text-transform: uppercase; font-weight:700 !important;">
+                            ${item.difficulty} • ${(item.length * 10 / 1000).toFixed(1)}KM
                         </div>
                     </div>
                     <div class="card-title">${item.title}</div>
@@ -401,7 +382,7 @@
 
             if (target && target.icon && target.icon.springs) {
                 const s = target.icon.springs; 
-                s.scale.target = 1.12;
+                s.scale.target = 1.1;
                 s.focusState.target = 1.0;
                 if (dx) s.posX.vel = dx * 28; 
                 if (dy) s.posY.vel = dy * 28; 
@@ -416,7 +397,7 @@
         }
 
         // ==========================================================================
-        // Navigation Actions & Routing
+        // Input Routing
         // ==========================================================================
         function executeAction() {
             if (STATE.currentScreen === 'grid') {
@@ -437,9 +418,6 @@
             }
         }
 
-        // ==========================================================================
-        // Input Handling System (Keyboard & Gamepad Fused Continuous Processing)
-        // ==========================================================================
         const keysPressed = {};
         const INPUT_STATE = {
             steer: 0,
@@ -493,30 +471,6 @@
             keysPressed[e.key] = false;
         }
 
-        function updateOverlayFocus() {
-            const retryBtn = document.getElementById('game-retry-btn');
-            const exitBtn = document.getElementById('game-exit-btn');
-            if (STATE.overlayFocusedIndex === 0) {
-                retryBtn.classList.add('is-focused');
-                exitBtn.classList.remove('is-focused');
-            } else {
-                retryBtn.classList.remove('is-focused');
-                exitBtn.classList.add('is-focused');
-            }
-        }
-
-        function executeOverlayAction() {
-            if (STATE.overlayFocusedIndex === 0) {
-                if (game.state === 'paused') {
-                    resumeGame();
-                } else {
-                    startGame(game.track);
-                }
-            } else {
-                closeGame();
-            }
-        }
-
         let lastGamepadState = { up: false, down: false, left: false, right: false, enter: false, back: false };
         let gpActiveDir = null;
         let holdTime = 0, lastRepeatTime = 0;
@@ -533,12 +487,9 @@
                 const enter = gp.buttons[0]?.pressed; // A
                 const back = gp.buttons[1]?.pressed;   // B
 
-                // Continuous joystick updates
+                // Continuous joystick capture
                 STATE.joyX = Math.abs(gp.axes[0]) > 0.15 ? gp.axes[0] : 0;
                 STATE.joyY = Math.abs(gp.axes[1]) > 0.15 ? gp.axes[1] : 0;
-
-                INPUT_STATE.boost = enter || up;
-                INPUT_STATE.brake = back || down;
 
                 let dir = up ? 'up' : down ? 'down' : left ? 'left' : right ? 'right' : null;
                 if (dir) {
@@ -566,132 +517,212 @@
         }
 
         // ==========================================================================
-        // Pseudo-3D Racing Simulation Engine
+        // True WebGL 3D Driving Simulator Implementation (Three.js)
         // ==========================================================================
-        let canvas = document.getElementById('game-canvas');
-        let ctx = canvas.getContext('2d');
-
-        const segmentLength = 200;
-        const cameraDepth = 0.8; 
-        const roadWidth = 2000;
-        const cameraHeight = 1000;
-        const drawDistance = 220;
+        let scene, camera, renderer;
+        const segmentLength = 10; // units per segment
 
         const game = {
             track: null,
             road: [],
             position: 0,
             speed: 0,
+            maxSpeed: 4.5,
             playerX: 0,
-            prevPlayerX: 0,
-            carTilt: 0,
+            playerVX: 0,
             score: 0,
-            shields: 3,
-            boostEnergy: 100,
-            boosting: false,
-            baseSpeed: 100,
-            maxSpeed: 230,
             state: 'idle', // 'idle' | 'running' | 'paused' | 'gameover' | 'victory'
-            skyX: 0,
+            carMesh: null,
+            obstacles: [],
             particles: [],
-            labels: [],
             countdown: 0,
-            screenShake: 0,
-            flashDuration: 0
+            shakeAmount: 0
         };
 
-        function buildRoad(track) {
+        function buildProcedural3DTrack(track) {
             const segments = [];
+            let currentX = 0;
             let currentY = 0;
-            let currentCurve = 0;
-            const total = track.trackLength;
-            
-            for (let i = 0; i < total; i++) {
-                // Procedural curves
-                if (i > 100 && i % 140 === 0) {
-                    currentCurve = (Math.sin(i / 10) * track.roadCurve);
+            let curve = 0;
+            let hill = 0;
+
+            const roadGroup = new THREE.Group();
+            scene.add(roadGroup);
+
+            for (let i = 0; i < track.length; i++) {
+                if (i > 15 && i % 25 === 0) {
+                    curve = (Math.random() - 0.5) * track.curveScale;
+                    hill = (Math.random() - 0.5) * 0.4;
                 }
-                if (i > 100 && i % 220 === 0) {
-                    currentCurve = (Math.random() - 0.5) * track.roadCurve * 3;
+                // Maintain flat landing area near start/finish
+                if (i < 10 || i > track.length - 15) {
+                    curve = 0;
+                    hill = 0;
                 }
-                // Procedural hills
-                if (i > 150 && i % 200 === 0) {
-                    currentY = (Math.sin(i / 30) * 700);
-                }
+
+                currentX += curve;
+                currentY += hill;
+
+                // Base Road Plane
+                const geom = new THREE.BoxGeometry(11, 0.1, segmentLength);
+                const mat = new THREE.MeshLambertMaterial({
+                    color: i % 2 === 0 ? 0x1e1e21 : 0x161619
+                });
+                const mesh = new THREE.Mesh(geom, mat);
+                mesh.position.set(currentX, currentY, -i * segmentLength);
+                roadGroup.add(mesh);
+
+                // Track Boundary Stripes
+                const railGeom = new THREE.BoxGeometry(0.3, 0.4, segmentLength);
+                const railMat = new THREE.MeshBasicMaterial({
+                    color: i % 2 === 0 ? 0xffffff : 0xaa1111
+                });
+                const leftRail = new THREE.Mesh(railGeom, railMat);
+                leftRail.position.set(-5.5, 0.2, 0);
+                mesh.add(leftRail);
+
+                const rightRail = new THREE.Mesh(railGeom, railMat);
+                rightRail.position.set(5.5, 0.2, 0);
+                mesh.add(rightRail);
 
                 segments.push({
                     index: i,
-                    p1: { world: { x: 0, y: i === 0 ? 0 : segments[i-1].p2.world.y, z: i * segmentLength }, screen: { x: 0, y: 0, w: 0 } },
-                    p2: { world: { x: 0, y: currentY, z: (i + 1) * segmentLength }, screen: { x: 0, y: 0, w: 0 } },
-                    curve: currentCurve,
-                    color: (Math.floor(i / 4) % 2 === 0) ? track.roadColor1 : track.roadColor2,
-                    rumbleColor: (Math.floor(i / 4) % 2 === 0) ? track.color : 'rgba(0,0,0,0.3)',
-                    lineColor: (Math.floor(i / 4) % 2 === 0) ? '#ffffff' : 'transparent',
+                    x: currentX,
+                    y: currentY,
+                    z: -i * segmentLength,
+                    mesh: mesh,
                     obstacles: []
                 });
-            }
 
-            // Distribute Neon Obstacles & System Core nodes cleanly across lanes
-            for (let i = 150; i < total - 200; i += Math.floor(25 + Math.random() * 40 / track.obstacleDensity)) {
-                let laneChoice = Math.floor(Math.random() * 3); // -0.6 (left), 0 (center), 0.6 (right)
-                let offset = laneChoice === 0 ? -0.6 : (laneChoice === 1 ? 0 : 0.6);
-                let type = Math.random() > 0.82 ? 'core' : 'barrier';
+                // Generate Simple Cone Obstacles
+                if (i > 15 && i < track.length - 15 && Math.random() < track.obstacleDensity) {
+                    let sideChoice = Math.floor(Math.random() * 3);
+                    let lateralOffset = sideChoice === 0 ? -3.5 : (sideChoice === 1 ? 0 : 3.5);
 
-                segments[i].obstacles.push({
-                    offset: offset,
-                    type: type,
-                    width: 320,
-                    height: 400
-                });
+                    const coneGeom = new THREE.ConeGeometry(0.5, 1.4, 5);
+                    const coneMat = new THREE.MeshLambertMaterial({ color: 0xff6600 });
+                    const cone = new THREE.Mesh(coneGeom, coneMat);
+                    cone.position.set(lateralOffset, 0.7, 0);
+                    mesh.add(cone);
+
+                    segments[i].obstacles.push({
+                        offset: lateralOffset,
+                        mesh: cone
+                    });
+                }
             }
             return segments;
         }
 
-        function project(point, cameraX, cameraY, cameraZ, width, height, roadWidth, depth) {
-            point.camera = {
-                x: point.world.x - cameraX,
-                y: point.world.y - cameraY,
-                z: point.world.z - cameraZ
-            };
-            const z = point.camera.z;
-            const scale = z > 0 ? (depth / z) : 0;
-            point.screen.x = Math.round((width / 2) + (scale * point.camera.x * width / 2));
-            point.screen.y = Math.round((height / 2) - (scale * point.camera.y * height / 2));
-            point.screen.w = Math.round(scale * roadWidth * width / 2);
+        function createCarMesh() {
+            const carGroup = new THREE.Group();
+
+            // Minimalist Main Chassis
+            const bodyGeom = new THREE.BoxGeometry(1.4, 0.5, 2.8);
+            const bodyMat = new THREE.MeshLambertMaterial({ color: 0xe5e5ea });
+            const body = new THREE.Mesh(bodyGeom, bodyMat);
+            body.position.y = 0.35;
+            carGroup.add(body);
+
+            // Roof Cabin
+            const cabinGeom = new THREE.BoxGeometry(1.0, 0.4, 1.4);
+            const cabinMat = new THREE.MeshLambertMaterial({ color: 0x1c1c1e });
+            const cabin = new THREE.Mesh(cabinGeom, cabinMat);
+            cabin.position.set(0, 0.75, 0.2);
+            carGroup.add(cabin);
+
+            // Simple Wheels
+            const wheelGeom = new THREE.CylinderGeometry(0.35, 0.35, 0.25, 12);
+            const wheelMat = new THREE.MeshBasicMaterial({ color: 0x2c2c2e });
+            wheelGeom.rotateZ(Math.PI / 2);
+
+            const fl = new THREE.Mesh(wheelGeom, wheelMat); fl.position.set(-0.8, 0.25, -0.8); carGroup.add(fl);
+            const fr = new THREE.Mesh(wheelGeom, wheelMat); fr.position.set(0.8, 0.25, -0.8); carGroup.add(fr);
+            const rl = new THREE.Mesh(wheelGeom, wheelMat); rl.position.set(-0.8, 0.25, 0.8); carGroup.add(rl);
+            const rr = new THREE.Mesh(wheelGeom, wheelMat); rr.position.set(0.8, 0.25, 0.8); carGroup.add(rr);
+
+            scene.add(carGroup);
+            return carGroup;
+        }
+
+        function cleanupThreeJS() {
+            if (renderer) {
+                renderer.dispose();
+                while(scene.children.length > 0) { 
+                    scene.remove(scene.children[0]); 
+                }
+            }
+            const oldCanvas = document.getElementById('game-canvas');
+            if (oldCanvas) oldCanvas.remove();
+
+            const newCanvas = document.createElement('canvas');
+            newCanvas.id = 'game-canvas';
+            newCanvas.style.position = 'absolute';
+            newCanvas.style.inset = '0';
+            newCanvas.style.width = '100%';
+            newCanvas.style.height = '100%';
+            newCanvas.style.zIndex = '1000';
+            DOM_CACHE.detail.insertBefore(newCanvas, DOM_CACHE.detail.firstChild);
         }
 
         // ==========================================================================
-        // Simulation Lifecycles & State Transitions
+        // Gameplay Management & Game Loop
         // ==========================================================================
         function startGame(track) {
+            cleanupThreeJS();
+            
+            canvas = document.getElementById('game-canvas');
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x0a0a0c, 1);
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+            // Add standard structural lighting
+            const ambient = new THREE.AmbientLight(0xffffff, 0.55);
+            scene.add(ambient);
+            const directional = new THREE.DirectionalLight(0xffffff, 0.7);
+            directional.position.set(10, 20, 15);
+            scene.add(directional);
+
+            // Procedural sky starfield
+            const starGeom = new THREE.BufferGeometry();
+            const starsCount = 600;
+            const starPos = new Float32Array(starsCount * 3);
+            for(let i=0; i<starsCount*3; i+=3) {
+                starPos[i] = (Math.random() - 0.5) * 800;
+                starPos[i+1] = Math.random() * 250 + 20;
+                starPos[i+2] = (Math.random() - 0.5) * 800;
+            }
+            starGeom.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+            const starsMat = new THREE.PointsMaterial({ color: 0x8e8e93, size: 1.2 });
+            const starfield = new THREE.Points(starGeom, starsMat);
+            scene.add(starfield);
+
+            // Construct 3D track properties
             game.track = track;
-            game.road = buildRoad(track);
+            game.road = buildProcedural3DTrack(track);
+            game.carMesh = createCarMesh();
+
             game.position = 0;
             game.speed = 0;
             game.playerX = 0;
-            game.prevPlayerX = 0;
-            game.carTilt = 0;
+            game.playerVX = 0;
             game.score = 0;
-            game.shields = 3;
-            game.boostEnergy = 100;
-            game.boosting = false;
-            game.baseSpeed = track.speedLimit * 0.75;
-            game.maxSpeed = track.speedLimit * 1.5;
-            game.skyX = 0;
+            game.countdown = 90;
+            game.shakeAmount = 0;
             game.particles = [];
-            game.labels = [];
-            game.countdown = 90; // Frame duration buffer
-            game.screenShake = 0;
-            game.flashDuration = 0;
             game.state = 'running';
 
             STATE.currentScreen = 'game';
-            resizeCanvas();
-
+            
+            // HUD DOM Setup
             DOM_CACHE.detail.classList.add('visible');
             document.getElementById('game-hud').style.display = 'flex';
             document.getElementById('game-overlay').style.display = 'none';
-            document.getElementById('hud-track').innerText = track.title;
+            document.getElementById('hud-track-name').innerText = track.title;
+            document.getElementById('hud-record').innerText = STATE.highScores[track.id].toLocaleString();
 
             requestAnimationFrame(gameTick);
         }
@@ -699,8 +730,8 @@
         function pauseGame() {
             game.state = 'paused';
             STATE.overlayFocusedIndex = 0;
-            document.getElementById('overlay-title').innerText = "Simulation Paused";
-            document.getElementById('overlay-subtitle').innerText = "Matrix link active. Settle vector alignment before resuming.";
+            document.getElementById('overlay-title').innerText = "Drive Halted";
+            document.getElementById('overlay-subtitle').innerText = "Circuit execution paused.";
             document.getElementById('game-retry-btn').innerText = "Resume Simulation";
             document.getElementById('game-overlay').style.display = 'flex';
             updateOverlayFocus();
@@ -711,27 +742,43 @@
             document.getElementById('game-overlay').style.display = 'none';
         }
 
-        function gameOverGame() {
-            game.state = 'gameover';
-            STATE.overlayFocusedIndex = 0;
-            document.getElementById('overlay-title').innerText = "Simulation Halted";
-            document.getElementById('overlay-subtitle').innerText = "System Integrity compromised. Chassis structural breakdown.";
-            document.getElementById('game-retry-btn').innerText = "Restart Simulation";
-            document.getElementById('game-overlay').style.display = 'flex';
-            updateOverlayFocus();
+        function triggerCrash() {
+            game.speed *= 0.15; // Heavy deceleration penalty
+            game.shakeAmount = 1.2;
+
+            // Simple collision particle burst
+            for(let i=0; i<15; i++) {
+                const partGeom = new THREE.BoxGeometry(0.15, 0.15, 0.15);
+                const partMat = new THREE.MeshBasicMaterial({ color: 0xff6600 });
+                const mesh = new THREE.Mesh(partGeom, partMat);
+                mesh.position.set(game.carMesh.position.x + (Math.random() - 0.5) * 2, game.carMesh.position.y + 0.5, game.carMesh.position.z - 1.5);
+                scene.add(mesh);
+
+                game.particles.push({
+                    mesh: mesh,
+                    vX: (Math.random() - 0.5) * 6,
+                    vY: Math.random() * 5 + 2,
+                    vZ: Math.random() * 6 - 3,
+                    life: 1.0
+                });
+            }
         }
 
         function victoryGame() {
             game.state = 'victory';
             STATE.overlayFocusedIndex = 0;
-            document.getElementById('overlay-title').innerText = "Sequence Complete";
-            document.getElementById('overlay-subtitle').innerText = `Matrix solved cleanly. Final Score: ${game.score.toLocaleString()} PTS`;
-            document.getElementById('game-retry-btn').innerText = "Run Grid Again";
-
-            if (!STATE.highScores[game.track.id] || game.score > STATE.highScores[game.track.id]) {
+            
+            document.getElementById('overlay-title').innerText = "Circuit Complete";
+            const isRecord = game.score > STATE.highScores[game.track.id];
+            
+            if (isRecord) {
                 STATE.highScores[game.track.id] = game.score;
-                document.getElementById('overlay-subtitle').innerText += ` • NEW BEST RECORD!`;
+                document.getElementById('overlay-subtitle').innerText = `New record achieved: ${game.score.toLocaleString()} points.`;
+            } else {
+                document.getElementById('overlay-subtitle').innerText = `Score: ${game.score.toLocaleString()} points. Best: ${STATE.highScores[game.track.id].toLocaleString()}`;
             }
+
+            document.getElementById('game-retry-btn').innerText = "Drive Again";
             document.getElementById('game-overlay').style.display = 'flex';
             updateOverlayFocus();
         }
@@ -742,590 +789,149 @@
             DOM_CACHE.detail.classList.remove('visible');
             document.getElementById('game-hud').style.display = 'none';
             document.getElementById('game-overlay').style.display = 'none';
+            cleanupThreeJS();
             buildGridMenu();
         }
 
-        function resizeCanvas() {
-            if (canvas) {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            }
-        }
-        window.addEventListener('resize', resizeCanvas);
-
-        // ==========================================================================
-        // Active Render loops & Game Loop ticking
-        // ==========================================================================
         function gameTick() {
             if (STATE.currentScreen !== 'game') return;
-            updateGame();
-            renderGame();
+            updateGamePhysics();
+            render3DScene();
             requestAnimationFrame(gameTick);
         }
 
-        function updateGame() {
+        function updateGamePhysics() {
             if (game.state !== 'running') return;
 
-            // Handle start sequence buffer
+            // Wait for countdown buffer
             if (game.countdown > 0) {
                 game.countdown--;
-                if (game.countdown === 0) {
-                    game.labels.push({
-                        x: canvas.width / 2, y: canvas.height / 2 - 50,
-                        text: "SEQUENCE ACTIVE!", color: "#00ffff", alpha: 1.5, scale: 2.5
-                    });
-                }
-                updateActiveParticlesAndLabels();
                 return;
             }
 
-            // 1. Navigation & Steer Input (Keyboards / Gamepads)
+            // 1. Steering & Slide/Drift Mechanics
             let steerVal = 0;
             if (keysPressed['ArrowLeft'] || keysPressed['a'] || keysPressed['A']) steerVal = -1.0;
             if (keysPressed['ArrowRight'] || keysPressed['d'] || keysPressed['D']) steerVal = 1.0;
             if (Math.abs(STATE.joyX) > 0.15) steerVal = STATE.joyX;
 
-            // Drift interpolation
-            game.playerX += steerVal * 0.045 * (game.speed / game.maxSpeed);
-            if (steerVal === 0) {
-                game.playerX += (0 - game.playerX) * 0.08; // Auto-center
-            }
-            game.playerX = Math.max(-1.8, Math.min(1.8, game.playerX));
-
-            // 2. Velocity evaluation (Boost / Brake)
-            let boosting = keysPressed['ArrowUp'] || keysPressed[' '] || keysPressed['w'] || keysPressed['W'] || INPUT_STATE.boost;
-            let braking = keysPressed['ArrowDown'] || keysPressed['s'] || keysPressed['S'] || INPUT_STATE.brake;
-
-            let targetSpeed = game.baseSpeed;
-            if (boosting && game.boostEnergy > 0) {
-                targetSpeed = game.maxSpeed;
-                game.boosting = true;
-                game.boostEnergy = Math.max(0, game.boostEnergy - 0.45);
-            } else {
-                game.boosting = false;
-                game.boostEnergy = Math.min(100, game.boostEnergy + 0.15); // Recharge decay
-            }
-
-            if (braking) targetSpeed = 0;
-
-            // Apply friction & accel
-            let accelFactor = braking ? 0.08 : (game.boosting ? 0.05 : 0.015);
-            game.speed += (targetSpeed - game.speed) * accelFactor;
-            if (game.speed < 1) game.speed = 0;
-
-            // 3. Distance progress tracking
-            game.position += game.speed;
+            // Simple drifty lateral speed calculation
+            let steerAgility = 0.22;
+            let speedPercentage = game.speed / game.maxSpeed;
+            game.playerVX += steerVal * steerAgility * speedPercentage;
+            game.playerVX *= 0.85; // Sideways drag friction
             
-            // Check Win Condition
-            let trackLengthZ = game.road.length * segmentLength;
-            if (game.position >= trackLengthZ - 300) {
+            game.playerX += game.playerVX;
+            game.playerX = Math.max(-5.0, Math.min(5.0, game.playerX));
+
+            // 2. Active Joystick Acceleration Mechanics (Requires active forward tilt/Up)
+            let isAccelerating = keysPressed['ArrowUp'] || keysPressed['w'] || keysPressed['W'] || (STATE.joyY < -0.15);
+            if (isAccelerating) {
+                // Read continuous analog value of joystick, or treat keys as 100% tilt
+                let tiltAmount = (STATE.joyY < -0.15) ? Math.max(0, -STATE.joyY) : 1.0;
+                game.speed += 0.08 * tiltAmount;
+            } else {
+                game.speed *= 0.97; // Engine breaking drag
+            }
+            game.speed = Math.max(0, Math.min(game.maxSpeed, game.speed));
+
+            // Move the vehicle forward along the Z coordinate
+            game.position += game.speed;
+
+            // 3. Track segments references
+            let startSegIndex = Math.floor(game.position / segmentLength);
+            let percent = (game.position % segmentLength) / segmentLength;
+
+            // Boundary check for completion
+            if (startSegIndex >= game.road.length - 2) {
                 victoryGame();
                 return;
             }
 
-            // 4. Parallax calculations
-            let currentSegment = game.road[Math.floor(game.position / segmentLength) % game.road.length];
-            game.skyX -= (currentSegment.curve * (game.speed / game.maxSpeed) * 3.5);
+            let curSeg = game.road[startSegIndex];
+            let nextSeg = game.road[startSegIndex + 1];
 
-            // 5. Check Obstacle Collisions
-            let segIndex = Math.floor(game.position / segmentLength);
-            for (let i = segIndex; i <= segIndex + 1; i++) {
-                let segment = game.road[i % game.road.length];
-                if (segment.obstacles.length > 0 && Math.floor(game.position) % segmentLength < 100) {
-                    segment.obstacles.forEach((obs, idx) => {
-                        let offsetDiff = Math.abs(game.playerX - obs.offset);
-                        if (offsetDiff < 0.28) {
-                            if (obs.type === 'barrier') {
-                                triggerCrash();
-                                segment.obstacles.splice(idx, 1);
-                            } else if (obs.type === 'core') {
-                                triggerCollect();
-                                segment.obstacles.splice(idx, 1);
-                            }
-                        }
-                    });
-                }
-            }
+            // Project absolute 3D position of the player car on road surface
+            let segX = curSeg.x + (nextSeg.x - curSeg.x) * percent;
+            let segY = curSeg.y + (nextSeg.y - curSeg.y) * percent;
 
-            // 6. Accumulate driving points
-            game.score += Math.round(game.speed / 12);
+            game.carMesh.position.set(segX + game.playerX, segY + 0.1, -game.position);
 
-            updateActiveParticlesAndLabels();
-        }
+            // Align rotation heading vector to match upcoming segments
+            let lookSeg = game.road[Math.min(game.road.length - 1, startSegIndex + 3)];
+            let targetHeading = Math.atan2(lookSeg.x - curSeg.x, lookSeg.z - curSeg.z);
+            let visualDriftSlideAngle = -game.playerVX * 0.15; // Visual slide swing-out
 
-        function triggerCrash() {
-            game.shields--;
-            game.speed = 20; 
-            game.screenShake = 24;
-            game.flashDuration = 10;
+            game.carMesh.rotation.y = targetHeading + visualDriftSlideAngle;
 
-            // Explode spark particles
-            for (let i = 0; i < 35; i++) {
-                game.particles.push({
-                    x: canvas.width / 2 + (Math.random() - 0.5) * 80,
-                    y: canvas.height - 110 + (Math.random() - 0.5) * 40,
-                    vx: (Math.random() - 0.5) * 18,
-                    vy: (Math.random() - 0.5) * 18 - 4,
-                    color: '#ff0055',
-                    size: Math.random() * 5 + 2,
-                    alpha: 1.0,
-                    decay: 0.025
+            // 4. Boundary Wall or obstacle collisions
+            if (curSeg.obstacles.length > 0 && Math.floor(game.position) % segmentLength < 8) {
+                curSeg.obstacles.forEach(obs => {
+                    let distanceDiff = Math.abs(game.playerX - obs.offset);
+                    if (distanceDiff < 0.9) {
+                        triggerCrash();
+                    }
                 });
             }
 
-            game.labels.push({
-                x: canvas.width / 2, y: canvas.height / 2 - 100,
-                text: "COLLISION DETECTED - SHIELD DAMAGE", color: '#ff0055', alpha: 1.0, scale: 1.3
-            });
-
-            if (game.shields <= 0) {
-                gameOverGame();
-            }
-        }
-
-        function triggerCollect() {
-            game.boostEnergy = Math.min(100, game.boostEnergy + 30);
-            game.score += 1500;
-
-            // Energy core capture sparks
-            for (let i = 0; i < 15; i++) {
-                game.particles.push({
-                    x: canvas.width / 2 + (Math.random() - 0.5) * 80,
-                    y: canvas.height - 110 + (Math.random() - 0.5) * 30,
-                    vx: (Math.random() - 0.5) * 10,
-                    vy: (Math.random() - 0.5) * 8 - 4,
-                    color: '#39ff14',
-                    size: Math.random() * 4 + 1.5,
-                    alpha: 1.0,
-                    decay: 0.03
-                });
+            // Standard score calculation
+            if (game.speed > 0.5) {
+                game.score += Math.round(game.speed * 1.5);
             }
 
-            game.labels.push({
-                x: canvas.width / 2, y: canvas.height / 2 - 100,
-                text: "SYSTEM CORE SECURED +1,500 PTS", color: '#39ff14', alpha: 1.0, scale: 1.3
-            });
-        }
-
-        function updateActiveParticlesAndLabels() {
-            // Exhaust spark generations
-            if (game.speed > 10) {
-                let rate = game.boosting ? 5 : 1.5;
-                for (let i = 0; i < rate; i++) {
-                    game.particles.push({
-                        x: canvas.width / 2 + (Math.random() - 0.5) * 60 - (game.playerX - game.prevPlayerX) * 120,
-                        y: canvas.height - 110 + Math.sin(Date.now() * 0.01) * 3,
-                        vx: (Math.random() - 0.5) * 4 - (game.playerX - game.prevPlayerX) * 20,
-                        vy: Math.random() * 5 + 4,
-                        color: game.boosting ? '#ffdd00' : '#00ffff',
-                        size: Math.random() * 3 + 1.5,
-                        alpha: 1.0,
-                        decay: 0.04
-                    });
-                }
-            }
-
-            // Particle cleanups
-            for (let i = game.particles.length - 1; i >= 0; i--) {
+            // Cleanup/Animate physics particles
+            for(let i=game.particles.length-1; i>=0; i--) {
                 let p = game.particles[i];
-                p.x += p.vx;
-                p.y += p.vy;
-                p.alpha -= p.decay;
-                if (p.alpha <= 0) game.particles.splice(i, 1);
-            }
-
-            // Labels updates
-            for (let i = game.labels.length - 1; i >= 0; i--) {
-                let lbl = game.labels[i];
-                lbl.y -= 1.5;
-                lbl.alpha -= 0.02;
-                if (lbl.alpha <= 0) game.labels.splice(i, 1);
-            }
-        }
-
-        // ==========================================================================
-        // Graphic Rendering Functions (Backdrops, Vector Roads, and Dashboard UI)
-        // ==========================================================================
-        function renderGame() {
-            let cameraX = game.playerX * roadWidth;
-            let startSegment = Math.floor(game.position / segmentLength);
-            let percent = (game.position % segmentLength) / segmentLength;
-            
-            let playerSegment = game.road[startSegment % game.road.length];
-            let nextPlayerSegment = game.road[(startSegment + 1) % game.road.length];
-            let playerY = playerSegment.p1.world.y + (nextPlayerSegment.p1.world.y - playerSegment.p1.world.y) * percent;
-
-            let dx = -(playerSegment.curve * percent);
-            let x = 0;
-            let maxy = canvas.height;
-
-            // Draw Parallax Vector Backdrop
-            drawSkyAndBackdrop(ctx, canvas.width, canvas.height, game.skyX);
-
-            // Dynamically scale field-of-view depth to accentuate high speeds
-            let dynamicDepth = cameraDepth * (1.0 + (game.speed / game.maxSpeed) * 0.35);
-
-            ctx.save();
-            if (game.screenShake > 0) {
-                ctx.translate((Math.random() - 0.5) * game.screenShake, (Math.random() - 0.5) * game.screenShake);
-                game.screenShake *= 0.88;
-                if (game.screenShake < 0.2) game.screenShake = 0;
-            }
-
-            // Draw Road Segments
-            for (let n = 0; n < drawDistance; n++) {
-                let index = (startSegment + n) % game.road.length;
-                let segment = game.road[index];
-                let looped = index < startSegment;
-                let segmentLoopedOffset = looped ? game.road.length * segmentLength : 0;
-
-                project(segment.p1, cameraX - x, playerY + cameraHeight, game.position - segmentLoopedOffset, canvas.width, canvas.height, roadWidth, dynamicDepth);
-                project(segment.p2, cameraX - x - dx, playerY + cameraHeight, game.position - segmentLoopedOffset, canvas.width, canvas.height, roadWidth, dynamicDepth);
-
-                x = x + dx;
-                dx = dx + segment.curve;
-
-                if (segment.p1.camera.z <= 0) continue;
-                if (segment.p2.screen.y >= maxy || segment.p2.screen.y >= segment.p1.screen.y) continue;
-
-                drawSegment(ctx, canvas.width, segment.p1.screen, segment.p2.screen, segment.color, segment.rumbleColor, segment.lineColor);
-                maxy = segment.p1.screen.y;
-            }
-
-            // Depth-sorted obstacle placement (rendered back-to-front)
-            for (let n = drawDistance - 1; n >= 0; n--) {
-                let index = (startSegment + n) % game.road.length;
-                let segment = game.road[index];
-                if (segment.obstacles && segment.obstacles.length > 0) {
-                    segment.obstacles.forEach(obs => {
-                        let obstacleX = segment.p1.screen.x + (segment.p1.screen.w * obs.offset);
-                        let obstacleY = segment.p1.screen.y;
-                        let scale = segment.p1.screen.w / roadWidth;
-                        let obsW = obs.width * scale * canvas.width / 2000;
-                        let obsH = obs.height * scale * canvas.height / 1000;
-                        
-                        if (segment.p1.camera.z > 50) {
-                            drawObstacle(ctx, obstacleX, obstacleY, obsW, obsH, obs.type);
-                        }
-                    });
+                p.mesh.position.x += p.vX * 0.016;
+                p.mesh.position.y += p.vY * 0.016;
+                p.mesh.position.z += p.vZ * 0.016;
+                p.vY -= 9.8 * 0.016; // gravity
+                p.life -= 0.04;
+                if (p.life <= 0) {
+                    scene.remove(p.mesh);
+                    game.particles.splice(i, 1);
                 }
             }
-
-            drawPlayerCar(ctx, canvas.width, canvas.height);
-            drawParticles(ctx);
-            drawLabels(ctx);
-
-            ctx.restore();
-
-            // Render warp lines on boosting
-            if (game.boosting && game.speed > 100) {
-                drawWarpLines(ctx, canvas.width, canvas.height);
-            }
-
-            // Damage flash
-            if (game.flashDuration > 0) {
-                ctx.fillStyle = `rgba(255, 0, 85, ${(game.flashDuration / 10) * 0.45})`;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                game.flashDuration--;
-            }
-
-            // Countdown displays
-            if (game.countdown > 0) {
-                let countdownVal = Math.ceil(game.countdown / 30);
-                let col = countdownVal === 3 ? '#ff0055' : (countdownVal === 2 ? '#ffea00' : '#00ffff');
-                ctx.save();
-                ctx.fillStyle = col;
-                ctx.font = "italic 900 120px 'Inter Tight', sans-serif";
-                ctx.textAlign = 'center';
-                ctx.shadowColor = col;
-                ctx.shadowBlur = 30;
-                ctx.fillText(countdownVal, canvas.width / 2, canvas.height / 2 - 20);
-                ctx.restore();
-            }
-
-            updateHTMLHUD();
         }
 
-        function drawSkyAndBackdrop(ctx, width, height, skyX) {
-            let skyGrad = ctx.createLinearGradient(0, 0, 0, height / 2 + 50);
-            skyGrad.addColorStop(0, game.track.skyColor);
-            skyGrad.addColorStop(0.7, '#110022');
-            skyGrad.addColorStop(1, '#05000c');
-            ctx.fillStyle = skyGrad;
-            ctx.fillRect(0, 0, width, height);
+        function render3DScene() {
+            if (!renderer || !scene || !camera) return;
 
-            // Vector Synth Sunset
-            let sunY = height / 2;
-            let sunGrad = ctx.createLinearGradient(0, sunY - 160, 0, sunY);
-            sunGrad.addColorStop(0, '#ff007f');
-            sunGrad.addColorStop(0.5, '#ff5500');
-            sunGrad.addColorStop(1, '#ffea00');
-            
-            ctx.save();
-            ctx.shadowColor = '#ff007f';
-            ctx.shadowBlur = 30;
-            ctx.fillStyle = sunGrad;
-            ctx.beginPath();
-            ctx.arc(width / 2 + (skyX * 0.1) % (width * 0.2), sunY - 30, 140, Math.PI, 0, false);
-            ctx.fill();
-            ctx.restore();
+            // 1. Position Camera chasing the car
+            let targetCamX = game.carMesh.position.x;
+            let targetCamY = game.carMesh.position.y + 3.2;
+            let targetCamZ = game.carMesh.position.z + 9.5;
 
-            // Scanner sunrise stripes
-            ctx.fillStyle = game.track.skyColor;
-            for (let y = sunY - 170; y < sunY; y += 12) {
-                let h = 1 + (y - (sunY - 170)) / 12;
-                ctx.fillRect(0, y, width, h);
+            camera.position.x += (targetCamX - camera.position.x) * 0.12;
+            camera.position.y += (targetCamY - camera.position.y) * 0.12;
+            camera.position.z += (targetCamZ - camera.position.z) * 0.12;
+
+            // 2. Point camera at upcoming path
+            camera.lookAt(game.carMesh.position.x, game.carMesh.position.y + 0.8, game.carMesh.position.z - 12);
+
+            // 3. Screen shake logic
+            if (game.shakeAmount > 0) {
+                camera.position.x += (Math.random() - 0.5) * game.shakeAmount;
+                camera.position.y += (Math.random() - 0.5) * game.shakeAmount;
+                game.shakeAmount *= 0.85;
+                if (game.shakeAmount < 0.01) game.shakeAmount = 0;
             }
 
-            // Parallax skyscrapers
-            ctx.strokeStyle = '#00ffff';
-            ctx.shadowColor = '#00ffff';
-            ctx.shadowBlur = 4;
-            ctx.lineWidth = 1;
-            
-            let startX = (skyX % 300) - 300;
-            ctx.fillStyle = '#080010';
-            for (let x = startX; x < width + 300; x += 120) {
-                let h = 80 + Math.sin(x) * 50 + Math.cos(x / 10) * 30;
-                ctx.fillRect(x, sunY - h, 70, h);
-                ctx.strokeRect(x, sunY - h, 70, h);
-                
-                // Building vector segments
-                ctx.beginPath();
-                ctx.moveTo(x + 20, sunY - h + 15);
-                ctx.lineTo(x + 20, sunY);
-                ctx.moveTo(x + 50, sunY - h + 15);
-                ctx.lineTo(x + 50, sunY);
-                ctx.stroke();
-            }
-            ctx.shadowBlur = 0;
-        }
+            renderer.render(scene, camera);
 
-        function drawPolygon(ctx, x1, y1, w1, x2, y2, w2, color) {
-            ctx.fillStyle = color;
-            ctx.beginPath();
-            ctx.moveTo(x1 - w1, y1);
-            ctx.lineTo(x2 - w2, y2);
-            ctx.lineTo(x2 + w2, y2);
-            ctx.lineTo(x1 + w1, y1);
-            ctx.closePath();
-            ctx.fill();
-        }
-
-        function drawSegment(ctx, width, p1, p2, color, rumbleColor, lineColor) {
-            // Field landscape boundaries
-            ctx.fillStyle = color;
-            ctx.fillRect(0, p2.y, width, p1.y - p2.y + 1);
-
-            // Vector pavement surface
-            drawPolygon(ctx, p1.x, p1.y + 1, p1.w, p2.x, p2.y, p2.w, '#080811');
-
-            // Rumble outer boundaries
-            const r1 = p1.w * 0.08;
-            const r2 = p2.w * 0.08;
-            drawPolygon(ctx, p1.x - p1.w - r1, p1.y + 1, r1, p2.x - p2.w - r2, p2.y, r2, rumbleColor);
-            drawPolygon(ctx, p1.x + p1.w, p1.y + 1, r1, p2.x + p2.w, p2.y, r2, rumbleColor);
-
-            // Center lane markings
-            if (lineColor !== 'transparent') {
-                const laneW1 = p1.w * 0.015;
-                const laneW2 = p2.w * 0.015;
-                drawPolygon(ctx, p1.x, p1.y + 1, laneW1, p2.x, p2.y, laneW2, lineColor);
-            }
-        }
-
-        function drawObstacle(ctx, x, y, w, h, type) {
-            if (w < 1 || h < 1) return;
-            ctx.save();
-            if (type === 'barrier') {
-                ctx.strokeStyle = '#ff0055';
-                ctx.lineWidth = 2;
-                ctx.shadowColor = '#ff0055';
-                ctx.shadowBlur = 8;
-                ctx.fillStyle = 'rgba(255, 0, 85, 0.15)';
-                ctx.beginPath();
-                ctx.moveTo(x - w, y);
-                ctx.lineTo(x - w * 0.8, y - h);
-                ctx.lineTo(x + w * 0.8, y - h);
-                ctx.lineTo(x + w, y);
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-            } else if (type === 'core') {
-                ctx.strokeStyle = '#39ff14';
-                ctx.lineWidth = 2;
-                ctx.shadowColor = '#39ff14';
-                ctx.shadowBlur = 8;
-                ctx.fillStyle = 'rgba(57, 255, 20, 0.2)';
-                let bobY = Math.sin(Date.now() * 0.01) * 10;
-                ctx.beginPath();
-                ctx.moveTo(x, y - h * 0.6 + bobY);
-                ctx.lineTo(x - w * 0.4, y - h * 0.3 + bobY);
-                ctx.lineTo(x, y + bobY);
-                ctx.lineTo(x + w * 0.4, y - h * 0.3 + bobY);
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-            }
-            ctx.restore();
-        }
-
-        function drawPlayerCar(ctx, width, height) {
-            let carX = width / 2;
-            let carY = height - 120;
-            let carW = 140;
-            let carH = 50;
-            
-            let hoverY = Math.sin(Date.now() * 0.008) * 3;
-            carY += hoverY;
-
-            // Tilt physics relative to steering vectors
-            let tilt = (game.playerX - game.prevPlayerX) * 180;
-            game.prevPlayerX = game.playerX;
-            game.carTilt += (tilt - game.carTilt) * 0.15;
-            
-            ctx.save();
-            ctx.translate(carX, carY);
-            ctx.rotate(game.carTilt * Math.PI / 180);
-
-            // Shadow glow
-            let shadowGrad = ctx.createRadialGradient(0, 20, 5, 0, 20, carW * 0.8);
-            shadowGrad.addColorStop(0, 'rgba(0, 255, 200, 0.4)');
-            shadowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-            ctx.fillStyle = shadowGrad;
-            ctx.beginPath();
-            ctx.ellipse(0, 20, carW * 0.6, 12, 0, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Glow vector thrusters
-            let thrusterW = 18;
-            let thrusterH = 8;
-            ctx.fillStyle = game.boosting ? '#ffea00' : '#00ffff';
-            ctx.shadowColor = game.boosting ? '#ffea00' : '#00ffff';
-            ctx.shadowBlur = game.boosting ? 15 : 6;
-            ctx.fillRect(-carW * 0.35 - thrusterW/2, 10, thrusterW, thrusterH);
-            ctx.fillRect(carW * 0.35 - thrusterW/2, 10, thrusterW, thrusterH);
-
-            // Wireframe body
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 1.5;
-            ctx.fillStyle = '#0c001a';
-            ctx.shadowBlur = 4;
-            ctx.shadowColor = '#ffffff';
-
-            ctx.beginPath();
-            ctx.moveTo(-carW * 0.5, 10);
-            ctx.lineTo(-carW * 0.45, -15);
-            ctx.lineTo(-carW * 0.25, -20);
-            ctx.lineTo(-carW * 0.15, -35);
-            ctx.lineTo(carW * 0.15, -35); 
-            ctx.lineTo(carW * 0.25, -20);
-            ctx.lineTo(carW * 0.45, -15);
-            ctx.lineTo(carW * 0.5, 10);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            // Canopy glass glow
-            ctx.strokeStyle = '#00ffff';
-            ctx.shadowColor = '#00ffff';
-            ctx.shadowBlur = 8;
-            ctx.fillStyle = 'rgba(0, 255, 255, 0.2)';
-            ctx.beginPath();
-            ctx.moveTo(-carW * 0.2, -18);
-            ctx.lineTo(-carW * 0.12, -32);
-            ctx.lineTo(carW * 0.12, -32);
-            ctx.lineTo(carW * 0.2, -18);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            // Highlight bar
-            ctx.strokeStyle = '#ff0055';
-            ctx.shadowColor = '#ff0055';
-            ctx.beginPath();
-            ctx.moveTo(-carW * 0.45, -12);
-            ctx.lineTo(carW * 0.45, -12);
-            ctx.stroke();
-
-            ctx.restore();
-        }
-
-        function drawParticles(ctx) {
-            game.particles.forEach(p => {
-                ctx.save();
-                ctx.globalAlpha = p.alpha;
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-            });
-        }
-
-        function drawLabels(ctx) {
-            game.labels.forEach(lbl => {
-                ctx.save();
-                ctx.fillStyle = lbl.color;
-                ctx.globalAlpha = lbl.alpha;
-                ctx.font = `bold ${Math.round(20 * lbl.scale)}px 'Inter Tight', sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.shadowColor = lbl.color;
-                ctx.shadowBlur = 10;
-                ctx.fillText(lbl.text, lbl.x, lbl.y);
-                ctx.restore();
-            });
-        }
-
-        function drawWarpLines(ctx, width, height) {
-            ctx.save();
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-            ctx.lineWidth = 1.5;
-            let center = { x: width / 2, y: height / 2 };
-            for (let i = 0; i < 20; i++) {
-                let angle = Math.random() * Math.PI * 2;
-                let len = 50 + Math.random() * 150;
-                let dist = 150 + Math.random() * 300;
-                let startX = center.x + Math.cos(angle) * dist;
-                let startY = center.y + Math.sin(angle) * dist;
-                let endX = startX + Math.cos(angle) * len;
-                let endY = startY + Math.sin(angle) * len;
-                
-                ctx.beginPath();
-                ctx.moveTo(startX, startY);
-                ctx.lineTo(endX, endY);
-                ctx.stroke();
-            }
-            ctx.restore();
-        }
-
-        function updateHTMLHUD() {
-            document.getElementById('hud-speed').innerText = `${Math.round(game.speed * 1.5)} KM/H`;
-            document.getElementById('hud-score').innerText = String(game.score).padStart(6, '0');
-            
-            let shieldHTML = '';
-            for (let i = 0; i < 3; i++) {
-                shieldHTML += i < game.shields ? '▲ ' : '△ ';
-            }
-            document.getElementById('hud-shields').innerHTML = shieldHTML;
-            
-            let progress = Math.min(100, Math.round((game.position / (game.road.length * segmentLength)) * 100));
-            document.getElementById('hud-progress-bar').style.width = `${progress}%`;
-            document.getElementById('hud-boost-bar').style.width = `${game.boostEnergy}%`;
+            // 4. Update HUD
+            document.getElementById('hud-speed').innerText = `${Math.round(game.speed * 45)} KM/H`;
+            document.getElementById('hud-score').innerText = game.score.toLocaleString();
         }
 
         // ==========================================================================
-        // UI Navigation Spring Render Tick
+        // UI Menu Selection Springs Tick
         // ==========================================================================
-        let lastTargetElement = null;
-        let focusScale = 1.0;
-
         function tickMicroanimations() {
             const activeTarget = getActiveTarget();
             const currentElement = activeTarget ? activeTarget.icon : null;
             const currentContainer = activeTarget ? activeTarget.container : null;
 
-            // Clear visual residues
             const tiltedElements = document.querySelectorAll('.tilted-focus');
             tiltedElements.forEach(el => {
                 if (el !== currentElement && el !== currentContainer) {
@@ -1336,7 +942,6 @@
                 }
             });
 
-            // Update Spring physics
             springElements.forEach(el => {
                 if (!el.isConnected) return;
                 const s = el.springs; 
