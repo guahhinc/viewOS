@@ -3,37 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>viewOS App Template</title>
+    <title>viewOS Application Template</title>
     <style>
         /* ==========================================================================
            viewOS System Typography & Layout Constants
            ========================================================================== */
-        @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400&display=swap');
 
         :root {
             --bg-color: #000000;
             --text-color: #ffffff;
-            --secondary-text: #aaaaaa;
+            --secondary-text: #a0a0a5;
             
-            --card-width: 260px;
-            --card-height: calc(var(--card-width) * 0.6);
-            --border-radius: 8px;
+            /* Enlarged visual grid sizing for better spatial/TV readability */
+            --card-width: 320px;
+            --card-height: calc(var(--card-width) * 0.625); /* 16:10 aspect ratio */
+            --border-radius: 12px;
         }
 
         * {
             font-family: 'Inter Tight', -apple-system, sans-serif;
             font-weight: 300 !important;
             letter-spacing: -0.03em !important;
-            line-height: 1.2;
+            line-height: 1.25;
             box-sizing: border-box;
             user-select: none;
             -webkit-font-smoothing: antialiased;
+            /* ViewOS maps gamepad/keyboard navigation, so the default cursor is hidden */
             cursor: none !important;
-            margin: 0; padding: 0;
+            margin: 0; 
+            padding: 0;
         }
 
         html, body {
-            width: 100vw; height: 100vh;
+            width: 100vw; 
+            height: 100vh;
             background-color: var(--bg-color);
             color: var(--text-color);
             overflow: hidden;
@@ -41,74 +45,125 @@
 
         #app-root {
             position: relative;
-            width: 100%; height: 100%;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: flex-start;
-            padding: 80px 4vw 120px 4vw;
+            width: 100%; 
+            height: 100%;
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            justify-content: flex-start;
+            padding: 100px 4vw 140px 4vw; /* More breathing room */
         }
 
         #app-header {
             text-align: center;
-            margin-bottom: 60px;
+            margin-bottom: 80px;
         }
-        #app-header h1 { font-size: 2.8rem; margin-bottom: 12px; }
-        #app-header p { font-size: 1.3rem; color: var(--secondary-text); }
+        /* Enlarged typography scales */
+        #app-header h1 { font-size: 3.6rem; font-weight: 400 !important; margin-bottom: 16px; }
+        #app-header p { font-size: 1.6rem; color: var(--secondary-text); max-width: 800px; margin: 0 auto; }
 
         #content-grid {
             display: grid;
             grid-template-columns: repeat(4, var(--card-width));
-            gap: 35px;
+            gap: 45px; /* Spacious gaps */
             justify-content: center;
-            perspective: 1000px;
+            perspective: 1200px;
         }
 
         .grid-item {
-            display: flex; flex-direction: column; align-items: center;
-            width: 100%; transform-style: preserve-3d; will-change: transform;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+            width: 100%; 
+            transform-style: preserve-3d; 
+            will-change: transform;
         }
 
         .card-visual {
-            width: var(--card-width); height: var(--card-height);
-            background-color: #111111; border-radius: var(--border-radius);
-            position: relative; z-index: 1; transform-style: preserve-3d;
-            background-size: cover; background-position: center;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            width: var(--card-width); 
+            height: var(--card-height);
+            background-color: #1c1c1e; 
+            border-radius: var(--border-radius);
+            position: relative; 
+            z-index: 1; 
+            transform-style: preserve-3d;
+            background-size: cover; 
+            background-position: center;
+            border: 1.5px solid rgba(255, 255, 255, 0.08);
+            transition: border-color 0.2s;
+        }
+
+        .grid-item.is-focused .card-visual {
+            border-color: rgba(255, 255, 255, 0.25);
         }
 
         .card-title {
-            font-size: 1.4rem; color: #ffffff; margin-top: 24px;
-            text-align: center; white-space: nowrap; overflow: hidden;
-            text-overflow: ellipsis; width: 100%;
+            font-size: 1.6rem; /* Enlarged title text */
+            color: var(--secondary-text); 
+            margin-top: 28px;
+            text-align: center; 
+            white-space: nowrap; 
+            overflow: hidden;
+            text-overflow: ellipsis; 
+            width: 100%;
+            transition: color 0.2s ease;
         }
 
         /* 3D Dynamic Reflection Layers */
         .card-shine {
-            position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 11;
-            mix-blend-mode: screen; opacity: 0; will-change: opacity; overflow: hidden;
+            position: absolute; 
+            inset: 0; 
+            border-radius: inherit; 
+            pointer-events: none; 
+            z-index: 11;
+            mix-blend-mode: screen; 
+            opacity: 0; 
+            will-change: opacity; 
+            overflow: hidden;
             transform: translate3d(0, 0, 0.5px);
         }
+        
         .card-glass-border {
-            position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 12;
-            border: 1.5px solid rgba(255,255,255,.3); opacity: 0; will-change: opacity;
+            position: absolute; 
+            inset: 0; 
+            border-radius: inherit; 
+            pointer-events: none; 
+            z-index: 12;
+            border: 1.5px solid rgba(255, 255, 255, 0.3); 
+            opacity: 0; 
+            will-change: opacity;
             transform: translate3d(0, 0, 1px);
         }
 
         /* Detail/Sub-navigation View Overlay */
         #detail-view {
-            position: fixed; inset: 0; background: #000;
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-            opacity: 0; transition: opacity 0.3s ease; z-index: 1000; padding: 40px;
+            position: fixed; 
+            inset: 0; 
+            background: #000;
+            display: none; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+            opacity: 0; 
+            transition: opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1); 
+            z-index: 1000; 
+            padding: 40px;
         }
         #detail-view.visible { display: flex; opacity: 1; }
-        #detail-view h2 { font-size: 3rem; margin-bottom: 15px; }
-        #detail-view p { font-size: 1.5rem; color: var(--secondary-text); margin-bottom: 40px; }
+        #detail-view h2 { font-size: 4rem; margin-bottom: 24px; }
+        #detail-view p { font-size: 1.8rem; color: var(--secondary-text); margin-bottom: 60px; }
 
         /* Custom Specificity overrides to avoid CSS clashing when focused */
         .grid-item.is-focused .card-title { color: #ffffff !important; }
+        
         #detail-close-btn {
-            font-size: 1.5rem; color: #ffffff; background: rgba(255,255,255,0.08);
-            padding: 16px 40px; border-radius: var(--border-radius);
-            transform-style: preserve-3d; transition: background-color 0.25s ease, color 0.25s ease;
+            font-size: 1.8rem; 
+            color: #ffffff; 
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px 50px; 
+            border-radius: var(--border-radius);
+            transform-style: preserve-3d; 
+            transition: background-color 0.25s ease, color 0.25s ease;
         }
         #detail-close-btn.is-focused {
             color: #000000 !important;
@@ -120,37 +175,49 @@
 </head>
 <body>
 
+    <!-- 
+      DEVELOPER NOTE: 
+      This is the primary root of your application. You should structure your main vistas, 
+      side bars, or canvas instances inside here. The layout below is a baseline demo grid.
+    -->
     <div id="app-root">
         <header id="app-header">
-            <h1>Demo App</h1>
-            <p>Customize this baseline template to build your viewOS application.</p>
+            <h1>viewOS App Template</h1>
+            <p>Use this structure as a baseline to design your custom application. It comes pre-packaged with gamepad navigation, focus states, and the system exit callback.</p>
         </header>
 
+        <!-- Main interactive content grid -->
         <main id="content-grid"></main>
     </div>
 
+    <!-- 
+      DEVELOPER NOTE: 
+      This is an overlay detail view. Replace this setup with your own state routing or custom visual layers.
+    -->
     <div id="detail-view">
         <h2 id="detail-title">Detail Title</h2>
-        <p>This sub-navigation sample blocks root exit. Press Back to return to grid.</p>
+        <p>This sub-navigation overlay intercepts inputs. Press Back/B/Esc to return to the grid.</p>
         <div id="detail-close-btn">Return to Grid</div>
     </div>
 
     <script>
         // ==========================================================================
-        // Developer Data Definition
+        // Developer Configuration & Mock Data
         // ==========================================================================
+        // REPLACE THIS: Add your own data objects, icons, image URLs, or views here.
         const appItems = [
-            { id: 0, title: "Option One", color: "#1a120b" },
-            { id: 1, title: "Option Two", color: "#0f172a" },
-            { id: 2, title: "Option Three", color: "#14532d" },
-            { id: 3, title: "Option Four", color: "#581c87" }
+            { id: 0, title: "Media Library", color: "#1c2541" },
+            { id: 1, title: "System Settings", color: "#1f1a3a" },
+            { id: 2, title: "Cloud Explorer", color: "#0b3c5d" },
+            { id: 3, title: "Web Terminal", color: "#328cc1" }
         ];
 
+        // The central layout/state variables of the application
         const STATE = {
-            currentScreen: 'grid', // 'grid' | 'detail'
+            currentScreen: 'grid', // Track currently active screen for input routing: 'grid' | 'detail'
             focusedIndex: 0,
             columns: 4,
-            joyX: 0, joyY: 0
+            joyX: 0, joyY: 0       // Live joystick values for fine-tuned 3D tilts
         };
 
         const DOM_CACHE = {
@@ -164,21 +231,29 @@
         let springElements = [];
 
         // ==========================================================================
-        // Spring Engine Implementation
+        // Physics Engine Implementation
         // ==========================================================================
-        function Spring(val, stiffness, damping) {
-            this.val = val; this.target = val; this.vel = 0;
-            this.stiffness = stiffness || 0.12; this.damping = damping || 0.78;
+        // Simple spring math to deliver natural, tactile feedback on selection shifts
+        function Spring(val, stiffness = 0.12, damping = 0.78) {
+            this.val = val; 
+            this.target = val; 
+            this.vel = 0;
+            this.stiffness = stiffness; 
+            this.damping = damping;
         }
         Spring.prototype.update = function() {
             if (Math.abs(this.target - this.val) < 0.001 && Math.abs(this.vel) < 0.001) {
-                this.val = this.target; this.vel = 0; return false;
+                this.val = this.target; 
+                this.vel = 0; 
+                return false;
             }
             const force = (this.target - this.val) * this.stiffness;
-            this.vel = (this.vel + force) * this.damping; this.val += this.vel;
+            this.vel = (this.vel + force) * this.damping; 
+            this.val += this.vel;
             return true;
         };
 
+        // Hooks up interactive variables, reflections, and borders to elements
         function setupSpringPhysics(el) {
             if (el.springs) return;
             el.springs = { 
@@ -196,12 +271,13 @@
         }
 
         // ==========================================================================
-        // App Controller Setup
+        // Application Lifecycle Initializer
         // ==========================================================================
         function initApp() {
             DOM_CACHE.grid.innerHTML = '';
             cachedElements = [];
             
+            // Build elements dynamic off appItems list
             appItems.forEach((item, index) => {
                 const itemEl = document.createElement('div');
                 itemEl.className = 'grid-item';
@@ -219,8 +295,10 @@
                 cachedElements.push({ container: itemEl, icon: visual, data: item });
             });
 
+            // Standard event listeners
             document.addEventListener('keydown', handleKeydown);
             
+            // Start physical engine tick loops
             requestAnimationFrame(pollGamepads);
             requestAnimationFrame(tickMicroanimations);
             
@@ -235,17 +313,30 @@
 
         let lastActiveTarget = null;
         function updateFocus(isInitialLoad = false, dx = 0, dy = 0) {
+            // Remove previous focus classes
             document.querySelectorAll('.is-focused').forEach(el => el.classList.remove('is-focused'));
             const target = getActiveTarget();
 
+            // Settle out-of-focus elements
             if (lastActiveTarget && lastActiveTarget.icon && lastActiveTarget.icon.springs && lastActiveTarget !== target) {
-                const s = lastActiveTarget.icon.springs; s.scale.target = 1.0; s.focusState.target = 0; s.posX.target = 0; s.posY.target = 0;
-                if (dx) s.posX.vel = dx * 22; if (dy) s.posY.vel = dy * 22; lastActiveTarget.icon.style.zIndex = '1';
+                const s = lastActiveTarget.icon.springs; 
+                s.scale.target = 1.0; 
+                s.focusState.target = 0; 
+                s.posX.target = 0; 
+                s.posY.target = 0;
+                if (dx) s.posX.vel = dx * 22; 
+                if (dy) s.posY.vel = dy * 22; 
+                lastActiveTarget.icon.style.zIndex = '1';
             }
 
+            // Set physics targets on incoming focus element
             if (target && target.icon && target.icon.springs) {
-                const s = target.icon.springs; s.scale.target = 1.15; s.focusState.target = 1.0;
-                if (dx) s.posX.vel = dx * 28; if (dy) s.posY.vel = dy * 28; target.icon.style.zIndex = '50';
+                const s = target.icon.springs; 
+                s.scale.target = 1.12; // Modest scale up on focus
+                s.focusState.target = 1.0;
+                if (dx) s.posX.vel = dx * 28; 
+                if (dy) s.posY.vel = dy * 28; 
+                target.icon.style.zIndex = '50';
             }
 
             lastActiveTarget = target;
@@ -256,7 +347,7 @@
         }
 
         // ==========================================================================
-        // Sub-Navigation Handling
+        // Navigation Actions & Routing
         // ==========================================================================
         function executeAction() {
             if (STATE.currentScreen === 'grid') {
@@ -276,19 +367,20 @@
             updateFocus(false);
         }
 
+        // System exit message
         function handleSystemBack() {
             if (STATE.currentScreen === 'detail') {
                 closeDetailView();
             } else {
+                // Post message telling the host OS we wish to quit back to home/launcher
                 window.parent.postMessage({ type: 'exitApp' }, '*');
             }
         }
 
         // ==========================================================================
-        // Input Interceptor & Gamepad Loop
+        // Keyboard Input Processing
         // ==========================================================================
         function handleKeydown(e) {
-            // Guarding dynamic preventDefault executions to avoid Gamepad thread crashes
             if (e && typeof e.preventDefault === 'function') e.preventDefault();
             
             let dx = 0, dy = 0;
@@ -307,6 +399,9 @@
             }
         }
 
+        // ==========================================================================
+        // Gamepad Loop & Input Polling
+        // ==========================================================================
         let lastGamepadState = { up: false, down: false, left: false, right: false, enter: false, back: false };
         let gpActiveDir = null;
         let holdTime = 0, lastRepeatTime = 0;
@@ -316,15 +411,17 @@
             for (let i = 0; i < gamepads.length; i++) {
                 const gp = gamepads[i]; if (!gp) continue;
 
+                // DPAD mappings & Joystick bounds check
                 const up = gp.buttons[12]?.pressed || gp.axes[1] < -0.5;
                 const down = gp.buttons[13]?.pressed || gp.axes[1] > 0.5;
                 const left = gp.buttons[14]?.pressed || gp.axes[0] < -0.5;
                 const right = gp.buttons[15]?.pressed || gp.axes[0] > 0.5;
-                const enter = gp.buttons[0]?.pressed;
-                const back = gp.buttons[1]?.pressed;
+                const enter = gp.buttons[0]?.pressed; // A
+                const back = gp.buttons[1]?.pressed;   // B
 
-                STATE.joyX = Math.abs(gp.axes[0]) > 0.1 ? gp.axes[0] : 0;
-                STATE.joyY = Math.abs(gp.axes[1]) > 0.1 ? gp.axes[1] : 0;
+                // Deadzone check for fine-grained 3D tilts
+                STATE.joyX = Math.abs(gp.axes[0]) > 0.12 ? gp.axes[0] : 0;
+                STATE.joyY = Math.abs(gp.axes[1]) > 0.12 ? gp.axes[1] : 0;
 
                 let dir = up ? 'up' : down ? 'down' : left ? 'left' : right ? 'right' : null;
                 if (dir) {
@@ -347,7 +444,7 @@
         }
 
         // ==========================================================================
-        // Physics Engine Pipeline
+        // Render & Physics Loop
         // ==========================================================================
         let lastTargetElement = null;
         let focusScale = 1.0;
@@ -357,16 +454,22 @@
             const currentElement = activeTarget ? activeTarget.icon : null;
             const currentContainer = activeTarget ? activeTarget.container : null;
 
+            // Clear visual residues on unfocused items
             const tiltedElements = document.querySelectorAll('.tilted-focus');
             tiltedElements.forEach(el => {
                 if (el !== currentElement && el !== currentContainer) {
-                    if (!el.springs) { el.style.transform = ''; el.classList.remove('tilted-focus'); }
+                    if (!el.springs) { 
+                        el.style.transform = ''; 
+                        el.classList.remove('tilted-focus'); 
+                    }
                 }
             });
 
+            // Update Spring Calculations
             springElements.forEach(el => {
                 if (!el.isConnected) return;
-                const s = el.springs; let changed = false;
+                const s = el.springs; 
+                let changed = false;
                 
                 if (s.scale.update()) changed = true; 
                 if (s.posX.update()) changed = true; 
@@ -391,22 +494,25 @@
                     const totalTranslateX = springX + iconTranslateX;
                     const totalTranslateY = springY + iconTranslateY;
 
+                    // Compute dynamic perspective transforms
                     el.style.transform = `scale(${s.scale.val.toFixed(3)}) translate3d(${totalTranslateX.toFixed(2)}px, ${totalTranslateY.toFixed(2)}px, 0) rotateX(${iconRotateX.toFixed(2)}deg) rotateY(${iconRotateY.toFixed(2)}deg)`;
                     el.classList.add('tilted-focus');
 
+                    // Compute highlights & physical gloss effects
                     const f = Math.max(0, s.focusState.val);
-                    if (el.glassBorder) el.glassBorder.style.opacity = (0.3 + 0.7 * f).toFixed(3);
+                    if (el.glassBorder) el.glassBorder.style.opacity = (0.2 + 0.8 * f).toFixed(3);
                     if (el.shine) {
                         el.shine.style.opacity = f.toFixed(3);
                         if (isFocused) {
                             const shineX = 30 + (s.posX.val * 2.2) + Math.sin(Date.now() * 0.001) * 3;
                             const shineY = 30 + (s.posY.val * 2.2) + Math.cos(Date.now() * 0.001) * 3;
-                            el.shine.style.background = `radial-gradient(circle at ${shineX.toFixed(1)}% ${shineY.toFixed(1)}%, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0) 100%)`;
+                            el.shine.style.background = `radial-gradient(circle at ${shineX.toFixed(1)}% ${shineY.toFixed(1)}%, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 60%, rgba(255,255,255,0) 100%)`;
                         }
                     }
                 }
             });
 
+            // Handle elements not explicitly powered by the physics framework (such as detail buttons)
             if (activeTarget && activeTarget.icon && activeTarget.container && !activeTarget.icon.springs) {
                 const container = activeTarget.container;
                 const icon = activeTarget.icon;
