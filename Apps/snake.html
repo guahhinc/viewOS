@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>snakeOS - viewOS Arcade</title>
+    <style>
+        /* ==========================================================================
+           viewOS System Typography & Layout Constants
+           ========================================================================== */
+        @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300&display=swap');
+
+        :root {
+            --bg-color: #000000;
+            --text-color: #ffffff;
+            --secondary-text: #aaaaaa;
+            
+            --card-width: 260px;
+            --card-height: calc(var(--card-width) * 0.6);
+            --border-radius: 8px;
+        }
+
+        * {
+            font-family: 'Inter Tight', -apple-system, sans-serif;
+            font-weight: 300 !important;
+            letter-spacing: -0.03em !important;
+            line-height: 1.2;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-font-smoothing: antialiased;
+            cursor: none !important;
+            margin: 0; padding: 0;
+        }
+
+        html, body {
+            width: 100vw; height: 100vh;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow: hidden;
+        }
+
+        #app-root {
+            position: relative;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: flex-start;
+            padding: 80px 4vw 120px 4vw;
+        }
+
+        #app-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        #app-header h1 { font-size: 2.8rem; margin-bottom: 12px; }
+        #app-header p { font-size: 1.3rem; color: var(--secondary-text); }
+
+        #content-grid {
+            display: grid;
+            grid-template-columns: repeat(4, var(--card-width));
+            gap: 35px;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        .grid-item {
+            display: flex; flex-direction: column; align-items: center;
+            width: 100%; transform-style: preserve-3d; will-change: transform;
+        }
+
+        .card-visual {
+            width: var(--card-width); height: var(--card-height);
+            background-color: #111111; border-radius: var(--border-radius);
+            position: relative; z-index: 1; transform-style: preserve-3d;
+            background-size: cover; background-position: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+
+        .card-title {
+            font-size: 1.4rem; color: #ffffff; margin-top: 24px;
+            text-align: center; white-space: nowrap; overflow: hidden;
+            text-overflow: ellipsis; width: 100%;
+        }
+
+        .card-sub {
+            font-size: 0.9rem; color: var(--secondary-text); margin-top: 6px;
+            text-align: center; white-space: nowrap; overflow: hidden;
+            text-overflow: ellipsis; width: 100%;
+            opacity: 0.85;
+        }
+
+        /* 3D Dynamic Reflection Layers */
+        .card-shine {
+            position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 11;
+            mix-blend-mode: screen; opacity: 0; will-change: opacity; overflow: hidden;
+            transform: translate3d(0, 0, 0.5px);
+        }
+        .card-glass-border {
+            position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 12;
+            border: 1.5px solid rgba(255,255,255,.3); opacity: 0; will-change: opacity;
+            transform: translate3d(0, 0, 1px);
+        }
+
+        /* Detail/Sub-navigation View Overlay */
+        #detail-view {
+            position: fixed; inset: 0; background: #000;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s ease; z-index: 1000; padding: 40px;
+        }
+        #detail-view.visible { display: flex; opacity: 1; }
+
+        /* Custom Specificity overrides to avoid CSS clashing when focused */
+        .grid-item.is-focused .card-title { color: #ffffff !important; }
+        
+        #detail-close-btn {
+            font-size: 1.1rem; color: #ffffff; background: rgba(255,255,255,0.06);
+            padding: 12px 30px; border-radius: var(--border-radius);
+            transform-style: preserve-3d; transition: background-color 0.25s ease, color 0.25s ease;
+            text-align: center;
+            cursor: pointer;
+            margin-top: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+            width: 100%;
+        }
+        #detail-close-btn.is-focused {
+            color: #000000 !important;
+            background-color: #ffffff !important;
+        }
+
+        .tilted-focus { transition: none !important; }
+
+        /* ==========================================================================
+           Snake Game Specific Styles
+           ========================================================================== */
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            background: #111111;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.9);
+            transform-style: preserve-3d;
+            width: 448px;
+            position: relative;
+            will-change: transform;
+        }
+
+        #game-hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 0 10px;
+            z-index: 2;
+        }
+
+        .hud-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hud-label {
+            font-size: 0.75rem;
+            color: var(--secondary-text);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 2px;
+        }
+
+        #game-score, #game-highscore {
+            font-size: 1.8rem;
+            font-weight: 300;
+        }
+
+        #game-status-text {
+            font-size: 1rem;
+            letter-spacing: 0.12em;
+            color: #10b981;
+            text-transform: uppercase;
+        }
+
+        #canvas-wrapper {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1.5px solid rgba(255,255,255,0.1);
+            background: #000000;
+            z-index: 2;
+        }
+
+        #game-canvas {
+            display: block;
+        }
+
+        #game-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            backdrop-filter: blur(4px);
+            z-index: 15;
+        }
+
+        #overlay-title {
+            font-size: 2.2rem;
+            color: #ef4444;
+            letter-spacing: 0.05em;
+        }
+
+        #overlay-subtitle {
+            font-size: 1rem;
+            color: var(--secondary-text);
+            text-align: center;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app-root">
+        <header id="app-header">
+            <h1>snakeOS</h1>
+            <p>A spatial retro concept built for viewOS.</p>
+        </header>
+
+        <main id="content-grid"></main>
+    </div>
+
+    <div id="detail-view">
+        <div id="game-container">
+            <div id="game-hud">
+                <div class="hud-item">
+                    <span class="hud-label">Score</span>
+                    <span id="game-score">000</span>
+                </div>
+                <div id="game-status-text">PLAYING</div>
+                <div class="hud-item">
+                    <span class="hud-label">High</span>
+                    <span id="game-highscore">000</span>
+                </div>
+            </div>
+            <div id="canvas-wrapper">
+                <canvas id="game-canvas" width="400" height="400"></canvas>
+                <div id="game-overlay">
+                    <div id="overlay-title">GAME OVER</div>
+                    <div id="overlay-subtitle">Press Enter / Action to retry<br>Press Escape / Back to exit</div>
+                </div>
+            </div>
+            <div id="detail-close-btn">Exit Simulator</div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================================================
+        // Developer Data Definition & Themes
+        // ==========================================================================
+        const APP_THEMES = [
+            { name: "viewOS Classic", bg: "#000000", snake: "#ffffff", food: "#f59e0b", gridColor: "rgba(255,255,255,0.03)" },
+            { name: "Neon Cyber", bg: "#09090e", snake: "#06b6d4", food: "#ec4899", gridColor: "rgba(6,182,212,0.05)" },
+            { name: "Matrix Code", bg: "#021c0e", snake: "#22c55e", food: "#10b981", gridColor: "rgba(34,197,94,0.04)" },
+            { name: "Solar Flare", bg: "#150600", snake: "#eab308", food: "#ef4444", gridColor: "rgba(234,179,8,0.04)" }
+        ];
+
+        const APP_SPEEDS = [
+            { label: "Slow", ms: 140 },
+            { label: "Medium", ms: 95 },
+            { label: "Fast", ms: 55 }
+        ];
+
+        const appItems = [
+            { id: 0, title: "Start Game", desc: "Launch simulator", color: "#14532d" },
+            { id: 1, title: "Speed: Medium", desc: "Simulation pace", color: "#1e3a8a" },
+            { id: 2, title: "Theme: Classic", desc: "Visual profile", color: "#000000" },
+            { id: 3, title: "High Score: 0", desc: "Reset progress", color: "#1e293b" }
+        ];
+
+        const STATE = {
+            currentScreen: 'grid', // 'grid' | 'game'
+            focusedIndex: 0,
+            columns: 4,
+            joyX: 0, joyY: 0,
+
+            // System Configurations
+            speedIdx: 1, 
+            themeIdx: 0,
+            highScore: parseInt(localStorage.getItem('viewos_snake_high') || '0', 10),
+
+            // Gameplay State variables
+            isPlaying: false,
+            isGameOver: false,
+            score: 0
+        };
+
+        const DOM_CACHE = {
+            grid: document.getElementById('content-grid'),
+            detail: document.getElementById('detail-view'),
+            detailBtn: document.getElementById('detail-close-btn'),
+            canvas: document.getElementById('game-canvas'),
+            scoreLabel: document.getElementById('game-score'),
+            highLabel: document.getElementById('game-highscore'),
+            statusLabel: document.getElementById('game-status-text'),
+            overlay: document.getElementById('game-overlay')
+        };
+
+        let cachedElements = [];
+        let springElements = [];
+
+        // Snake Engine Coordinates
+        let snake = [];
+        let dir = { x: 0, y: -1 };
+        let nextDir = { x: 0, y: -1 };
+        let food = { x: 0, y: 0 };
+        let gameInterval = null;
+
+        // ==========================================================================
+        // Spring Engine Implementation
+        // ==========================================================================
+        function Spring(val, stiffness, damping) {
+            this.val = val; this.target = val; this.vel = 0;
+            this.stiffness = stiffness || 0.12; this.damping = damping || 0.78;
+        }
+        Spring.prototype.update = function() {
+            if (Math.abs(this.target - this.val) < 0.001 && Math.abs(this.vel) < 0.001) {
+                this.val = this.target; this.vel = 0; return false;
+            }
+            const force = (this.target - this.val) * this.stiffness;
+            this.vel = (this.vel + force) * this.damping; this.val += this.vel;
+            return true;
+        };
+
+        function setupSpringPhysics(el) {
+            if (el.springs) return;
+            el.springs = { 
+                scale: new Spring(1.0, 0.15, 0.70), 
+                posX: new Spring(0, 0.08, 0.70), 
+                posY: new Spring(0, 0.08, 0.70), 
+                focusState: new Spring(0, 0.12, 0.80) 
+            };
+            
+            let shine = document.createElement('div'); shine.className = 'card-shine'; 
+            let glassBorder = document.createElement('div'); glassBorder.className = 'card-glass-border'; 
+            el.shine = shine; el.glassBorder = glassBorder;
+            el.appendChild(shine); el.appendChild(glassBorder);
+            springElements.push(el);
+        }
+
+        // ==========================================================================
+        // App Controller Setup
+        // ==========================================================================
+        function initApp() {
+            DOM_CACHE.grid.innerHTML = '';
+            cachedElements = [];
+            
+            appItems.forEach((item, index) => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'grid-item';
+                itemEl.id = `item-${index}`;
+                
+                itemEl.innerHTML = `
+                    <div class="card-visual" style="background-color: ${item.color};"></div>
+                    <div class="card-title">${item.title}</div>
+                    <div class="card-sub">${item.desc}</div>
+                `;
+                
+                DOM_CACHE.grid.appendChild(itemEl);
+                const visual = itemEl.querySelector('.card-visual');
+                setupSpringPhysics(visual);
+                
+                cachedElements.push({ container: itemEl, icon: visual, data: item });
+            });
+
+            // Initialize game container into physics loops for dynamic 3D screen tilt
+            const gameContainer = document.getElementById('game-container');
+            setupSpringPhysics(gameContainer);
+
+            document.addEventListener('keydown', handleKeydown);
+            DOM_CACHE.detailBtn.addEventListener('click', exitGame);
+            
+            updateMenuItems();
+            requestAnimationFrame(pollGamepads);
+            requestAnimationFrame(tickMicroanimations);
+            
+            updateFocus(true);
+        }
+
+        function getActiveTarget() {
+            if (STATE.currentScreen === 'grid') return cachedElements[STATE.focusedIndex] || null;
+            if (STATE.currentScreen === 'game') {
+                const gameContainer = document.getElementById('game-container');
+                return { container: gameContainer, icon: gameContainer };
+            }
+            return null;
+        }
+
+        let lastActiveTarget = null;
+        function updateFocus(isInitialLoad = false, dx = 0, dy = 0) {
+            document.querySelectorAll('.is-focused').forEach(el => el.classList.remove('is-focused'));
+            const target = getActiveTarget();
+
+            if (lastActiveTarget && lastActiveTarget.icon && lastActiveTarget.icon.springs && lastActiveTarget !== target) {
+                const s = lastActiveTarget.icon.springs; s.scale.target = 1.0; s.focusState.target = 0; s.posX.target = 0; s.posY.target = 0;
+                if (dx) s.posX.vel = dx * 22; if (dy) s.posY.vel = dy * 22; lastActiveTarget.icon.style.zIndex = '1';
+            }
+
+            if (target && target.icon && target.icon.springs) {
+                const s = target.icon.springs; 
+                const isGame = (target.icon.id === 'game-container');
+                s.scale.target = isGame ? 1.02 : 1.15; 
+                s.focusState.target = 1.0;
+                if (dx) s.posX.vel = dx * 28; if (dy) s.posY.vel = dy * 28; target.icon.style.zIndex = '50';
+            }
+
+            lastActiveTarget = target;
+            if (target && target.container && target.icon) {
+                target.container.classList.add('is-focused');
+                if (target.icon !== target.container) target.icon.classList.add('is-focused');
+            }
+        }
+
+        function updateMenuItems() {
+            appItems[1].title = `Speed: ${APP_SPEEDS[STATE.speedIdx].label}`;
+            appItems[2].title = `Theme: ${APP_THEMES[STATE.themeIdx].name}`;
+            appItems[3].title = `High Score: ${padScore(STATE.highScore)}`;
+            
+            appItems.forEach((item, index) => {
+                const el = cachedElements[index];
+                if (el) {
+                    el.container.querySelector('.card-title').innerText = item.title;
+                    if (index === 2) {
+                        el.icon.style.backgroundColor = APP_THEMES[STATE.themeIdx].bg;
+                        el.icon.style.borderColor = APP_THEMES[STATE.themeIdx].snake;
+                    }
+                }
+            });
+        }
+
+        function triggerCardPressAnimation(index) {
+            const el = cachedElements[index];
+            if (el && el.icon && el.icon.springs) {
+                el.icon.springs.scale.val = 0.92;
+                el.icon.springs.focusState.val = 1.3;
+            }
+        }
+
+        // ==========================================================================
+        // Snake Gameplay Implementation
+        // ==========================================================================
+        function startGame() {
+            STATE.currentScreen = 'game';
+            STATE.isPlaying = true;
+            STATE.isGameOver = false;
+            STATE.score = 0;
+
+            snake = [
+                { x: 10, y: 10 },
+                { x: 10, y: 11 },
+                { x: 10, y: 12 }
+            ];
+            dir = { x: 0, y: -1 };
+            nextDir = { x: 0, y: -1 };
+
+            spawnFood();
+            
+            DOM_CACHE.scoreLabel.innerText = padScore(STATE.score);
+            DOM_CACHE.highLabel.innerText = padScore(STATE.highScore);
+            DOM_CACHE.overlay.style.display = 'none';
+            DOM_CACHE.statusLabel.innerText = 'PLAYING';
+            DOM_CACHE.statusLabel.style.color = '#10b981';
+
+            if (gameInterval) clearInterval(gameInterval);
+            gameInterval = setInterval(gameStep, APP_SPEEDS[STATE.speedIdx].ms);
+            
+            DOM_CACHE.detail.classList.add('visible');
+            updateFocus(false);
+        }
+
+        function gameStep() {
+            if (!STATE.isPlaying || STATE.isGameOver) return;
+
+            dir = nextDir;
+            const head = snake[0];
+            const newHead = { x: head.x + dir.x, y: head.y + dir.y };
+
+            // Wall Collisions
+            if (newHead.x < 0 || newHead.x >= 20 || newHead.y < 0 || newHead.y >= 20) {
+                triggerGameOver();
+                return;
+            }
+
+            // Self Collisions
+            for (let i = 0; i < snake.length; i++) {
+                if (snake[i].x === newHead.x && snake[i].y === newHead.y) {
+                    triggerGameOver();
+                    return;
+                }
+            }
+
+            snake.unshift(newHead);
+
+            // Food Collisions
+            if (newHead.x === food.x && newHead.y === food.y) {
+                STATE.score += 10;
+                DOM_CACHE.scoreLabel.innerText = padScore(STATE.score);
+
+                if (STATE.score > STATE.highScore) {
+                    STATE.highScore = STATE.score;
+                    localStorage.setItem('viewos_snake_high', STATE.highScore);
+                    DOM_CACHE.highLabel.innerText = padScore(STATE.highScore);
+                }
+
+                triggerEatingJolt();
+                spawnFood();
+            } else {
+                snake.pop();
+            }
+        }
+
+        function spawnFood() {
+            let safetyCounter = 0;
+            while (safetyCounter < 200) {
+                const rx = Math.floor(Math.random() * 20);
+                const ry = Math.floor(Math.random() * 20);
+                
+                let occupied = false;
+                for (let i = 0; i < snake.length; i++) {
+                    if (snake[i].x === rx && snake[i].y === ry) {
+                        occupied = true;
+                        break;
+                    }
+                }
+                if (!occupied) {
+                    food = { x: rx, y: ry };
+                    return;
+                }
+                safetyCounter++;
+            }
+            food = { x: 5, y: 5 }; // Fallback
+        }
+
+        function triggerEatingJolt() {
+            const container = document.getElementById('game-container');
+            if (container && container.springs) {
+                container.springs.posX.vel = (Math.random() - 0.5) * 16;
+                container.springs.posY.vel = (Math.random() - 0.5) * 16;
+                container.springs.scale.val = 1.05;
+            }
+        }
+
+        function triggerGameOver() {
+            STATE.isGameOver = true;
+            STATE.isPlaying = false;
+            if (gameInterval) clearInterval(gameInterval);
+
+            DOM_CACHE.overlay.style.display = 'flex';
+            DOM_CACHE.statusLabel.innerText = 'GAME OVER';
+            DOM_CACHE.statusLabel.style.color = '#ef4444';
+
+            // High intensity spring impact shake
+            const container = document.getElementById('game-container');
+            if (container && container.springs) {
+                container.springs.posX.vel = (Math.random() - 0.5) * 35;
+                container.springs.posY.vel = (Math.random() - 0.5) * 35;
+            }
+        }
+
+        function exitGame() {
+            STATE.isPlaying = false;
+            STATE.isGameOver = false;
+            if (gameInterval) clearInterval(gameInterval);
+
+            STATE.currentScreen = 'grid';
+            DOM_CACHE.detail.classList.remove('visible');
+            updateFocus(false);
+            updateMenuItems();
+        }
+
+        function padScore(val) {
+            return String(val).padStart(3, '0');
+        }
+
+        // ==========================================================================
+        // Sub-Navigation Handling
+        // ==========================================================================
+        function executeAction() {
+            if (STATE.currentScreen === 'grid') {
+                if (STATE.focusedIndex === 0) {
+                    startGame();
+                } else if (STATE.focusedIndex === 1) {
+                    STATE.speedIdx = (STATE.speedIdx + 1) % APP_SPEEDS.length;
+                    updateMenuItems();
+                    triggerCardPressAnimation(1);
+                } else if (STATE.focusedIndex === 2) {
+                    STATE.themeIdx = (STATE.themeIdx + 1) % APP_THEMES.length;
+                    updateMenuItems();
+                    triggerCardPressAnimation(2);
+                } else if (STATE.focusedIndex === 3) {
+                    STATE.highScore = 0;
+                    localStorage.setItem('viewos_snake_high', '0');
+                    updateMenuItems();
+                    triggerCardPressAnimation(3);
+                }
+            } else if (STATE.currentScreen === 'game') {
+                if (STATE.isGameOver) {
+                    startGame();
+                }
+            }
+        }
+
+        function handleSystemBack() {
+            if (STATE.currentScreen === 'game') {
+                exitGame();
+            } else {
+                window.parent.postMessage({ type: 'exitApp' }, '*');
+            }
+        }
+
+        // ==========================================================================
+        // Canvas Rendering Pipeline
+        // ==========================================================================
+        function drawGame() {
+            const canvas = DOM_CACHE.canvas;
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const theme = APP_THEMES[STATE.themeIdx];
+
+            // Setup Theme Context
+            ctx.fillStyle = theme.bg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const gridCells = 20;
+            const cellSize = canvas.width / gridCells;
+
+            // Draw Background Grid Lines
+            ctx.strokeStyle = theme.gridColor;
+            ctx.lineWidth = 1;
+            for (let i = 1; i < gridCells; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * cellSize, 0);
+                ctx.lineTo(i * cellSize, canvas.height);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(0, i * cellSize);
+                ctx.lineTo(canvas.width, i * cellSize);
+                ctx.stroke();
+            }
+
+            // Draw Food (Pulsing Orbit Radial Gradient Effect)
+            const fx = food.x * cellSize + cellSize / 2;
+            const fy = food.y * cellSize + cellSize / 2;
+            const r = cellSize * 0.42;
+            const pulse = 1.0 + 0.16 * Math.sin(Date.now() * 0.012);
+
+            ctx.shadowBlur = 16;
+            ctx.shadowColor = theme.food;
+            ctx.fillStyle = theme.food;
+            ctx.beginPath();
+            ctx.arc(fx, fy, r * pulse, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0; // standard flat reset for optimizing body elements
+
+            // Draw Snake Segments
+            for (let i = 0; i < snake.length; i++) {
+                const segment = snake[i];
+                const sx = segment.x * cellSize;
+                const sy = segment.y * cellSize;
+                const isHead = (i === 0);
+
+                // Body segmentation scale fade out
+                const densityRatio = 1.0 - (i / snake.length) * 0.55; 
+                ctx.fillStyle = hexToRgba(theme.snake, densityRatio);
+
+                if (isHead) {
+                    ctx.shadowBlur = 12;
+                    ctx.shadowColor = theme.snake;
+                    drawRoundedRect(ctx, sx + 2, sy + 2, cellSize - 4, cellSize - 4, 6);
+                    ctx.shadowBlur = 0;
+
+                    // Eye positioning vectors relative to target orientation
+                    ctx.fillStyle = theme.bg;
+                    const eyeRadius = 2.5;
+                    const offset = 5.5;
+                    
+                    if (dir.x !== 0) {
+                        ctx.beginPath();
+                        ctx.arc(sx + cellSize / 2 + dir.x * 2, sy + offset, eyeRadius, 0, Math.PI * 2);
+                        ctx.arc(sx + cellSize / 2 + dir.x * 2, sy + cellSize - offset, eyeRadius, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else {
+                        ctx.beginPath();
+                        ctx.arc(sx + offset, sy + cellSize / 2 + dir.y * 2, eyeRadius, 0, Math.PI * 2);
+                        ctx.arc(sx + cellSize - offset, sy + cellSize / 2 + dir.y * 2, eyeRadius, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                } else {
+                    drawRoundedRect(ctx, sx + 2, sy + 2, cellSize - 4, cellSize - 4, 4);
+                }
+            }
+        }
+
+        function drawRoundedRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function hexToRgba(hex, alpha) {
+            let c = hex.substring(1);
+            if (c.length === 3) c = c[0]+c[0] + c[1]+c[1] + c[2]+c[2];
+            const r = parseInt(c.slice(0, 2), 16);
+            const g = parseInt(c.slice(2, 4), 16);
+            const b = parseInt(c.slice(4, 6), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        // ==========================================================================
+        // Input Interceptor & Gamepad Loop
+        // ==========================================================================
+        function handleKeydown(e) {
+            if (e && typeof e.preventDefault === 'function') e.preventDefault();
+            
+            let dx = 0, dy = 0;
+            const c = STATE.columns, t = appItems.length;
+
+            if (e.key === 'Escape' || e.key === 'Backspace') { handleSystemBack(); return; }
+            if (e.key === 'Enter' || e.key === ' ') { executeAction(); return; }
+
+            if (STATE.currentScreen === 'grid') {
+                if (e.key === 'ArrowRight' && (STATE.focusedIndex + 1) % c !== 0 && STATE.focusedIndex + 1 < t) { STATE.focusedIndex++; dx = 1; }
+                else if (e.key === 'ArrowLeft' && STATE.focusedIndex % c !== 0) { STATE.focusedIndex--; dx = -1; }
+                else if (e.key === 'ArrowDown' && STATE.focusedIndex + c < t) { STATE.focusedIndex += c; dy = 1; }
+                else if (e.key === 'ArrowUp' && STATE.focusedIndex - c >= 0) { STATE.focusedIndex -= c; dy = -1; }
+                
+                if (dx !== 0 || dy !== 0) updateFocus(false, dx, dy);
+            } else if (STATE.currentScreen === 'game' && !STATE.isGameOver) {
+                // Direction change vectors guarded from direct inversion
+                const code = e.key.toUpperCase();
+                if ((e.key === 'ArrowUp' || code === 'W') && dir.y === 0) { nextDir = { x: 0, y: -1 }; }
+                else if ((e.key === 'ArrowDown' || code === 'S') && dir.y === 0) { nextDir = { x: 0, y: 1 }; }
+                else if ((e.key === 'ArrowLeft' || code === 'A') && dir.x === 0) { nextDir = { x: -1, y: 0 }; }
+                else if ((e.key === 'ArrowRight' || code === 'D') && dir.x === 0) { nextDir = { x: 1, y: 0 }; }
+            }
+        }
+
+        let lastGamepadState = { up: false, down: false, left: false, right: false, enter: false, back: false };
+        let gpActiveDir = null;
+        let holdTime = 0, lastRepeatTime = 0;
+
+        function pollGamepads() {
+            const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+            for (let i = 0; i < gamepads.length; i++) {
+                const gp = gamepads[i]; if (!gp) continue;
+
+                const up = gp.buttons[12]?.pressed || gp.axes[1] < -0.5;
+                const down = gp.buttons[13]?.pressed || gp.axes[1] > 0.5;
+                const left = gp.buttons[14]?.pressed || gp.axes[0] < -0.5;
+                const right = gp.buttons[15]?.pressed || gp.axes[0] > 0.5;
+                const enter = gp.buttons[0]?.pressed;
+                const back = gp.buttons[1]?.pressed;
+
+                STATE.joyX = Math.abs(gp.axes[0]) > 0.1 ? gp.axes[0] : 0;
+                STATE.joyY = Math.abs(gp.axes[1]) > 0.1 ? gp.axes[1] : 0;
+
+                let dirString = up ? 'up' : down ? 'down' : left ? 'left' : right ? 'right' : null;
+                if (dirString) {
+                    if (gpActiveDir !== dirString) {
+                        gpActiveDir = dirString; holdTime = Date.now(); lastRepeatTime = Date.now();
+                        handleKeydown({ key: { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[dirString] });
+                    } else if (Date.now() - holdTime > 350 && Date.now() - lastRepeatTime > 80) {
+                        handleKeydown({ key: { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[dirString] });
+                        lastRepeatTime = Date.now();
+                    }
+                } else gpActiveDir = null;
+
+                if (enter && !lastGamepadState.enter) executeAction();
+                if (back && !lastGamepadState.back) handleSystemBack();
+
+                lastGamepadState = { up, down, left, right, enter, back };
+                break;
+            }
+            requestAnimationFrame(pollGamepads);
+        }
+
+        // ==========================================================================
+        // Physics Engine Pipeline
+        // ==========================================================================
+        let lastTargetElement = null;
+        let focusScale = 1.0;
+
+        function tickMicroanimations() {
+            // Render High Refresh Rate Graphics on Game Screen
+            if (STATE.currentScreen === 'game') {
+                drawGame();
+            }
+
+            const activeTarget = getActiveTarget();
+            const currentElement = activeTarget ? activeTarget.icon : null;
+            const currentContainer = activeTarget ? activeTarget.container : null;
+
+            const tiltedElements = document.querySelectorAll('.tilted-focus');
+            tiltedElements.forEach(el => {
+                if (el !== currentElement && el !== currentContainer) {
+                    if (!el.springs) { el.style.transform = ''; el.classList.remove('tilted-focus'); }
+                }
+            });
+
+            springElements.forEach(el => {
+                if (!el.isConnected) return;
+                const s = el.springs; let changed = false;
+                
+                if (s.scale.update()) changed = true; 
+                if (s.posX.update()) changed = true; 
+                if (s.posY.update()) changed = true; 
+                if (s.focusState.update()) changed = true;
+                
+                const isFocused = s.focusState.val > 0.01;
+                const isCurrent = (el === currentElement);
+
+                if (changed || isFocused || isCurrent) {
+                    const cardMoveScale = 0.48;
+                    const springX = s.posX.val * cardMoveScale;
+                    const springY = s.posY.val * cardMoveScale;
+                    const jX = isCurrent ? STATE.joyX : 0;
+                    const jY = isCurrent ? STATE.joyY : 0;
+                    
+                    const maxIconRotate = 8, maxIconTranslate = 6;
+                    const iconRotateY = jX * maxIconRotate;
+                    const iconRotateX = -jY * maxIconRotate;
+                    const iconTranslateX = jX * maxIconTranslate;
+                    const iconTranslateY = jY * maxIconTranslate;
+                    const totalTranslateX = springX + iconTranslateX;
+                    const totalTranslateY = springY + iconTranslateY;
+
+                    el.style.transform = `scale(${s.scale.val.toFixed(3)}) translate3d(${totalTranslateX.toFixed(2)}px, ${totalTranslateY.toFixed(2)}px, 0) rotateX(${iconRotateX.toFixed(2)}deg) rotateY(${iconRotateY.toFixed(2)}deg)`;
+                    el.classList.add('tilted-focus');
+
+                    const f = Math.max(0, s.focusState.val);
+                    if (el.glassBorder) el.glassBorder.style.opacity = (0.3 + 0.7 * f).toFixed(3);
+                    if (el.shine) {
+                        el.shine.style.opacity = f.toFixed(3);
+                        if (isFocused) {
+                            const shineX = 30 + (s.posX.val * 2.2) + Math.sin(Date.now() * 0.001) * 3;
+                            const shineY = 30 + (s.posY.val * 2.2) + Math.cos(Date.now() * 0.001) * 3;
+                            el.shine.style.background = `radial-gradient(circle at ${shineX.toFixed(1)}% ${shineY.toFixed(1)}%, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0) 100%)`;
+                        }
+                    }
+                }
+            });
+
+            if (activeTarget && activeTarget.icon && activeTarget.container && !activeTarget.icon.springs) {
+                const container = activeTarget.container;
+                const icon = activeTarget.icon;
+                if (icon !== lastTargetElement) { focusScale = 1.0; lastTargetElement = icon; }
+                focusScale += (1.08 - focusScale) * 0.12;
+
+                container.classList.add('tilted-focus');
+                icon.classList.add('tilted-focus');
+                
+                const maxIconRotate = 8, maxIconTranslate = 6;
+                const iconRotateY = STATE.joyX * maxIconRotate;
+                const iconRotateX = -STATE.joyY * maxIconRotate;
+                const iconTranslateX = STATE.joyX * maxIconTranslate;
+                const iconTranslateY = STATE.joyY * maxIconTranslate;
+
+                if (container === icon) {
+                    icon.style.transform = `scale(${focusScale}) translate3d(${iconTranslateX}px, ${iconTranslateY}px, 0) rotateX(${iconRotateX}deg) rotateY(${iconRotateY}deg)`;
+                }
+            }
+
+            requestAnimationFrame(tickMicroanimations);
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
