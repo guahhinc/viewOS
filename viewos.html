@@ -393,7 +393,7 @@
 
         // View Cloud Configuration & Local Version Parameters
         const VIEW_CLOUD_URL = 'https://script.google.com/macros/s/AKfycbzR_BI7fcEi1B_ZGG0nlP7Xw6vVSJ9WCDnlrsBWN8jDKmUmUtfNTJz0uEzMZsoDFeOgEA/exec';
-        const CURRENT_OS_VERSION = '0.8.1';
+        const CURRENT_OS_VERSION = '0.8.2';
         const CLIENT_VERSION = 1;
 
         (function() {
@@ -575,14 +575,36 @@
             { id: "version", name: "Version", type: "info", value: `viewOS ${CURRENT_OS_VERSION}` },
             { id: "volume", name: "Volume", type: "cycle", options: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100], labels: ["0%", "10%", "20%", "30%", "40%", "50%", "60%", "70%", "80%", "90%", "100%"], currentIndex: 5 },
             { id: "software_update", name: "Software Update", type: "action" },
+            { id: "auto_app_updates", name: "Automatic App Updates", type: "cycle", options: [true, false], labels: ["ON", "OFF"], currentIndex: 0 },
+            { id: "view_cloud", name: "View Cloud", type: "cycle", options: [true, false], labels: ["ON", "OFF"], currentIndex: 0 },
             { id: "sleep", name: "Sleep", type: "action" },
-            { id: "reboot", name: "Reboot", type: "action" },
-            { id: "clear_data", name: "Clear All Data", type: "action" }
+            { id: "reboot", name: "Reboot", type: "action" }
         ];
+
+        function isViewCloudEnabled() {
+            const vcSetting = settingsRegistry.find(s => s.id === 'view_cloud');
+            return vcSetting ? vcSetting.options[vcSetting.currentIndex] === true : true;
+        }
+
+        function checkViewCloudAccess(showPopup = true) {
+            if (!isViewCloudEnabled()) {
+                if (showPopup) {
+                    showSystemPopup(
+                        "View Cloud Connection Disabled", 
+                        "If you wish to continue please turn on View Cloud in settings to allow connection to the View Cloud servers", 
+                        [{ label: 'OK', action: () => {} }]
+                    );
+                }
+                return false;
+            }
+            return true;
+        }
 
         function preRenderAllMedia() {
             db.forEach(item => {
                 if (!item) return;
+                if (DB_ITEM_ELEMENTS.has(item)) return;
+
                 const itemEl = document.createElement('div'); itemEl.className = 'media-item';
                 const card = document.createElement('div'); card.className = 'media-card';
                 const artPath = getArtPath(item);
@@ -599,6 +621,8 @@
             tvshows.forEach(item => { const showName = item.show || "YouTube"; if (!showMap[showName]) showMap[showName] = []; showMap[showName].push(item); });
 
             Object.keys(showMap).forEach(showName => {
+                if (TV_SHOW_FOLDER_ELEMENTS.has(showName)) return;
+
                 const folderItem = { id: "show-folder", name: showName, app: "tvshows", art: showMap[showName][0].art, file: showMap[showName][0].file, episodes: showMap[showName] };
                 const itemEl = document.createElement('div'); itemEl.className = 'media-item';
                 const card = document.createElement('div'); card.className = 'media-card';
@@ -622,14 +646,27 @@
                 }
             });
 
+            let localVolIndex = null; try { localVolIndex = localStorage.getItem('viewOS_volume_index'); } catch(e) {}
+            if (localVolIndex !== null) settingsRegistry.find(s => s.id === 'volume').currentIndex = parseInt(localVolIndex);
+            
+            try { 
+                let localAutoUpdate = localStorage.getItem('viewOS_auto_app_updates');
+                if (localAutoUpdate !== null) {
+                    const setting = settingsRegistry.find(s => s.id === 'auto_app_updates');
+                    setting.currentIndex = parseInt(localAutoUpdate);
+                }
+                let localViewCloud = localStorage.getItem('viewOS_view_cloud');
+                if (localViewCloud !== null) {
+                    const setting = settingsRegistry.find(s => s.id === 'view_cloud');
+                    setting.currentIndex = parseInt(localViewCloud);
+                }
+            } catch(e) {}
+
             await fetchYouTubeContent();
             preRenderAllMedia();
             fetchYouTubeMetadata();
 
             renderHomeGrid();
-
-            let localVolIndex = null; try { localVolIndex = localStorage.getItem('viewOS_volume_index'); } catch(e) {}
-            if (localVolIndex !== null) settingsRegistry[1].currentIndex = parseInt(localVolIndex);
             renderSettingsList();
 
             document.getElementById('cc-vol-tile').addEventListener('click', () => { STATE.ccFocusedIndex = 0; updateControlCenterFocus(); });
@@ -657,6 +694,11 @@
 
             if (typeof YT !== 'undefined' && YT.Player) initDurationPlayer();
             requestAnimationFrame(tickMicroanimations);
+
+            setInterval(() => {
+                fetchYouTubeContent(true);
+                backgroundAppUpdates();
+            }, 180000); // 3-minute Background Ping
 
             setTimeout(() => {
                 const bootScreen = document.getElementById('boot-screen');
@@ -726,22 +768,56 @@
             return (match && match[2] && match[2].length === 11) ? match[2] : null; 
         }
 
-        async function fetchYouTubeContent() {
+        async function fetchYouTubeContent(isBackgroundPing = false) {
+            if (!isViewCloudEnabled()) return;
             try {
                 const response = await fetch(`${VIEW_CLOUD_URL}?action=getYouTubeLinks`); 
                 if (!response.ok) return;
                 const data = await response.json();
                 if (data && data.links) {
-                    data.links.forEach(url => {
-                        const videoId = getYouTubeId(url);
-                        if (videoId) db.push({ id: `yt-${videoId}`, app: 'youtube', file: `${videoId}.yt`, url: url, videoId: videoId, title: `Loading Video (${videoId})...`, art: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`, isYouTube: true });
+                    const fetchedVideoIds = data.links.map(getYouTubeId).filter(Boolean);
+                    let changed = false;
+
+                    for (let i = db.length - 1; i >= 0; i--) {
+                        const item = db[i];
+                        if (item && item.isYouTube) {
+                            if (!fetchedVideoIds.includes(item.videoId)) {
+                                const isPlaying = (STATE.activePlayingItemPath === getContentFilePath(item) || window.pendingYTLaunchVideoId === item.videoId);
+                                const hasResume = hasResumeData(item);
+                                if (!isPlaying && !hasResume) {
+                                    const el = DB_ITEM_ELEMENTS.get(item);
+                                    if (el && el.parentNode) el.parentNode.removeChild(el);
+                                    DB_ITEM_ELEMENTS.delete(item);
+                                    db.splice(i, 1);
+                                    changed = true;
+                                }
+                            }
+                        }
+                    }
+
+                    fetchedVideoIds.forEach((videoId, idx) => {
+                        const exists = db.find(item => item && item.isYouTube && item.videoId === videoId);
+                        if (!exists) {
+                            const originalUrl = data.links[idx];
+                            db.push({ id: `yt-${videoId}`, app: 'youtube', file: `${videoId}.yt`, url: originalUrl, videoId: videoId, title: `Loading Video (${videoId})...`, art: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`, isYouTube: true });
+                            changed = true;
+                        }
                     });
+
+                    if (changed) {
+                        preRenderAllMedia();
+                        fetchYouTubeMetadata();
+                        if (STATE.currentScreen === 'media' && STATE.activeApp === 'youtube') {
+                            renderMediaGrid('youtube');
+                        }
+                    }
                 }
             } catch (e) {}
         }
 
         function fetchYouTubeMetadata() {
-            db.filter(i => i && i.isYouTube).forEach(item => {
+            db.filter(i => i && i.isYouTube && !i.metadataFetched).forEach(item => {
+                item.metadataFetched = true;
                 const itemEl = DB_ITEM_ELEMENTS.get(item); if (!itemEl) return;
                 fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${item.videoId}`).then(r => r.json()).then(data => {
                     if (data && data.title) { item.title = data.title; const t = itemEl.querySelector('.media-title'); if (t) t.innerText = data.title; }
@@ -751,7 +827,7 @@
                         img.onerror = () => { item.art = data.thumbnail_url; if (card) card.style.backgroundImage = `url('${item.art}')`; };
                         img.src = `https://i.ytimg.com/vi/${item.videoId}/maxresdefault.jpg`;
                     }
-                }).catch(()=>{});
+                }).catch(()=>{ item.metadataFetched = false; });
             });
         }
 
@@ -838,7 +914,8 @@
             ytDiv = document.createElement('div'); ytDiv.id = 'cinema-youtube';
             document.getElementById('cinema-player').insertBefore(ytDiv, document.getElementById('cinema-osd'));
 
-            const vol = settingsRegistry[1].options[settingsRegistry[1].currentIndex];
+            const volSetting = settingsRegistry.find(s => s.id === 'volume');
+            const vol = volSetting.options[volSetting.currentIndex];
             
             function createPlayer() {
                 ytPlayer = new YT.Player('cinema-youtube', {
@@ -938,6 +1015,7 @@
         }
 
         async function checkForUpdates() {
+            if (!checkViewCloudAccess()) return;
             if (STATE.isInstallingUpdate) return;
             triggerSystemToast("Checking for updates...");
             try {
@@ -1006,6 +1084,51 @@
                 STATE.isInstallingUpdate = false;
                 showSystemPopup("Update Failed", "Network error while downloading the update.", [{ label: 'OK', action: () => {} }]);
             }
+        }
+
+        async function backgroundAppUpdates() {
+            if (!isViewCloudEnabled()) return;
+            const autoUpdateSetting = settingsRegistry.find(s => s.id === 'auto_app_updates');
+            if (autoUpdateSetting && autoUpdateSetting.options[autoUpdateSetting.currentIndex] === false) return;
+
+            try {
+                const res = await fetch(`${VIEW_CLOUD_URL}?action=getAppList`);
+                if (!res.ok) return;
+                const data = await res.json();
+                const serverApps = (data && Array.isArray(data.apps)) ? data.apps : [];
+                
+                let installedApps = [];
+                try { installedApps = JSON.parse(localStorage.getItem('viewOS_installed_apps') || '[]'); } catch(e) {}
+
+                for (let localApp of installedApps) {
+                    const serverApp = serverApps.find(a => a.name === localApp.name);
+                    if (serverApp && compareVersions(serverApp.version, localApp.version) > 0) {
+                        const isSupported = !serverApp.supportedClients || serverApp.supportedClients.length === 0 || serverApp.supportedClients.some(v => compareVersions(CURRENT_OS_VERSION, v.toString().trim()) >= 0);
+                        if (isSupported) {
+                            await backgroundAppInstall(serverApp);
+                        }
+                    }
+                }
+            } catch (e) {}
+        }
+
+        async function backgroundAppInstall(app) {
+            try {
+                const res = await fetch(`${VIEW_CLOUD_URL}?action=getAppCode&appName=${encodeURIComponent(app.name)}`);
+                const code = await res.text();
+                
+                if (code && code.includes('<html')) {
+                    localStorage.setItem(`viewOS_appcode_${app.name}`, code);
+                    
+                    let installedApps = [];
+                    try { installedApps = JSON.parse(localStorage.getItem('viewOS_installed_apps') || '[]'); } catch(e) {}
+                    installedApps = installedApps.filter(a => a.name !== app.name);
+                    installedApps.push({ name: app.name, icon: app.icon || app.art, version: app.version, installTime: Date.now() });
+                    localStorage.setItem('viewOS_installed_apps', JSON.stringify(installedApps));
+
+                    triggerSystemToast(`${app.name} Automatically Updated`);
+                }
+            } catch(e) {}
         }
 
         async function executeAppInstall(app) {
@@ -1399,6 +1522,8 @@
         }
 
         function openAppPanel(appId) {
+            if ((appId === 'store' || appId === 'youtube') && !checkViewCloudAccess(true)) return;
+
             STATE.activeApp = appId; const fromScreen = document.getElementById('home-screen');
             if (appId === 'settings') {
                 STATE.currentScreen = 'settings'; STATE.settingsFocusedIndex = 0; renderSettingsList();
@@ -1491,7 +1616,11 @@
             if (item.isYouTube) {
                 video.style.display = 'none'; try { video.pause(); } catch(e) {} initYouTubePlayer(item.videoId);
             } else {
-                video.style.display = 'block'; video.src = STATE.activePlayingItemPath; video.volume = settingsRegistry[1].options[settingsRegistry[1].currentIndex] / 100;
+                video.style.display = 'block'; video.src = STATE.activePlayingItemPath; 
+                
+                const volSetting = settingsRegistry.find(s => s.id === 'volume');
+                video.volume = volSetting.options[volSetting.currentIndex] / 100;
+                
                 let saved = null; try { saved = localStorage.getItem(`viewOS_resume_${STATE.activePlayingItemPath}`); } catch(err) {}
                 if (saved) { const progress = JSON.parse(saved); video.addEventListener('loadedmetadata', () => { video.currentTime = progress.current; triggerSystemToast(`Resumed from ${formatTime(progress.current)}`); }, { once: true }); }
                 video.play().catch(()=>{}); updatePlayStateIcon('cinema'); triggerCinemaOSD();
@@ -1520,7 +1649,11 @@
         }
 
         function playAudioTrack(track) {
-            activeAudio.src = getContentFilePath(track); activeAudio.volume = settingsRegistry[1].options[settingsRegistry[1].currentIndex] / 100; activeAudio.play().catch(()=>{});
+            activeAudio.src = getContentFilePath(track); 
+            const volSetting = settingsRegistry.find(s => s.id === 'volume');
+            activeAudio.volume = volSetting.options[volSetting.currentIndex] / 100; 
+            activeAudio.play().catch(()=>{});
+            
             const fromScreen = document.getElementById(STATE.currentScreen === 'home' ? 'home-screen' : 'media-environment');
             STATE.currentScreen = 'audio_player';
             const artElement = document.getElementById('audio-playing-art'), artPath = getArtPath(track);
@@ -1607,11 +1740,11 @@
             const localApp = installedApps.find(a => a.name === app.name);
             const buttons = [];
             
-            const isSupported = app.supportedClients && app.supportedClients.some(v => v.toString().trim() === CLIENT_VERSION.toString());
+            const isSupported = !app.supportedClients || app.supportedClients.length === 0 || app.supportedClients.some(v => compareVersions(CURRENT_OS_VERSION, v.toString().trim()) >= 0);
             
             if (!isSupported) {
                 buttons.push({ label: 'Cancel', action: () => {} });
-                showSystemPopup(app.name, "This app requires newer viewOS client or new device.", buttons, app.art, 'app');
+                showSystemPopup(app.name, "This app requires newer viewOS or device.", buttons, app.art, 'app');
                 return;
             }
 
@@ -1637,7 +1770,7 @@
             const oldTarget = getActiveTarget();
             
             if (STATE.inControlCenter) {
-                const vs = settingsRegistry[1]; 
+                const vs = settingsRegistry.find(s => s.id === 'volume'); 
                 if (STATE.ccFocusedIndex === 0) {
                     if (key === 'ArrowRight' && vs.currentIndex < vs.options.length - 1) { vs.currentIndex++; updateVolumeUI(); }
                     else if (key === 'ArrowLeft' && vs.currentIndex > 0) { vs.currentIndex--; updateVolumeUI(); }
@@ -1727,14 +1860,17 @@
                 else if (key === 'ArrowUp' && STATE.settingsFocusedIndex > 0) STATE.settingsFocusedIndex--;
                 else if (['ArrowLeft','ArrowRight','Enter'].includes(key)) {
                     const set = settingsRegistry[STATE.settingsFocusedIndex];
-                    if (set.type === 'cycle') { set.currentIndex = (set.currentIndex + (key === 'ArrowLeft' ? -1 : 1) + set.options.length) % set.options.length; if (set.id === 'volume') updateVolumeUI(); renderSettingsList(); }
+                    if (set.type === 'cycle') { 
+                        set.currentIndex = (set.currentIndex + (key === 'ArrowLeft' ? -1 : 1) + set.options.length) % set.options.length; 
+                        if (set.id === 'volume') updateVolumeUI(); 
+                        else {
+                            try { localStorage.setItem(`viewOS_${set.id}`, set.currentIndex); } catch(e) {}
+                        }
+                        renderSettingsList(); 
+                    }
                     else if (set.id === 'software_update' && key === 'Enter') checkForUpdates();
                     else if (set.id === 'sleep' && key === 'Enter') startSleep(); 
                     else if (set.id === 'reboot' && key === 'Enter') location.reload();
-                    else if (set.id === 'clear_data' && key === 'Enter') showSystemPopup("Erase All Data?", "All data including installed apps will be deleted are you sure?", [
-                        { label: 'Continue', action: () => { try { localStorage.clear(); } catch(e) {} settingsRegistry[1].currentIndex = 5; updateVolumeUI(); renderSettingsList(); triggerSystemToast("All Data Cleared"); setTimeout(() => location.reload(), 1000); } }, 
-                        { label: 'Cancel', action: () => {} }
-                    ]);
                 }
             }
             const changed = (oldTarget !== getActiveTarget()); updateFocus(false, changed ? dx : 0, changed ? dy : 0);
@@ -1883,7 +2019,7 @@
         }
         
         function updateVolumeUI() {
-            const v = settingsRegistry[1], c = v.options[v.currentIndex]; 
+            const v = settingsRegistry.find(s => s.id === 'volume'), c = v.options[v.currentIndex]; 
             document.getElementById('volume-fill').style.width = `${c}%`; document.getElementById('volume-text').innerText = `${c}%`;
             const f = c / 100; activeAudio.volume = f; 
             const cv = document.getElementById('cinema-video'); if (cv) cv.volume = f; 
