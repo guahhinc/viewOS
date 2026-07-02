@@ -393,7 +393,7 @@
 
         // View Cloud Configuration & Local Version Parameters
         const VIEW_CLOUD_URL = 'https://script.google.com/macros/s/AKfycbzR_BI7fcEi1B_ZGG0nlP7Xw6vVSJ9WCDnlrsBWN8jDKmUmUtfNTJz0uEzMZsoDFeOgEA/exec';
-        const CURRENT_OS_VERSION = '0.8.4';
+        const CURRENT_OS_VERSION = '0.8.1';
         const CLIENT_VERSION = 1;
 
         (function() {
@@ -575,37 +575,14 @@
             { id: "version", name: "Version", type: "info", value: `viewOS ${CURRENT_OS_VERSION}` },
             { id: "volume", name: "Volume", type: "cycle", options: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100], labels: ["0%", "10%", "20%", "30%", "40%", "50%", "60%", "70%", "80%", "90%", "100%"], currentIndex: 5 },
             { id: "software_update", name: "Software Update", type: "action" },
-            { id: "auto_app_updates", name: "Automatic App Updates", type: "cycle", options: [true, false], labels: ["ON", "OFF"], currentIndex: 0 },
-            { id: "view_cloud", name: "View Cloud", type: "cycle", options: [true, false], labels: ["ON", "OFF"], currentIndex: 0 },
             { id: "sleep", name: "Sleep", type: "action" },
-            { id: "reboot", name: "Reboot", type: "action" }
+            { id: "reboot", name: "Reboot", type: "action" },
+            { id: "clear_data", name: "Clear All Data", type: "action" }
         ];
-
-        function isViewCloudEnabled() {
-            const vcSetting = settingsRegistry.find(s => s.id === 'view_cloud');
-            return vcSetting ? vcSetting.options[vcSetting.currentIndex] === true : true;
-        }
-
-        // Display standard, non-overconfident connection notifications
-        function checkViewCloudAccess(showPopup = true) {
-            if (!isViewCloudEnabled()) {
-                if (showPopup) {
-                    showSystemPopup(
-                        "View Cloud Connection Disabled", 
-                        "If you wish to continue please turn on View Cloud in settings to allow connection to the View Cloud servers", 
-                        [{ label: 'OK', action: () => {} }]
-                    );
-                }
-                return false;
-            }
-            return true;
-        }
 
         function preRenderAllMedia() {
             db.forEach(item => {
                 if (!item) return;
-                if (DB_ITEM_ELEMENTS.has(item)) return;
-
                 const itemEl = document.createElement('div'); itemEl.className = 'media-item';
                 const card = document.createElement('div'); card.className = 'media-card';
                 const artPath = getArtPath(item);
@@ -622,8 +599,6 @@
             tvshows.forEach(item => { const showName = item.show || "YouTube"; if (!showMap[showName]) showMap[showName] = []; showMap[showName].push(item); });
 
             Object.keys(showMap).forEach(showName => {
-                if (TV_SHOW_FOLDER_ELEMENTS.has(showName)) return;
-
                 const folderItem = { id: "show-folder", name: showName, app: "tvshows", art: showMap[showName][0].art, file: showMap[showName][0].file, episodes: showMap[showName] };
                 const itemEl = document.createElement('div'); itemEl.className = 'media-item';
                 const card = document.createElement('div'); card.className = 'media-card';
@@ -647,27 +622,14 @@
                 }
             });
 
-            let localVolIndex = null; try { localVolIndex = localStorage.getItem('viewOS_volume_index'); } catch(e) {}
-            if (localVolIndex !== null) settingsRegistry.find(s => s.id === 'volume').currentIndex = parseInt(localVolIndex);
-            
-            try { 
-                let localAutoUpdate = localStorage.getItem('viewOS_auto_app_updates');
-                if (localAutoUpdate !== null) {
-                    const setting = settingsRegistry.find(s => s.id === 'auto_app_updates');
-                    setting.currentIndex = parseInt(localAutoUpdate);
-                }
-                let localViewCloud = localStorage.getItem('viewOS_view_cloud');
-                if (localViewCloud !== null) {
-                    const setting = settingsRegistry.find(s => s.id === 'view_cloud');
-                    setting.currentIndex = parseInt(localViewCloud);
-                }
-            } catch(e) {}
-
             await fetchYouTubeContent();
             preRenderAllMedia();
             fetchYouTubeMetadata();
 
             renderHomeGrid();
+
+            let localVolIndex = null; try { localVolIndex = localStorage.getItem('viewOS_volume_index'); } catch(e) {}
+            if (localVolIndex !== null) settingsRegistry[1].currentIndex = parseInt(localVolIndex);
             renderSettingsList();
 
             document.getElementById('cc-vol-tile').addEventListener('click', () => { STATE.ccFocusedIndex = 0; updateControlCenterFocus(); });
@@ -695,11 +657,6 @@
 
             if (typeof YT !== 'undefined' && YT.Player) initDurationPlayer();
             requestAnimationFrame(tickMicroanimations);
-
-            setInterval(() => {
-                fetchYouTubeContent(true);
-                backgroundAppUpdates();
-            }, 180000); // 3-minute Background Ping
 
             setTimeout(() => {
                 const bootScreen = document.getElementById('boot-screen');
@@ -769,56 +726,22 @@
             return (match && match[2] && match[2].length === 11) ? match[2] : null; 
         }
 
-        async function fetchYouTubeContent(isBackgroundPing = false) {
-            if (!isViewCloudEnabled()) return;
+        async function fetchYouTubeContent() {
             try {
                 const response = await fetch(`${VIEW_CLOUD_URL}?action=getYouTubeLinks`); 
                 if (!response.ok) return;
                 const data = await response.json();
                 if (data && data.links) {
-                    const fetchedVideoIds = data.links.map(getYouTubeId).filter(Boolean);
-                    let changed = false;
-
-                    for (let i = db.length - 1; i >= 0; i--) {
-                        const item = db[i];
-                        if (item && item.isYouTube) {
-                            if (!fetchedVideoIds.includes(item.videoId)) {
-                                const isPlaying = (STATE.activePlayingItemPath === getContentFilePath(item) || window.pendingYTLaunchVideoId === item.videoId);
-                                const hasResume = hasResumeData(item);
-                                if (!isPlaying && !hasResume) {
-                                    const el = DB_ITEM_ELEMENTS.get(item);
-                                    if (el && el.parentNode) el.parentNode.removeChild(el);
-                                    DB_ITEM_ELEMENTS.delete(item);
-                                    db.splice(i, 1);
-                                    changed = true;
-                                }
-                            }
-                        }
-                    }
-
-                    fetchedVideoIds.forEach((videoId, idx) => {
-                        const exists = db.find(item => item && item.isYouTube && item.videoId === videoId);
-                        if (!exists) {
-                            const originalUrl = data.links[idx];
-                            db.push({ id: `yt-${videoId}`, app: 'youtube', file: `${videoId}.yt`, url: originalUrl, videoId: videoId, title: `Loading Video (${videoId})...`, art: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`, isYouTube: true });
-                            changed = true;
-                        }
+                    data.links.forEach(url => {
+                        const videoId = getYouTubeId(url);
+                        if (videoId) db.push({ id: `yt-${videoId}`, app: 'youtube', file: `${videoId}.yt`, url: url, videoId: videoId, title: `Loading Video (${videoId})...`, art: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`, isYouTube: true });
                     });
-
-                    if (changed) {
-                        preRenderAllMedia();
-                        fetchYouTubeMetadata();
-                        if (STATE.currentScreen === 'media' && STATE.activeApp === 'youtube') {
-                            renderMediaGrid('youtube');
-                        }
-                    }
                 }
             } catch (e) {}
         }
 
         function fetchYouTubeMetadata() {
-            db.filter(i => i && i.isYouTube && !i.metadataFetched).forEach(item => {
-                item.metadataFetched = true;
+            db.filter(i => i && i.isYouTube).forEach(item => {
                 const itemEl = DB_ITEM_ELEMENTS.get(item); if (!itemEl) return;
                 fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${item.videoId}`).then(r => r.json()).then(data => {
                     if (data && data.title) { item.title = data.title; const t = itemEl.querySelector('.media-title'); if (t) t.innerText = data.title; }
@@ -828,7 +751,7 @@
                         img.onerror = () => { item.art = data.thumbnail_url; if (card) card.style.backgroundImage = `url('${item.art}')`; };
                         img.src = `https://i.ytimg.com/vi/${item.videoId}/maxresdefault.jpg`;
                     }
-                }).catch(()=>{ item.metadataFetched = false; });
+                }).catch(()=>{});
             });
         }
 
@@ -915,28 +838,11 @@
             ytDiv = document.createElement('div'); ytDiv.id = 'cinema-youtube';
             document.getElementById('cinema-player').insertBefore(ytDiv, document.getElementById('cinema-osd'));
 
-            const volSetting = settingsRegistry.find(s => s.id === 'volume');
-            const vol = volSetting.options[volSetting.currentIndex];
-            const originVal = (window.location.protocol.startsWith('http')) ? window.location.origin : undefined;
+            const vol = settingsRegistry[1].options[settingsRegistry[1].currentIndex];
             
             function createPlayer() {
-                const pVars = { 
-                    'autoplay': 1, 
-                    'controls': 0, 
-                    'disablekb': 1, 
-                    'rel': 0, 
-                    'showinfo': 0, 
-                    'modestbranding': 1, 
-                    'fs': 0, 
-                    'iv_load_policy': 3, 
-                    'autohide': 1, 
-                    'enablejsapi': 1, 
-                    'playsinline': 1
-                };
-                if (originVal) pVars.origin = originVal;
-
                 ytPlayer = new YT.Player('cinema-youtube', {
-                    videoId: videoId, playerVars: pVars,
+                    videoId: videoId, playerVars: { 'autoplay': 1, 'controls': 0, 'disablekb': 1, 'rel': 0, 'showinfo': 0, 'modestbranding': 1, 'fs': 0, 'iv_load_policy': 3, 'autohide': 1, 'enablejsapi': 1 },
                     events: {
                         'onReady': (e) => {
                             const iframe = document.getElementById('cinema-youtube');
@@ -1032,7 +938,6 @@
         }
 
         async function checkForUpdates() {
-            if (!checkViewCloudAccess()) return;
             if (STATE.isInstallingUpdate) return;
             triggerSystemToast("Checking for updates...");
             try {
@@ -1101,51 +1006,6 @@
                 STATE.isInstallingUpdate = false;
                 showSystemPopup("Update Failed", "Network error while downloading the update.", [{ label: 'OK', action: () => {} }]);
             }
-        }
-
-        async function backgroundAppUpdates() {
-            if (!isViewCloudEnabled()) return;
-            const autoUpdateSetting = settingsRegistry.find(s => s.id === 'auto_app_updates');
-            if (autoUpdateSetting && autoUpdateSetting.options[autoUpdateSetting.currentIndex] === false) return;
-
-            try {
-                const res = await fetch(`${VIEW_CLOUD_URL}?action=getAppList`);
-                if (!res.ok) return;
-                const data = await res.json();
-                const serverApps = (data && Array.isArray(data.apps)) ? data.apps : [];
-                
-                let installedApps = [];
-                try { installedApps = JSON.parse(localStorage.getItem('viewOS_installed_apps') || '[]'); } catch(e) {}
-
-                for (let localApp of installedApps) {
-                    const serverApp = serverApps.find(a => a.name === localApp.name);
-                    if (serverApp && compareVersions(serverApp.version, localApp.version) > 0) {
-                        const isSupported = !serverApp.supportedClients || serverApp.supportedClients.length === 0 || serverApp.supportedClients.some(v => compareVersions(CURRENT_OS_VERSION, v.toString().trim()) >= 0);
-                        if (isSupported) {
-                            await backgroundAppInstall(serverApp);
-                        }
-                    }
-                }
-            } catch (e) {}
-        }
-
-        async function backgroundAppInstall(app) {
-            try {
-                const res = await fetch(`${VIEW_CLOUD_URL}?action=getAppCode&appName=${encodeURIComponent(app.name)}`);
-                const code = await res.text();
-                
-                if (code && code.includes('<html')) {
-                    localStorage.setItem(`viewOS_appcode_${app.name}`, code);
-                    
-                    let installedApps = [];
-                    try { installedApps = JSON.parse(localStorage.getItem('viewOS_installed_apps') || '[]'); } catch(e) {}
-                    installedApps = installedApps.filter(a => a.name !== app.name);
-                    installedApps.push({ name: app.name, icon: app.icon || app.art, version: app.version, installTime: Date.now() });
-                    localStorage.setItem('viewOS_installed_apps', JSON.stringify(installedApps));
-
-                    triggerSystemToast(`${app.name} Automatically Updated`);
-                }
-            } catch(e) {}
         }
 
         async function executeAppInstall(app) {
@@ -1386,71 +1246,27 @@
             const isYT = !isAudio && STATE.activePlayingItemPath && STATE.activePlayingItemPath.includes('.yt');
             let duration = 0, current = 0;
 
-            if (isAudio) { 
-                if (!activeAudio || !activeAudio.duration) return; 
-                duration = activeAudio.duration; 
-                current = (STATE.audioScrubbingTime === null) ? activeAudio.currentTime : STATE.audioScrubbingTime; 
-            } else if (isYT) { 
-                if (!ytPlayer || typeof ytPlayer.getDuration !== 'function') return; 
-                duration = ytPlayer.getDuration(); 
-                current = (STATE.scrubbingTime === null) ? ytPlayer.getCurrentTime() : STATE.scrubbingTime; 
-            } else { 
-                duration = cv.duration; 
-                if (!duration) return; 
-                current = (STATE.scrubbingTime === null) ? cv.currentTime : STATE.scrubbingTime; 
-            }
+            if (isAudio) { if (!activeAudio || !activeAudio.duration) return; duration = activeAudio.duration; current = (STATE.audioScrubbingTime === null) ? activeAudio.currentTime : STATE.audioScrubbingTime; }
+            else if (isYT) { if (!ytPlayer || typeof ytPlayer.getDuration !== 'function') return; duration = ytPlayer.getDuration(); current = (STATE.scrubbingTime === null) ? ytPlayer.getCurrentTime() : STATE.scrubbingTime; }
+            else { duration = cv.duration; if (!duration) return; current = (STATE.scrubbingTime === null) ? cv.currentTime : STATE.scrubbingTime; }
 
-            const now = Date.now();
-            const lastTime = isAudio ? STATE.lastAudioSeekTime : STATE.lastSeekTime;
+            const now = Date.now(), lastTime = isAudio ? STATE.lastAudioSeekTime : STATE.lastSeekTime;
             let accel = isAudio ? STATE.audioSeekAcceleration : STATE.seekAcceleration;
-            
-            // Accelerates the longer they hold the scrub button
-            accel = (now - lastTime < 350) ? Math.min(isAudio ? 45 : 75, accel + (isAudio ? 3 : 5)) : (isAudio ? 5 : 10);
-            
-            if (isAudio) { 
-                STATE.lastAudioSeekTime = now; 
-                STATE.audioSeekAcceleration = accel; 
-            } else { 
-                STATE.lastSeekTime = now; 
-                STATE.seekAcceleration = accel; 
-            }
+            accel = (now - lastTime < 600) ? Math.min(isAudio ? 60 : 90, accel + (isAudio ? 5 : 10)) : (isAudio ? 5 : 10);
+            if (isAudio) { STATE.lastAudioSeekTime = now; STATE.audioSeekAcceleration = accel; } else { STATE.lastSeekTime = now; STATE.seekAcceleration = accel; }
 
             const targetTime = Math.max(0, Math.min(duration, direction === 'right' ? current + accel : current - accel));
-            
-            if (isAudio) {
-                STATE.audioScrubbingTime = targetTime;
-            } else {
-                STATE.scrubbingTime = targetTime;
-            }
+            if (isAudio) STATE.audioScrubbingTime = targetTime; else STATE.scrubbingTime = targetTime;
 
-            // Instantly update UI progress bar and clock
-            updateOSDProgress(prefix, targetTime, duration); 
-            if (!isAudio) triggerCinemaOSD();
+            updateOSDProgress(prefix, targetTime, duration); if (!isAudio) triggerCinemaOSD();
+            if (isAudio) activeAudio.currentTime = targetTime; else if (isYT) ytPlayer.seekTo(targetTime, false); else cv.currentTime = targetTime;
 
-            // Smoothly commit the seek after a brief pause of user input (debounce)
-            // This prevents the video decoder from choking while the user is rapidly clicking/holding the button.
             clearTimeout(isAudio ? STATE.audioSeekCommitTimer : STATE.seekCommitTimer);
-            
-            const commitTimer = setTimeout(() => {
-                if (isAudio) {
-                    activeAudio.currentTime = STATE.audioScrubbingTime;
-                    STATE.audioScrubbingTime = null;
-                } else if (isYT) {
-                    if (ytPlayer && typeof ytPlayer.seekTo === 'function') {
-                        ytPlayer.seekTo(STATE.scrubbingTime, true);
-                    }
-                    STATE.scrubbingTime = null;
-                } else {
-                    cv.currentTime = STATE.scrubbingTime;
-                    STATE.scrubbingTime = null;
-                }
-            }, 200); // 200ms debounce for buttery smooth scrubbing
-
-            if (isAudio) {
-                STATE.audioSeekCommitTimer = commitTimer;
-            } else {
-                STATE.seekCommitTimer = commitTimer;
-            }
+            const timer = setTimeout(() => {
+                if (!isAudio && isYT && ytPlayer && typeof ytPlayer.seekTo === 'function') ytPlayer.seekTo(STATE.scrubbingTime, true);
+                if (isAudio) STATE.audioScrubbingTime = null; else STATE.scrubbingTime = null;
+            }, 350);
+            if (isAudio) STATE.audioSeekCommitTimer = timer; else STATE.seekCommitTimer = timer;
         }
 
         function navigateScreen(fromEl, toEl, isForward = true) {
@@ -1583,8 +1399,6 @@
         }
 
         function openAppPanel(appId) {
-            if ((appId === 'store' || appId === 'youtube') && !checkViewCloudAccess(true)) return;
-
             STATE.activeApp = appId; const fromScreen = document.getElementById('home-screen');
             if (appId === 'settings') {
                 STATE.currentScreen = 'settings'; STATE.settingsFocusedIndex = 0; renderSettingsList();
@@ -1598,7 +1412,7 @@
                 grid.innerHTML = `
                     <div id="store-loading" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 150px; gap: 25px;">
                         <div style="width: 80px; height: 80px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #fff; border-radius: 50%; animation: spin 0.5s linear infinite;"></div>
-                        <span style="font-size: 1.6rem; color: var(--secondary-text); ">Connecting to View Cloud</span>
+                        <span style="font-size: 1.6rem; color: var(--secondary-text);">Connecting to View Cloud</span>
                     </div>
                 `;
                 
@@ -1677,38 +1491,10 @@
             if (item.isYouTube) {
                 video.style.display = 'none'; try { video.pause(); } catch(e) {} initYouTubePlayer(item.videoId);
             } else {
-                video.style.display = 'block'; 
-                video.src = STATE.activePlayingItemPath; 
-                
-                const volSetting = settingsRegistry.find(s => s.id === 'volume');
-                video.volume = volSetting.options[volSetting.currentIndex] / 100;
-                
-                let saved = null; 
-                try { saved = localStorage.getItem(`viewOS_resume_${STATE.activePlayingItemPath}`); } catch(err) {}
-                
-                if (saved) { 
-                    try {
-                        const progress = JSON.parse(saved); 
-                        // Set up event listener on metadata loaded to update duration context first, preventing InvalidStateError readyState exceptions.
-                        const onMetadata = () => {
-                            video.currentTime = progress.current; 
-                            triggerSystemToast(`Resumed from ${formatTime(progress.current)}`); 
-                        };
-                        video.addEventListener('loadedmetadata', onMetadata, { once: true });
-                    } catch(e){}
-                }
-                
-                // Synchronously play inside user action call stack to satisfy browser user gesture policies
-                video.play()
-                    .then(() => {
-                        updatePlayStateIcon('cinema');
-                        triggerCinemaOSD();
-                    })
-                    .catch((err) => {
-                        console.warn("Autoplay was prevented or failed:", err);
-                        updatePlayStateIcon('cinema');
-                        triggerCinemaOSD();
-                    });
+                video.style.display = 'block'; video.src = STATE.activePlayingItemPath; video.volume = settingsRegistry[1].options[settingsRegistry[1].currentIndex] / 100;
+                let saved = null; try { saved = localStorage.getItem(`viewOS_resume_${STATE.activePlayingItemPath}`); } catch(err) {}
+                if (saved) { const progress = JSON.parse(saved); video.addEventListener('loadedmetadata', () => { video.currentTime = progress.current; triggerSystemToast(`Resumed from ${formatTime(progress.current)}`); }, { once: true }); }
+                video.play().catch(()=>{}); updatePlayStateIcon('cinema'); triggerCinemaOSD();
             } navigateScreen(fromScreen, player, true);
         }
 
@@ -1734,11 +1520,7 @@
         }
 
         function playAudioTrack(track) {
-            activeAudio.src = getContentFilePath(track); 
-            const volSetting = settingsRegistry.find(s => s.id === 'volume');
-            activeAudio.volume = volSetting.options[volSetting.currentIndex] / 100; 
-            activeAudio.play().catch(()=>{});
-            
+            activeAudio.src = getContentFilePath(track); activeAudio.volume = settingsRegistry[1].options[settingsRegistry[1].currentIndex] / 100; activeAudio.play().catch(()=>{});
             const fromScreen = document.getElementById(STATE.currentScreen === 'home' ? 'home-screen' : 'media-environment');
             STATE.currentScreen = 'audio_player';
             const artElement = document.getElementById('audio-playing-art'), artPath = getArtPath(track);
@@ -1825,11 +1607,11 @@
             const localApp = installedApps.find(a => a.name === app.name);
             const buttons = [];
             
-            const isSupported = !app.supportedClients || app.supportedClients.length === 0 || app.supportedClients.some(v => compareVersions(CURRENT_OS_VERSION, v.toString().trim()) >= 0);
+            const isSupported = app.supportedClients && app.supportedClients.some(v => v.toString().trim() === CLIENT_VERSION.toString());
             
             if (!isSupported) {
                 buttons.push({ label: 'Cancel', action: () => {} });
-                showSystemPopup(app.name, "This app requires newer viewOS or device.", buttons, app.art, 'app');
+                showSystemPopup(app.name, "This app requires newer viewOS client or new device.", buttons, app.art, 'app');
                 return;
             }
 
@@ -1855,7 +1637,7 @@
             const oldTarget = getActiveTarget();
             
             if (STATE.inControlCenter) {
-                const vs = settingsRegistry.find(s => s.id === 'volume'); 
+                const vs = settingsRegistry[1]; 
                 if (STATE.ccFocusedIndex === 0) {
                     if (key === 'ArrowRight' && vs.currentIndex < vs.options.length - 1) { vs.currentIndex++; updateVolumeUI(); }
                     else if (key === 'ArrowLeft' && vs.currentIndex > 0) { vs.currentIndex--; updateVolumeUI(); }
@@ -1888,26 +1670,15 @@
                 const cv = document.getElementById('cinema-video');
                 const isYT = STATE.activePlayingItemPath && STATE.activePlayingItemPath.includes('.yt');
                 if (key === 'Enter') {
-                    if (isYT && ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
+                    if (isYT && ytPlayer) {
                         try {
                             const state = ytPlayer.getPlayerState();
-                            if (state === 1 || state === 3) {
-                                ytPlayer.pauseVideo();
-                            } else {
-                                ytPlayer.playVideo();
-                            }
+                            const playingConstant = (window.YT && YT.PlayerState) ? YT.PlayerState.PLAYING : 1;
+                            if (state === playingConstant) ytPlayer.pauseVideo(); else ytPlayer.playVideo();
                         } catch(err) {
                             try { ytPlayer.playVideo(); } catch(e) {}
                         }
-                    } else { 
-                        if (cv) {
-                            if (cv.paused) {
-                                cv.play().catch(err => console.warn("Local play failed:", err));
-                            } else {
-                                cv.pause();
-                            }
-                        }
-                    }
+                    } else { if (cv && cv.paused) cv.play(); else if (cv) cv.pause(); }
                     triggerCinemaOSD();
                 }
                 else if (key === 'ArrowRight') performScrub('right', 'cinema'); 
@@ -1956,108 +1727,65 @@
                 else if (key === 'ArrowUp' && STATE.settingsFocusedIndex > 0) STATE.settingsFocusedIndex--;
                 else if (['ArrowLeft','ArrowRight','Enter'].includes(key)) {
                     const set = settingsRegistry[STATE.settingsFocusedIndex];
-                    if (set.type === 'cycle') { 
-                        set.currentIndex = (set.currentIndex + (key === 'ArrowLeft' ? -1 : 1) + set.options.length) % set.options.length; 
-                        if (set.id === 'volume') updateVolumeUI(); 
-                        else {
-                            try { localStorage.setItem(`viewOS_${set.id}`, set.currentIndex); } catch(e) {}
-                        }
-                        renderSettingsList(); 
-                    }
+                    if (set.type === 'cycle') { set.currentIndex = (set.currentIndex + (key === 'ArrowLeft' ? -1 : 1) + set.options.length) % set.options.length; if (set.id === 'volume') updateVolumeUI(); renderSettingsList(); }
                     else if (set.id === 'software_update' && key === 'Enter') checkForUpdates();
                     else if (set.id === 'sleep' && key === 'Enter') startSleep(); 
                     else if (set.id === 'reboot' && key === 'Enter') location.reload();
+                    else if (set.id === 'clear_data' && key === 'Enter') showSystemPopup("Erase All Data?", "All data including installed apps will be deleted are you sure?", [
+                        { label: 'Continue', action: () => { try { localStorage.clear(); } catch(e) {} settingsRegistry[1].currentIndex = 5; updateVolumeUI(); renderSettingsList(); triggerSystemToast("All Data Cleared"); setTimeout(() => location.reload(), 1000); } }, 
+                        { label: 'Cancel', action: () => {} }
+                    ]);
                 }
             }
             const changed = (oldTarget !== getActiveTarget()); updateFocus(false, changed ? dx : 0, changed ? dy : 0);
         }
 
-        let lastGamepadState = { up: false, down: false, left: false, right: false, enter: false, back: false, triangle: false }, gamepadBackPressTime = 0, gamepadActiveDir = null, gamepadHoldStartTime = 0, gamepadLastRepeatTime = 0, gpEnterPressed = false, gpEnterHoldTriggered = false, gpEnterHoldTimer = null, gpSquarePressed = false;
+        let lastGamepadState = { up: false, down: false, left: false, right: false, enter: false, back: false, triangle: false }, gamepadBackPressTime = 0, gamepadActiveDir = null, gamepadHoldStartTime = 0, gamepadLastRepeatTime = 0, gpEnterPressed = false, gpEnterHoldTriggered = false, gpEnterHoldTimer = null;
         function pollGamepads() {
             if (STATE.isInstallingUpdate || STATE.isInstallingApp) return requestAnimationFrame(pollGamepads);
             
             const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
-            let activeGamepad = null;
             for (let i = 0; i < gamepads.length; i++) {
-                if (gamepads[i]) {
-                    const hasInput = gamepads[i].buttons.some(b => b.pressed) || gamepads[i].axes.some(a => Math.abs(a) > 0.15);
-                    if (hasInput) {
-                        activeGamepad = gamepads[i];
-                        break;
-                    }
+                const gp = gamepads[i]; if (!gp) continue;
+                
+                const back = gp.buttons[1]?.pressed, square = gp.buttons[2]?.pressed; 
+                if (back && square) { if (STATE.forceRebootStart === 0) { STATE.forceRebootStart = Date.now(); } else if (Date.now() - STATE.forceRebootStart >= 3000) { location.reload(); return; } } else { STATE.forceRebootStart = 0; }
+
+                // Universal Back/B hold to open CC - Overrides custom apps unconditionally
+                if (back && !lastGamepadState.back) { 
+                    gamepadBackPressTime = Date.now(); volumeOpenedByHold = false; 
+                } else if (back && lastGamepadState.back) { 
+                    if (!volumeOpenedByHold && (Date.now() - gamepadBackPressTime > 400)) { 
+                        volumeOpenedByHold = true; openControlCenter(); 
+                    } 
+                } else if (!back && lastGamepadState.back) { 
+                    if (!volumeOpenedByHold && STATE.currentScreen !== 'custom_app') { goBack(); } 
                 }
-            }
-            if (!activeGamepad) {
-                for (let i = 0; i < gamepads.length; i++) {
-                    if (gamepads[i]) {
-                        activeGamepad = gamepads[i];
-                        break;
-                    }
+
+                if (STATE.currentScreen === 'custom_app') {
+                    lastGamepadState = { ...lastGamepadState, back: back };
+                    break;
                 }
-            }
-            
-            if (!activeGamepad) return requestAnimationFrame(pollGamepads);
-            const gp = activeGamepad;
-            
-            const back = gp.buttons[1]?.pressed, square = gp.buttons[2]?.pressed; 
-            if (back && square) { if (STATE.forceRebootStart === 0) { STATE.forceRebootStart = Date.now(); } else if (Date.now() - STATE.forceRebootStart >= 3000) { location.reload(); return; } } else { STATE.forceRebootStart = 0; }
 
-            // Universal Back/B hold to open CC - Overrides custom apps unconditionally
-            if (back && !lastGamepadState.back) { 
-                gamepadBackPressTime = Date.now(); volumeOpenedByHold = false; 
-            } else if (back && lastGamepadState.back) { 
-                if (!volumeOpenedByHold && (Date.now() - gamepadBackPressTime > 400)) { 
-                    volumeOpenedByHold = true; openControlCenter(); 
-                } 
-            } else if (!back && lastGamepadState.back) { 
-                if (!volumeOpenedByHold && STATE.currentScreen !== 'custom_app') { goBack(); } 
-            }
+                const up = gp.buttons[12]?.pressed || gp.axes[1] < -0.5;
+                const down = gp.buttons[13]?.pressed || gp.axes[1] > 0.5;
+                const left = gp.buttons[14]?.pressed || gp.axes[0] < -0.5;
+                const right = gp.buttons[15]?.pressed || gp.axes[0] > 0.5;
+                const enter = gp.buttons[0]?.pressed;
 
-            if (STATE.currentScreen === 'custom_app') {
-                lastGamepadState = { ...lastGamepadState, back: back };
-                return requestAnimationFrame(pollGamepads);
-            }
-
-            const up = gp.buttons[12]?.pressed || gp.axes[1] < -0.5;
-            const down = gp.buttons[13]?.pressed || gp.axes[1] > 0.5;
-            const left = gp.buttons[14]?.pressed || gp.axes[0] < -0.5;
-            const right = gp.buttons[15]?.pressed || gp.axes[0] > 0.5;
-            const enter = gp.buttons[0]?.pressed || gp.buttons[8]?.pressed;
-
-            if (STATE.inSleep) {
-                let input = gp.buttons.some(b => b.pressed) || gp.axes.some(a => Math.abs(a) > 0.5);
-                if (input && !(back && square) && Date.now() - sleepActiveTime >= 1000) wakeUp(); 
-                lastGamepadState = { up, down, left, right, enter, back, triangle: false }; 
-                return requestAnimationFrame(pollGamepads);
-            }
-
-            let dir = up ? 'up' : down ? 'down' : left ? 'left' : right ? 'right' : null;
-            if (dir) { if (gamepadActiveDir !== dir) { gamepadActiveDir = dir; gamepadHoldStartTime = Date.now(); gamepadLastRepeatTime = Date.now(); processNavigation({ up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[dir]); } else if (Date.now() - gamepadHoldStartTime > 350 && Date.now() - gamepadLastRepeatTime > 80) { processNavigation({ up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[dir]); gamepadLastRepeatTime = Date.now(); } } else gamepadActiveDir = null; 
-
-            // Handle Square (Button 2) to toggle Favourites
-            if (square && !back) {
-                if (!gpSquarePressed) {
-                    gpSquarePressed = true;
-                    if (STATE.currentScreen === 'media' && !STATE.inPopup && STATE.mediaFocusArea !== 'top-bar' && STATE.activeApp !== 'store') {
-                        triggerFavouritePopup();
-                    }
+                if (STATE.inSleep) {
+                    let input = gp.buttons.some(b => b.pressed) || gp.axes.some(a => Math.abs(a) > 0.5);
+                    if (input && !(back && square) && Date.now() - sleepActiveTime >= 1000) wakeUp(); 
+                    lastGamepadState = { up, down, left, right, enter, back, triangle: false }; break; 
                 }
-            } else if (!square) {
-                gpSquarePressed = false;
-            }
 
-            // Handle Enter (Button 0 / A, or Button 8 / Select) immediately on press down (retains active user gesture context for browsers)
-            if (enter) { 
-                if (!gpEnterPressed) { 
-                    gpEnterPressed = true; 
-                    processNavigation('Enter'); 
-                } 
-            } else { 
-                gpEnterPressed = false; 
-            }
+                let dir = up ? 'up' : down ? 'down' : left ? 'left' : right ? 'right' : null;
+                if (dir) { if (gamepadActiveDir !== dir) { gamepadActiveDir = dir; gamepadHoldStartTime = Date.now(); gamepadLastRepeatTime = Date.now(); processNavigation({ up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[dir]); } else if (Date.now() - gamepadHoldStartTime > 350 && Date.now() - gamepadLastRepeatTime > 80) { processNavigation({ up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }[dir]); gamepadLastRepeatTime = Date.now(); } } else gamepadActiveDir = null; 
 
-            lastGamepadState = { up, down, left, right, enter, back, triangle: false };
-            requestAnimationFrame(pollGamepads);
+                if (enter) { if (!gpEnterPressed) { gpEnterPressed = true; gpEnterHoldTriggered = false; if (STATE.currentScreen === 'media' && !STATE.inPopup && STATE.mediaFocusArea !== 'top-bar' && STATE.activeApp !== 'store') gpEnterHoldTimer = setTimeout(() => { gpEnterHoldTriggered = true; triggerFavouritePopup(); }, 1700); } } else { if (gpEnterPressed) { clearTimeout(gpEnterHoldTimer); gpEnterHoldTimer = null; if (!gpEnterHoldTriggered) processNavigation('Enter'); gpEnterPressed = false; gpEnterHoldTriggered = false; } }
+
+                lastGamepadState = { up, down, left, right, enter, back, triangle: false }; break; 
+            } requestAnimationFrame(pollGamepads);
         }
 
         let lastTargetElement = null;
@@ -2155,7 +1883,7 @@
         }
         
         function updateVolumeUI() {
-            const v = settingsRegistry.find(s => s.id === 'volume'), c = v.options[v.currentIndex]; 
+            const v = settingsRegistry[1], c = v.options[v.currentIndex]; 
             document.getElementById('volume-fill').style.width = `${c}%`; document.getElementById('volume-text').innerText = `${c}%`;
             const f = c / 100; activeAudio.volume = f; 
             const cv = document.getElementById('cinema-video'); if (cv) cv.volume = f; 
@@ -2164,349 +1892,6 @@
         }
 
         window.onload = initOS;
-    </script>
-</body>
-</html>
---- END OF FILE viewos.html ---
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>viewOS Boot</title>
-    <style>
-        @font-face {
-            font-family: 'Inter Tight';
-            src: url('SystemData/InterTight-VariableFont_wght.ttf') format('truetype');
-        }
-
-        * {
-            font-family: 'Inter Tight', -apple-system, sans-serif;
-            font-weight: 300 !important;
-            letter-spacing: -0.03em !important; 
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-font-smoothing: antialiased;
-            cursor: none !important;
-            margin: 0; padding: 0;
-        }
-
-        body, html {
-            width: 100vw; height: 100vh;
-            background-color: #000000;
-            color: #ffffff;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Pitch Black Boot Cover Overlay (No text) */
-        #boot-screen {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: #000000; z-index: 1000;
-            transition: opacity 0.5s ease;
-        }
-
-        /* Recovery Screen UI */
-        #recovery-screen {
-            display: none; flex-direction: column; align-items: center; text-align: center;
-            opacity: 0; transition: opacity 0.5s ease;
-            width: 90%; max-width: 600px; z-index: 500;
-        }
-
-        h1 { font-size: 2.8rem; margin-bottom: 15px; }
-        p { font-size: 1.4rem; color: #aaaaaa; margin-bottom: 40px; line-height: 1.4; }
-
-        .btn-container { display: flex; flex-direction: column; gap: 15px; width: 100%; align-items: center; }
-
-        .recovery-btn {
-            width: fit-content; min-width: 260px; padding: 18px 35px; font-size: 1.5rem;
-            color: #ffffff; background-color: transparent; border: none;
-            border-radius: 8px; text-align: center; outline: none;
-            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-                        background-color 0.3s ease, color 0.3s ease;
-        }
-
-        .recovery-btn.is-focused {
-            background-color: #ffffff !important;
-            color: #000000 !important;
-            transform: scale(1.08);
-        }
-
-        #status-text {
-            margin-top: 30px; font-size: 1.2rem; color: #ffcc00; 
-            min-height: 20px; opacity: 0; transition: opacity 0.3s ease; line-height: 1.5;
-            max-width: 90%; word-wrap: break-word; text-align: center;
-        }
-    </style>
-</head>
-<body>
-
-    <!-- Pitch Black Screen Overlay (No Boot Logo text) -->
-    <div id="boot-screen"></div>
-
-    <!-- Recovery / Update Mode -->
-    <div id="recovery-screen">
-        <h1>viewOS Recovery</h1>
-        <p>No bootable operating system found or recovery forced.<br>Connect to View Cloud install viewOS.</p>
-        
-        <div class="btn-container">
-            <div class="recovery-btn is-focused" id="btn-boot">Boot viewOS</div>
-            <div class="recovery-btn" id="btn-update">Install viewOS</div>
-            <div class="recovery-btn" id="btn-reboot">Clear Data & Reboot</div>
-        </div>
-
-        <div id="status-text">Ready.</div>
-    </div>
-
-    <script>
-        // Wrapping everything in an IIFE to keep bootloader variables private
-        // and prevent scope collisions on document.write injection.
-        (function() {
-            const OS_STORAGE_KEY = 'viewOS_core_code';
-            const VIEW_CLOUD_URL = 'https://script.google.com/macros/s/AKfycbzR_BI7fcEi1B_ZGG0nlP7Xw6vVSJ9WCDnlrsBWN8jDKmUmUtfNTJz0uEzMZsoDFeOgEA/exec';
-            const CLIENT_VERSION = 1; // Hardcoded Client Identification
-            
-            let inRecovery = false;
-            let isDownloading = false;
-            let focusedIndex = 0;
-            let buttons;
-            let gpLastDir = null;
-            let gpEnterPressed = false;
-            
-            let forceRecovery = false;
-            let bootTimer = null;
-
-            function isValidOS(code) {
-                return code && code.includes('<html') && code.includes('initOS');
-            }
-
-            function handleBootKeys(e) {
-                if (e.key === 'x' || e.key === 'X') {
-                    forceRecovery = true;
-                    console.log("X pressed - Skipping OS boot to launch Recovery Menu");
-                }
-            }
-
-            window.addEventListener('keydown', handleBootKeys);
-
-            window.onload = () => {
-                // Wait 2 seconds in pitch black before making any decisions
-                bootTimer = setTimeout(() => {
-                    window.removeEventListener('keydown', handleBootKeys);
-
-                    const osCode = localStorage.getItem(OS_STORAGE_KEY);
-                    
-                    if (!forceRecovery && isValidOS(osCode)) {
-                        bootOS(osCode);
-                    } else {
-                        startRecoveryMode();
-                    }
-                }, 2000);
-            };
-
-            function bootOS(osCode) {
-                try {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(osCode, 'text/html');
-                    
-                    // 1. Wipe the bootloader markup and styles cleanly
-                    document.head.innerHTML = '';
-                    document.body.innerHTML = '';
-
-                    // 2. Clone any dynamic root metadata and styles
-                    Array.from(doc.documentElement.attributes).forEach(attr => {
-                        document.documentElement.setAttribute(attr.name, attr.value);
-                    });
-                    document.head.innerHTML = doc.head.innerHTML;
-                    document.body.innerHTML = doc.body.innerHTML;
-
-                    // 3. Extract and execute scripts in strict order
-                    const scripts = Array.from(doc.querySelectorAll('script'));
-                    let scriptIndex = 0;
-
-                    function loadNextScript() {
-                        if (scriptIndex >= scripts.length) {
-                            // Let the OS trigger its boot cycle organically once scripts are complete
-                            if (typeof window.onload === 'function') {
-                                window.onload();
-                            }
-                            return;
-                        }
-
-                        const oldScript = scripts[scriptIndex];
-                        scriptIndex++;
-
-                        const newScript = document.createElement('script');
-                        
-                        // Preserve all script attributes (src, defer, type, etc.)
-                        Array.from(oldScript.attributes).forEach(attr => {
-                            newScript.setAttribute(attr.name, attr.value);
-                        });
-
-                        // Copy inline scripts
-                        newScript.textContent = oldScript.textContent;
-
-                        if (oldScript.src) {
-                            // Ensure external assets resolve fully before running downstream code
-                            newScript.onload = loadNextScript;
-                            newScript.onerror = loadNextScript;
-                            document.head.appendChild(newScript);
-                        } else {
-                            document.head.appendChild(newScript);
-                            loadNextScript();
-                        }
-                    }
-
-                    loadNextScript();
-                } catch (e) {
-                    console.error("OS Loader failure: ", e);
-                    startRecoveryMode();
-                }
-            }
-
-            function startRecoveryMode() {
-                inRecovery = true;
-                document.getElementById('boot-screen').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('boot-screen').style.display = 'none';
-                    const rec = document.getElementById('recovery-screen');
-                    rec.style.display = 'flex';
-                    setTimeout(() => rec.style.opacity = '1', 50);
-                    
-                    buttons = document.querySelectorAll('.recovery-btn');
-
-                    document.addEventListener('keydown', handleKeydown);
-                    requestAnimationFrame(pollGamepads);
-                }, 500);
-            }
-
-            function updateFocus() {
-                buttons.forEach((btn, i) => {
-                    if (i === focusedIndex) btn.classList.add('is-focused');
-                    else btn.classList.remove('is-focused');
-                });
-            }
-
-            function triggerAction() {
-                if (isDownloading) return;
-                if (focusedIndex === 0) {
-                    // Boot action: refreshes the page directly
-                    location.reload();
-                } else if (focusedIndex === 1) {
-                    fetchAndInstallOS();
-                } else if (focusedIndex === 2) {
-                    // Safely clear all data and start completely fresh
-                    localStorage.clear();
-                    location.reload();
-                }
-            }
-
-            function setStatus(text, color = "#ffcc00") {
-                const statusEl = document.getElementById('status-text');
-                statusEl.innerText = text;
-                statusEl.style.color = color;
-                statusEl.style.opacity = '1';
-            }
-
-            async function fetchAndInstallOS() {
-                isDownloading = true;
-                setStatus("Connecting to View Cloud", "#ffffff");
-
-                try {
-                    // Step 1: Check Client Compatibility first
-                    const infoResponse = await fetch(`${VIEW_CLOUD_URL}?action=getUpdateInfo`);
-                    if (!infoResponse.ok) throw new Error("Failed to check device compatibility.");
-                    
-                    const info = await infoResponse.json();
-                    
-                    const isSupported = info.supportedClientVersions && info.supportedClientVersions.some(v => v.toString().trim() === CLIENT_VERSION.toString());
-                    
-                    if (!isSupported) {
-                        throw new Error("Device out of date. Please contact support to install last supported version or purchase a new View Device.");
-                    }
-
-                    // Step 2: Fetch and install the actual OS code
-                    setStatus("Downloading latest viewOS", "#ffffff");
-                    const response = await fetch(`${VIEW_CLOUD_URL}?action=getOSCode`);
-                    if (!response.ok) throw new Error("Network request failed.");
-                    
-                    const code = await response.text();
-                    
-                    if (!isValidOS(code)) {
-                        if (code.includes('google-site-verification') || code.includes('github-logo')) {
-                            throw new Error("Received a webpage instead of raw code.\nEnsure GitHub link is 'Raw' and Apps Script is deployed to 'Anyone'.");
-                        } else {
-                            throw new Error("Invalid OS data received from server.");
-                        }
-                    }
-
-                    setStatus("Saving viewOS to local storage", "#ffffff");
-                    localStorage.setItem(OS_STORAGE_KEY, code);
-
-                    setStatus("Install complete. booting", "#ffffff");
-                    
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1000);
-
-                } catch (error) {
-                    setStatus(`${error.message}`, "#ff3b30");
-                    isDownloading = false;
-                }
-            }
-
-            function handleKeydown(e) {
-                if (!inRecovery || isDownloading) return;
-                if (e.key === 'ArrowDown') {
-                    focusedIndex = Math.min(focusedIndex + 1, buttons.length - 1);
-                    updateFocus();
-                } else if (e.key === 'ArrowUp') {
-                    focusedIndex = Math.max(focusedIndex - 1, 0);
-                    updateFocus();
-                } else if (e.key === 'Enter') {
-                    triggerAction();
-                }
-            }
-
-            // Gamepad controller listener loop (A/Select Mapping added)
-            function pollGamepads() {
-                if (!inRecovery) return;
-                const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
-                for (let i = 0; i < gamepads.length; i++) {
-                    const gp = gamepads[i];
-                    if (!gp) continue;
-
-                    const up = gp.buttons[12]?.pressed || gp.axes[1] < -0.5;
-                    const down = gp.buttons[13]?.pressed || gp.axes[1] > 0.5;
-                    const enter = gp.buttons[0]?.pressed || gp.buttons[8]?.pressed;
-
-                    let dir = up ? 'up' : down ? 'down' : null;
-                    
-                    if (dir && gpLastDir !== dir) {
-                        gpLastDir = dir;
-                        if (dir === 'down') focusedIndex = Math.min(focusedIndex + 1, buttons.length - 1);
-                        if (dir === 'up') focusedIndex = Math.max(focusedIndex - 1, 0);
-                        updateFocus();
-                    } else if (!dir) {
-                        gpLastDir = null;
-                    }
-
-                    if (enter) {
-                        if (!gpEnterPressed) {
-                            gpEnterPressed = true;
-                            triggerAction();
-                        }
-                    } else {
-                        gpEnterPressed = false;
-                    }
-                    break;
-                }
-                requestAnimationFrame(pollGamepads);
-            }
-        })();
     </script>
 </body>
 </html>
