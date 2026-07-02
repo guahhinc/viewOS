@@ -60,7 +60,7 @@
             justify-content: center;
             align-items: flex-start;
             width: 100%;
-            max-width: 1600px; /* Expanded max-width to cleanly fit larger sidebar */
+            max-width: 1650px; /* Expanded max-width to cleanly fit larger sidebar */
             margin-top: 10px;
         }
 
@@ -77,14 +77,14 @@
         }
         
         #app-header h1 { 
-            font-size: 3.8rem; 
+            font-size: 4.4rem; /* Increased from 3.8rem */
             font-weight: 500 !important; 
             margin-bottom: 10px; 
             color: #d1ffc4;
         }
         
         #app-header p { 
-            font-size: 1.35rem; 
+            font-size: 1.55rem; /* Increased from 1.35rem */
             color: var(--secondary-text); 
             margin-bottom: 20px; 
             transition: color 0.25s ease, font-weight 0.2s ease;
@@ -110,14 +110,14 @@
             min-width: 110px;
         }
         .hud-label {
-            font-size: 0.95rem;
+            font-size: 1.15rem; /* Increased from 0.95rem */
             color: var(--secondary-text);
             text-transform: uppercase;
             letter-spacing: 0.06em;
             margin-bottom: 4px;
         }
         .hud-val {
-            font-size: 1.65rem;
+            font-size: 2.0rem; /* Increased from 1.65rem */
             font-weight: 500 !important;
             color: #ffffff;
         }
@@ -163,7 +163,7 @@
         }
 
         .card-title {
-            font-size: 1.2rem;
+            font-size: 1.4rem; /* Increased from 1.2rem */
             color: var(--secondary-text); 
             margin-top: 12px;
             text-align: center; 
@@ -189,7 +189,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         .sidebar-title {
-            font-size: 2.0rem; /* Increased from 1.8rem */
+            font-size: 2.4rem; /* Increased from 2.0rem */
             font-weight: 500 !important;
             color: #d1ffc4;
             border-bottom: 1.5px solid rgba(255, 255, 255, 0.08);
@@ -202,7 +202,7 @@
             gap: 12px;
         }
         .section-title {
-            font-size: 1.2rem; /* Increased from 1.05rem */
+            font-size: 1.4rem; /* Increased from 1.2rem */
             text-transform: uppercase;
             color: var(--secondary-text);
             letter-spacing: 0.06em;
@@ -223,10 +223,10 @@
             padding: 12px 16px;
         }
         .tool-icon {
-            font-size: 1.6rem; /* Increased from 1.4rem */
+            font-size: 1.8rem; /* Increased from 1.6rem */
         }
         .tool-text {
-            font-size: 1.25rem; /* Increased from 1.1rem */
+            font-size: 1.40rem; /* Increased from 1.25rem */
             color: #ffffff;
         }
         .inv-items-grid {
@@ -248,13 +248,13 @@
             opacity: 0.2;
         }
         .inv-emoji {
-            font-size: 1.95rem; /* Increased from 1.7rem */
+            font-size: 2.2rem; /* Increased from 1.95rem */
         }
         .inv-badge {
             position: absolute;
             bottom: 6px;
             right: 8px;
-            font-size: 1.05rem; /* Increased from 0.95rem */
+            font-size: 1.2rem; /* Increased from 1.05rem */
             background: rgba(0, 0, 0, 0.85);
             padding: 2px 8px;
             border-radius: 6px;
@@ -308,7 +308,7 @@
             pointer-events: all;
         }
         #detail-view h2 { 
-            font-size: 3.6rem; 
+            font-size: 4.2rem; /* Increased from 3.6rem */
             margin-bottom: 24px; 
             color: #d1ffc4;
             font-weight: 400 !important;
@@ -321,7 +321,7 @@
             align-items: center; 
             justify-content: flex-start; 
             margin-bottom: 20px;
-            max-height: 420px; /* Reduced to guarantee full visual accessibility and scroll */
+            max-height: 480px; /* Expanded slightly to account for larger action buttons */
             overflow-y: auto;
             padding-right: 12px;
             width: 100%;
@@ -329,14 +329,14 @@
 
         /* Button styling: Smaller layout/padding, but larger text */
         .detail-action-btn {
-            font-size: 1.65rem;
+            font-size: 2.1rem; /* Significantly expanded text size from 1.65rem */
             color: #ffffff;
             background: rgba(255, 255, 255, 0.04);
             border: 1.5px solid rgba(255, 255, 255, 0.08);
-            padding: 10px 30px; /* Reduced padding height to fit screen */
-            margin: 4px 0; /* Compact spacing */
+            padding: 12px 30px; /* Scaled padding */
+            margin: 6px 0; /* Compact spacing */
             border-radius: var(--border-radius);
-            width: 520px; /* Slimmed width */
+            width: 650px; /* Widened button layout to fit the larger text comfortably */
             text-align: center;
             transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
             transform-style: preserve-3d;
@@ -459,6 +459,8 @@
         const otherConfig = [
             { id: 'egg', label: 'Egg', emoji: '🥚' },
             { id: 'milk', label: 'Milk', emoji: '🥛' },
+            { id: 'wool', label: 'Wool', emoji: '🐑' },
+            { id: 'goatmilk', label: 'Goat Milk', emoji: '🥛' },
             { id: 'bread', label: 'Bread', emoji: '🍞' },
             { id: 'cheese', label: 'Cheese', emoji: '🧀' },
             { id: 'pie', label: 'Pie', emoji: '🥧' },
@@ -508,7 +510,7 @@
             
             seeds: { wheat: 2, potato: 2, carrot: 0, corn: 0, strawberry: 0, blueberry: 0, pumpkin: 0, starfruit: 0 },
             crops: { wheat: 0, potato: 0, carrot: 0, corn: 0, strawberry: 0, blueberry: 0, pumpkin: 0, starfruit: 0 },
-            other: { egg: 0, milk: 0, bread: 0, cheese: 0, pie: 0, cornbread: 0, jam: 0, soup: 0, juice: 0 },
+            other: { egg: 0, milk: 0, wool: 0, goatmilk: 0, bread: 0, cheese: 0, pie: 0, cornbread: 0, jam: 0, soup: 0, juice: 0 },
             
             plots: [
                 { status: 'wild', crop: null },
@@ -528,9 +530,13 @@
             // Livestock
             chickens: 0,
             cows: 0,
+            sheep: 0,  // Added Sheep
+            goats: 0,  // Added Goats
             animalsFed: false,
             eggsInCoop: 0,
             milkInBarn: 0,
+            woolInBarn: 0,     // Added wool collection buffer
+            goatMilkInBarn: 0, // Added goat milk collection buffer
             
             // Tool Upgrades
             waterCanLevel: 1, 
@@ -576,9 +582,13 @@
                 plots: STATE.plots,
                 chickens: STATE.chickens,
                 cows: STATE.cows,
+                sheep: STATE.sheep,
+                goats: STATE.goats,
                 animalsFed: STATE.animalsFed,
                 eggsInCoop: STATE.eggsInCoop,
                 milkInBarn: STATE.milkInBarn,
+                woolInBarn: STATE.woolInBarn,
+                goatMilkInBarn: STATE.goatMilkInBarn,
                 waterCanLevel: STATE.waterCanLevel,
                 hoeLevel: STATE.hoeLevel,
                 milestones: STATE.milestones
@@ -802,7 +812,7 @@
                 } else if (item.id === 'coop') {
                     bg = 'linear-gradient(135deg, #381a1a, #1a0c0c)';
                     graphic = '🐔';
-                    badges += `<span style="position:absolute; top:6px; right:6px; font-size:0.9rem; background:rgba(255,100,100,0.25); border:1px solid rgba(255,100,100,0.4); padding:4px 10px; border-radius:12px; backdrop-filter:blur(4px); line-height:1; z-index:10;">🐔${STATE.chickens} 🐮${STATE.cows}</span>`;
+                    badges += `<span style="position:absolute; top:6px; right:6px; font-size:0.9rem; background:rgba(255,100,100,0.25); border:1px solid rgba(255,100,100,0.4); padding:4px 10px; border-radius:12px; backdrop-filter:blur(4px); line-height:1; z-index:10;">🐔${STATE.chickens} 🐮${STATE.cows} 🐑${STATE.sheep} 🐐${STATE.goats}</span>`;
                 } else if (item.id === 'shipping') {
                     bg = 'linear-gradient(135deg, #5c3a21, #2e1a0c)';
                     graphic = '📦';
@@ -1035,8 +1045,8 @@
                     }
                 });
 
-                const productPrices = { egg: 40, milk: 90 };
-                ['egg', 'milk'].forEach(id => {
+                const productPrices = { egg: 40, milk: 90, wool: 160, goatmilk: 200 };
+                ['egg', 'milk', 'wool', 'goatmilk'].forEach(id => {
                     const price = productPrices[id];
                     const amount = STATE.other[id] || 0;
                     if (amount > 0) {
@@ -1050,11 +1060,11 @@
                     disabled: totalGoldToGain <= 0,
                     handler: () => {
                         STATE.gold += totalGoldToGain;
-                        itemsToSell.forEach(item => {
-                            if (item.type === 'crops') {
-                                STATE.crops[item.id] = 0;
+                        itemsToSell.forEach(itm => {
+                            if (itm.type === 'crops') {
+                                STATE.crops[itm.id] = 0;
                             } else {
-                                STATE.other[item.id] = 0;
+                                STATE.other[itm.id] = 0;
                             }
                         });
                         STATE.milestones.masterShipper = true;
@@ -1075,7 +1085,9 @@
 
                 const productConfigs = [
                     { id: 'egg', label: 'Egg', price: 40 },
-                    { id: 'milk', label: 'Milk', price: 90 }
+                    { id: 'milk', label: 'Milk', price: 90 },
+                    { id: 'wool', label: 'Wool', price: 160 },
+                    { id: 'goatmilk', label: 'Goat Milk', price: 200 }
                 ];
 
                 productConfigs.forEach(cfg => {
@@ -1093,7 +1105,7 @@
                     handler: () => {
                         STATE.gold -= 120;
                         STATE.chickens++;
-                        if (STATE.chickens + STATE.cows >= 4) STATE.milestones.animalLover = true;
+                        if (STATE.chickens + STATE.cows + STATE.sheep + STATE.goats >= 4) STATE.milestones.animalLover = true;
                         notifySuccess();
                     }
                 });
@@ -1103,15 +1115,35 @@
                     handler: () => {
                         STATE.gold -= 250;
                         STATE.cows++;
-                        if (STATE.chickens + STATE.cows >= 4) STATE.milestones.animalLover = true;
+                        if (STATE.chickens + STATE.cows + STATE.sheep + STATE.goats >= 4) STATE.milestones.animalLover = true;
+                        notifySuccess();
+                    }
+                });
+                actions.push({
+                    text: `Buy Sheep (350g | Have ${STATE.sheep}/2)`,
+                    disabled: STATE.gold < 350 || STATE.sheep >= 2,
+                    handler: () => {
+                        STATE.gold -= 350;
+                        STATE.sheep++;
+                        if (STATE.chickens + STATE.cows + STATE.sheep + STATE.goats >= 4) STATE.milestones.animalLover = true;
+                        notifySuccess();
+                    }
+                });
+                actions.push({
+                    text: `Buy Goat (400g | Have ${STATE.goats}/2)`,
+                    disabled: STATE.gold < 400 || STATE.goats >= 2,
+                    handler: () => {
+                        STATE.gold -= 400;
+                        STATE.goats++;
+                        if (STATE.chickens + STATE.cows + STATE.sheep + STATE.goats >= 4) STATE.milestones.animalLover = true;
                         notifySuccess();
                     }
                 });
                 
-                const feedCost = (STATE.chickens * 5) + (STATE.cows * 10);
+                const feedCost = (STATE.chickens * 5) + (STATE.cows * 10) + (STATE.sheep * 12) + (STATE.goats * 15);
                 actions.push({
                     text: `Feed Barn & Coop (Costs ${feedCost}g)`,
-                    disabled: STATE.gold < feedCost || (STATE.chickens + STATE.cows <= 0) || STATE.animalsFed,
+                    disabled: STATE.gold < feedCost || (STATE.chickens + STATE.cows + STATE.sheep + STATE.goats <= 0) || STATE.animalsFed,
                     handler: () => {
                         STATE.gold -= feedCost;
                         STATE.animalsFed = true;
@@ -1121,14 +1153,20 @@
                 
                 const eggs = STATE.eggsInCoop;
                 const milk = STATE.milkInBarn;
+                const wool = STATE.woolInBarn;
+                const goatmilk = STATE.goatMilkInBarn;
                 actions.push({
-                    text: `Collect Products (Gather ${eggs} Eggs, ${milk} Milk)`,
-                    disabled: eggs + milk <= 0,
+                    text: `Collect Products (Gather ${eggs}🥚, ${milk}🥛, ${wool}🐑, ${goatmilk}🥛)`,
+                    disabled: eggs + milk + wool + goatmilk <= 0,
                     handler: () => {
                         STATE.other.egg += eggs;
                         STATE.other.milk += milk;
+                        STATE.other.wool += wool;
+                        STATE.other.goatmilk += goatmilk;
                         STATE.eggsInCoop = 0;
                         STATE.milkInBarn = 0;
+                        STATE.woolInBarn = 0;
+                        STATE.goatMilkInBarn = 0;
                         notifySuccess();
                     }
                 });
@@ -1202,7 +1240,7 @@
             renderCardContent(STATE.focusedIndex);
             saveGameState(); // Auto-save all state changes to local storage
             if (STATE.currentScreen === 'detail') {
-                renderDetailMenu();
+                renderDetailMenu(); // Re-render keeps detailFocusedIndex intact
             }
         }
 
@@ -1226,7 +1264,7 @@
                 DOM_CACHE.detailActions.appendChild(btn);
             });
             
-            // Adjust index to prevent out-of-bounds error when active list updates live
+            // Adjust index cursor to prevent out-of-bounds errors on updates, but do NOT reset to 0
             if (STATE.detailFocusedIndex >= actions.length) {
                 STATE.detailFocusedIndex = Math.max(0, actions.length - 1);
             }
@@ -1298,13 +1336,21 @@
             // Animal production yields
             let eggsLaid = 0;
             let milkProduced = 0;
-            if (STATE.chickens > 0 || STATE.cows > 0) {
+            let woolProduced = 0;
+            let goatMilkProduced = 0;
+            if (STATE.chickens > 0 || STATE.cows > 0 || STATE.sheep > 0 || STATE.goats > 0) {
                 if (STATE.animalsFed) {
                     eggsLaid = STATE.chickens;
                     STATE.eggsInCoop += eggsLaid;
                     
                     milkProduced = STATE.cows;
                     STATE.milkInBarn += milkProduced;
+
+                    woolProduced = STATE.sheep;
+                    STATE.woolInBarn += woolProduced;
+
+                    goatMilkProduced = STATE.goats;
+                    STATE.goatMilkInBarn += goatMilkProduced;
                     
                     STATE.animalsFed = false;
                 }
@@ -1329,7 +1375,9 @@
             if (cropsGrown > 0) eventsText.push(`🌱 ${cropsGrown} plots grew`);
             if (eggsLaid > 0) eventsText.push(`🥚 ${eggsLaid} eggs laid`);
             if (milkProduced > 0) eventsText.push(`🥛 ${milkProduced} milk produced`);
-            if ((STATE.chickens + STATE.cows > 0) && !STATE.animalsFed) eventsText.push(`🐔 Animals hungry`);
+            if (woolProduced > 0) eventsText.push(`🐑 ${woolProduced} wool produced`);
+            if (goatMilkProduced > 0) eventsText.push(`🥛 ${goatMilkProduced} goat milk produced`);
+            if ((STATE.chickens + STATE.cows + STATE.sheep + STATE.goats > 0) && !STATE.animalsFed) eventsText.push(`🐔 Animals hungry`);
             
             if (eventsText.length > 0) {
                 summaryMsg += eventsText.join(" | ");
@@ -1355,6 +1403,7 @@
                 
                 STATE.currentScreen = 'detail';
                 DOM_CACHE.detail.classList.add('visible');
+                STATE.detailFocusedIndex = 0; // Explicitly reset to 0 ONLY on initial open
                 renderDetailMenu();
                 updateFocus(false);
             } else if (STATE.currentScreen === 'detail') {
