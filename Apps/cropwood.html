@@ -13,18 +13,17 @@
             --text-color: #ffffff;
             --secondary-text: #a0b0a5; /* Slate-green gray */
             
-            /* Symmetrical compact squares scaled up */
-            --card-width: 190px;
-            --card-height: 190px; 
-            --border-radius: 14px;
+            /* Symmetrical compact squares */
+            --card-width: 160px;
+            --card-height: 160px; 
+            --border-radius: 12px;
         }
 
         * {
-            /* Clean system-ui typography stack */
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             font-weight: 300 !important;
-            letter-spacing: -0.01em !important;
-            line-height: 1.3;
+            letter-spacing: -0.02em !important;
+            line-height: 1.25;
             box-sizing: border-box;
             user-select: none;
             -webkit-font-smoothing: antialiased;
@@ -32,7 +31,6 @@
             cursor: none !important;
             margin: 0; 
             padding: 0;
-            font-size: 1.2rem; /* Significantly enlarged default font size */
         }
 
         html, body {
@@ -41,7 +39,7 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             overflow-x: hidden;
-            overflow-y: auto; /* Enable page scroll when layout exceeds window */
+            overflow-y: auto; /* Enable standard vertical page scroll when needed */
         }
 
         #app-root {
@@ -54,7 +52,7 @@
             align-items: center;
         }
 
-        /* Scaled Dual-Column Layout */
+        /* Responsive Dual-Column Layout */
         #app-layout {
             display: flex;
             flex-direction: row;
@@ -79,14 +77,14 @@
         }
         
         #app-header h1 { 
-            font-size: 4rem; 
+            font-size: 3.2rem; 
             font-weight: 400 !important; 
-            margin-bottom: 8px; 
+            margin-bottom: 6px; 
             color: #d1ffc4;
         }
         
         #app-header p { 
-            font-size: 1.4rem; 
+            font-size: 1.15rem; 
             color: var(--secondary-text); 
             margin-bottom: 15px; 
             transition: color 0.25s ease;
@@ -101,7 +99,7 @@
             background: rgba(255, 255, 255, 0.03);
             border: 1.5px solid rgba(255, 255, 255, 0.08);
             border-radius: 14px;
-            padding: 14px 28px;
+            padding: 12px 28px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             margin: 0 auto;
         }
@@ -109,17 +107,17 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-width: 95px;
+            min-width: 85px;
         }
         .hud-label {
-            font-size: 0.95rem;
+            font-size: 0.8rem;
             color: var(--secondary-text);
             text-transform: uppercase;
             letter-spacing: 0.05em;
             margin-bottom: 2px;
         }
         .hud-val {
-            font-size: 1.6rem;
+            font-size: 1.35rem;
             font-weight: 400 !important;
             color: #ffffff;
         }
@@ -165,9 +163,9 @@
         }
 
         .card-title {
-            font-size: 1.25rem;
+            font-size: 1rem;
             color: var(--secondary-text); 
-            margin-top: 10px;
+            margin-top: 8px;
             text-align: center; 
             white-space: nowrap; 
             overflow: hidden;
@@ -178,20 +176,20 @@
 
         /* Persistent Inventory & Backpack Sidebar */
         #inventory-sidebar {
-            width: 380px;
+            width: 330px;
             background: rgba(255, 255, 255, 0.02);
             border: 1.5px solid rgba(255, 255, 255, 0.06);
             border-radius: var(--border-radius);
-            padding: 24px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            gap: 16px;
             align-self: flex-start;
             margin-top: 10px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         .sidebar-title {
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             font-weight: 400 !important;
             color: #d1ffc4;
             border-bottom: 1.5px solid rgba(255, 255, 255, 0.08);
@@ -203,7 +201,7 @@
             flex-direction: column;
         }
         .section-title {
-            font-size: 1rem;
+            font-size: 0.85rem;
             text-transform: uppercase;
             color: var(--secondary-text);
             letter-spacing: 0.05em;
@@ -224,16 +222,16 @@
             padding: 6px 10px;
         }
         .tool-icon {
-            font-size: 1.3rem;
+            font-size: 1.1rem;
         }
         .tool-text {
-            font-size: 1.05rem;
+            font-size: 0.85rem;
             color: #ffffff;
         }
         .inv-items-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
+            gap: 6px;
         }
         .inv-slot {
             position: relative;
@@ -249,13 +247,13 @@
             opacity: 0.2;
         }
         .inv-emoji {
-            font-size: 1.6rem;
+            font-size: 1.3rem;
         }
         .inv-badge {
             position: absolute;
             bottom: 2px;
             right: 4px;
-            font-size: 0.95rem;
+            font-size: 0.75rem;
             background: rgba(0, 0, 0, 0.85);
             padding: 0 4px;
             border-radius: 4px;
@@ -309,7 +307,7 @@
             pointer-events: all;
         }
         #detail-view h2 { 
-            font-size: 3.6rem; 
+            font-size: 3rem; 
             margin-bottom: 20px; 
             color: #d1ffc4;
         }
@@ -328,14 +326,14 @@
         }
 
         .detail-action-btn {
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             color: #ffffff;
             background: rgba(255, 255, 255, 0.04);
             border: 1.5px solid rgba(255, 255, 255, 0.08);
-            padding: 16px 40px;
+            padding: 12px 40px;
             margin: 5px 0;
             border-radius: var(--border-radius);
-            width: 550px;
+            width: 480px;
             text-align: center;
             transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
             transform-style: preserve-3d;
@@ -352,12 +350,52 @@
             opacity: 0.3;
         }
 
+        /* Sleep Summary Modal */
+        #night-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.97);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        #night-overlay.visible {
+            display: flex;
+            opacity: 1;
+        }
+        #night-text {
+            font-size: 4.5rem;
+            color: #d1b3ff;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+        #night-summary {
+            font-size: 1.6rem;
+            color: var(--secondary-text);
+            text-align: center;
+            max-width: 600px;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
         .grid-item.is-focused .card-title { color: #ffffff !important; }
         .tilted-focus { transition: none !important; }
 
         @keyframes bounce {
             0% { transform: translateY(0); }
             100% { transform: translateY(-4px); }
+        }
+        @keyframes blink {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
         }
     </style>
 </head>
@@ -373,9 +411,9 @@
                     <p>Cozy modular 2D farming estate. Navigate using Arrow Keys/D-pad, Select with Enter/A.</p>
                     
                     <div class="hud-container">
-                        <div class="hud-item"><span class="hud-label">GOLD</span><span id="hud-gold" class="hud-val" style="color:#ffd700;">150g</span></div>
-                        <div class="hud-item" style="border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1); padding: 0 35px;"><span class="hud-label">ENERGY</span><span id="hud-energy" class="hud-val" style="color:#00ffcc;">100/100</span></div>
-                        <div class="hud-item"><span class="hud-label">BARN FEED</span><span id="hud-feed" class="hud-val" style="color:#ffae19;">Hungry</span></div>
+                        <div class="hud-item"><span class="hud-label">DAY</span><span id="hud-day" class="hud-val">1</span></div>
+                        <div class="hud-item" style="border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1); padding: 0 25px;"><span class="hud-label">GOLD</span><span id="hud-gold" class="hud-val" style="color:#ffd700;">150g</span></div>
+                        <div class="hud-item"><span class="hud-label">ENERGY</span><span id="hud-energy" class="hud-val" style="color:#00ffcc;">100/100</span></div>
                     </div>
                 </header>
 
@@ -405,15 +443,8 @@
                 </div>
 
                 <div class="sidebar-section">
-                    <h4 class="section-title">Animal Yields</h4>
+                    <h4 class="section-title">Artisan & Animal Products</h4>
                     <div class="inv-items-grid" id="inv-other-grid"></div>
-                </div>
-
-                <div class="sidebar-section">
-                    <h4 class="section-title" style="color: #d1ffc4;">Milestones</h4>
-                    <div id="inv-milestones" style="font-size: 1.05rem; color: var(--secondary-text); display:flex; flex-direction:column; gap:4px;">
-                        <!-- Updated Dynamically -->
-                    </div>
                 </div>
             </aside>
 
@@ -426,7 +457,7 @@
         <div id="detail-actions"></div>
     </div>
 
-    <!-- Sleep Summary (Hidden, but kept for overlay layouts) -->
+    <!-- Sleep Summary -->
     <div id="night-overlay">
         <div id="night-text">Zzz...</div>
         <div id="night-summary"></div>
@@ -438,14 +469,14 @@
         // Game State Config & Crop Database
         // ==========================================================================
         const CROPS_DB = {
-            wheat: { name: 'Wheat', seedCost: 10, cropSell: 25, maxAge: 10, emoji: '🌾', regrows: false },
-            potato: { name: 'Potato', seedCost: 15, cropSell: 35, maxAge: 15, emoji: '🥔', regrows: false },
-            carrot: { name: 'Carrot', seedCost: 20, cropSell: 50, maxAge: 25, emoji: '🥕', regrows: false },
-            corn: { name: 'Corn', seedCost: 30, cropSell: 40, maxAge: 45, emoji: '🌽', regrows: true, regrowAge: 15 },
-            strawberry: { name: 'Strawberry', seedCost: 45, cropSell: 70, maxAge: 60, emoji: '🍓', regrows: true, regrowAge: 30 },
-            blueberry: { name: 'Blueberry', seedCost: 50, cropSell: 45, maxAge: 80, emoji: '🫐', regrows: true, regrowAge: 40, multiplier: 2 },
-            pumpkin: { name: 'Pumpkin', seedCost: 70, cropSell: 180, maxAge: 110, emoji: '🎃', regrows: false },
-            starfruit: { name: 'Starfruit', seedCost: 90, cropSell: 250, maxAge: 150, emoji: '🌟', regrows: false }
+            wheat: { name: 'Wheat', seedCost: 10, cropSell: 25, maxAge: 2, emoji: '🌾', regrows: false },
+            potato: { name: 'Potato', seedCost: 15, cropSell: 35, maxAge: 2, emoji: '🥔', regrows: false },
+            carrot: { name: 'Carrot', seedCost: 20, cropSell: 50, maxAge: 3, emoji: '🥕', regrows: false },
+            corn: { name: 'Corn', seedCost: 30, cropSell: 40, maxAge: 3, emoji: '🌽', regrows: true, regrowAge: 1 },
+            strawberry: { name: 'Strawberry', seedCost: 45, cropSell: 70, maxAge: 4, emoji: '🍓', regrows: true, regrowAge: 2 },
+            blueberry: { name: 'Blueberry', seedCost: 50, cropSell: 45, maxAge: 4, emoji: '🫐', regrows: true, regrowAge: 2, multiplier: 2 },
+            pumpkin: { name: 'Pumpkin', seedCost: 70, cropSell: 180, maxAge: 5, emoji: '🎃', regrows: false },
+            starfruit: { name: 'Starfruit', seedCost: 90, cropSell: 250, maxAge: 6, emoji: '🌟', regrows: false }
         };
 
         const seedsConfig = [
@@ -459,14 +490,20 @@
             { id: 'starfruit', label: 'Starf.', emoji: '🌟' }
         ];
 
-        // Simplified yields - Removed all complex baking items due to Cooking removal
         const otherConfig = [
             { id: 'egg', label: 'Egg', emoji: '🥚' },
-            { id: 'milk', label: 'Milk', emoji: '🥛' }
+            { id: 'milk', label: 'Milk', emoji: '🥛' },
+            { id: 'bread', label: 'Bread', emoji: '🍞' },
+            { id: 'cheese', label: 'Cheese', emoji: '🧀' },
+            { id: 'pie', label: 'Pie', emoji: '🥧' },
+            { id: 'cornbread', label: 'Cornb.', emoji: '🌽' },
+            { id: 'jam', label: 'Jam', emoji: '🍯' },
+            { id: 'soup', label: 'Soup', emoji: '🥣' },
+            { id: 'juice', label: 'Juice', emoji: '🍹' }
         ];
 
         const appItems = [
-            // Row 1, 2, & 3: Land Plots (Expanded to 14 total squares)
+            // Row 1, 2, & 3: Land Plots (12 total squares)
             { id: "plot-0", title: "Plot 1", type: "plot", plotIndex: 0 },
             { id: "plot-1", title: "Plot 2", type: "plot", plotIndex: 1 },
             { id: "plot-2", title: "Plot 3", type: "plot", plotIndex: 2 },
@@ -479,51 +516,62 @@
             { id: "plot-9", title: "Plot 10", type: "plot", plotIndex: 9 },
             { id: "plot-10", title: "Plot 11", type: "plot", plotIndex: 10 },
             { id: "plot-11", title: "Plot 12", type: "plot", plotIndex: 11 },
-            { id: "plot-12", title: "Plot 13", type: "plot", plotIndex: 12 },
-            { id: "plot-13", title: "Plot 14", type: "plot", plotIndex: 13 },
             // Row 4: Farm Hub Facilities
             { id: "shop", title: "Seed Shop", type: "facility" },
-            { id: "coop", title: "Barn & Coop", type: "facility" }
+            { id: "coop", title: "Barn & Coop", type: "facility" },
+            { id: "kitchen", title: "Cooking & Kitchen", type: "facility" },
+            { id: "farmhouse", title: "Cozy Farmhouse", type: "facility" }
         ];
 
         const STATE = {
-            currentScreen: 'grid', // 'grid' | 'detail'
+            currentScreen: 'grid', // 'grid' | 'detail' | 'night'
             focusedIndex: 0,
             detailFocusedIndex: 0,
             columns: 4,
             joyX: 0, joyY: 0,
             
-            // Resources
+            // Economy & Resources
             gold: 150, 
+            day: 1,
             energy: 100,
             maxEnergy: 100,
             
             seeds: { wheat: 2, potato: 2, carrot: 0, corn: 0, strawberry: 0, blueberry: 0, pumpkin: 0, starfruit: 0 },
             crops: { wheat: 0, potato: 0, carrot: 0, corn: 0, strawberry: 0, blueberry: 0, pumpkin: 0, starfruit: 0 },
-            other: { egg: 0, milk: 0 },
+            other: { egg: 0, milk: 0, bread: 0, cheese: 0, pie: 0, cornbread: 0, jam: 0, soup: 0, juice: 0 },
             
-            plots: Array.from({length: 14}, (_, i) => ({
-                status: i < 6 ? 'soil' : 'wild', // Initial setup contains tilled soil plots
-                crop: null 
-            })),
+            plots: [
+                { status: 'wild', crop: null },
+                { status: 'wild', crop: null },
+                { status: 'wild', crop: null },
+                { status: 'wild', crop: null },
+                { status: 'soil', crop: null },
+                { status: 'soil', crop: null },
+                { status: 'soil', crop: null },
+                { status: 'soil', crop: null },
+                { status: 'soil', crop: null },
+                { status: 'soil', crop: null },
+                { status: 'soil', crop: null },
+                { status: 'soil', crop: null }
+            ],
             
             // Livestock
             chickens: 0,
             cows: 0,
-            feedTimer: 0, // Real-time feed duration remaining
+            animalsFed: false,
             eggsInCoop: 0,
             milkInBarn: 0,
-            chickenProgress: 0,
-            cowProgress: 0,
             
             // Tool Upgrades
             waterCanLevel: 1, 
             hoeLevel: 1,      
             
+            viewingMilestones: false,
             milestones: {
                 firstHarvest: false,
                 tycoon: false,
                 animalLover: false,
+                masterChef: false,
                 starPlanter: false
             }
         };
@@ -541,13 +589,15 @@
         // Helper calculations
         function getTillingCost() { return [15, 8, 2][STATE.hoeLevel - 1]; }
         function getWateringCost() { return [5, 3, 1][STATE.waterCanLevel - 1]; }
+        function getCompletedMilestones() { return Object.values(STATE.milestones).filter(Boolean).length; }
 
         // ==========================================================================
         // Persistence Engine (Browser Storage)
         // ==========================================================================
         function saveGameState() {
-            localStorage.setItem('cropwood_save_v3', JSON.stringify({
+            localStorage.setItem('cropwood_save_v2', JSON.stringify({
                 gold: STATE.gold,
+                day: STATE.day,
                 energy: STATE.energy,
                 maxEnergy: STATE.maxEnergy,
                 seeds: STATE.seeds,
@@ -556,11 +606,9 @@
                 plots: STATE.plots,
                 chickens: STATE.chickens,
                 cows: STATE.cows,
-                feedTimer: STATE.feedTimer,
+                animalsFed: STATE.animalsFed,
                 eggsInCoop: STATE.eggsInCoop,
                 milkInBarn: STATE.milkInBarn,
-                chickenProgress: STATE.chickenProgress,
-                cowProgress: STATE.cowProgress,
                 waterCanLevel: STATE.waterCanLevel,
                 hoeLevel: STATE.hoeLevel,
                 milestones: STATE.milestones
@@ -568,7 +616,7 @@
         }
 
         function loadGameState() {
-            const saved = localStorage.getItem('cropwood_save_v3');
+            const saved = localStorage.getItem('cropwood_save_v2');
             if (saved) {
                 try {
                     const data = JSON.parse(saved);
@@ -577,6 +625,7 @@
                             STATE[key] = data[key];
                         }
                     }
+                    // Safely reconstruct plot data sizes to prevent mismatch error crashes
                     if (data.plots && Array.isArray(data.plots)) {
                         for (let i = 0; i < STATE.plots.length; i++) {
                             if (data.plots[i]) {
@@ -632,7 +681,7 @@
         // Application Lifecycle Initializer
         // ==========================================================================
         function initApp() {
-            loadGameState(); 
+            loadGameState(); // Load state before constructing DOM elements
 
             DOM_CACHE.grid.innerHTML = '';
             cachedElements = [];
@@ -660,9 +709,8 @@
             
             requestAnimationFrame(pollGamepads);
             requestAnimationFrame(tickMicroanimations);
-            requestAnimationFrame(mainGameLoop); // Core real-time delta tick sequence
             
-            updateHUDRealtime();
+            updateHUD();
             updateInventorySidebar();
             updateFocus(true);
         }
@@ -672,6 +720,10 @@
             if (STATE.currentScreen === 'detail') {
                 const activeBtn = document.getElementById(`action-btn-${STATE.detailFocusedIndex}`);
                 if (activeBtn) return { container: activeBtn, icon: activeBtn };
+            }
+            if (STATE.currentScreen === 'night') {
+                const continueBtn = document.getElementById('night-continue-btn');
+                return { container: continueBtn, icon: continueBtn };
             }
             return null;
         }
@@ -706,13 +758,13 @@
                 target.container.classList.add('is-focused');
                 if (target.icon !== target.container) target.icon.classList.add('is-focused');
                 
-                // Keep selected card elements properly aligned on smaller frames
+                // Automatically scroll layout window for visual tracking of grid rows
                 target.container.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
             }
         }
 
         // ==========================================================================
-        // Visual Renderers & UI Builders
+        // Visual Renderers
         // ==========================================================================
         function renderCardContent(index) {
             const item = appItems[index];
@@ -741,14 +793,13 @@
                     bg = 'linear-gradient(135deg, #1b2636, #0c121b)';
                     label = `Plot ${item.plotIndex + 1}: Wet Soil`;
                     graphic = `<div style="font-size: 2.8rem; margin-top: 15px;">🟫</div>`;
-                    badges += `<span style="position:absolute; top:8px; right:8px; font-size:0.8rem; background:rgba(0,150,255,0.4); border:1px solid rgba(0,200,255,0.6); padding:2px 8px; border-radius:12px; backdrop-filter:blur(4px); line-height:1; z-index:10; font-weight:400 !important;">💧 Wet</span>`;
+                    badges += `<span style="position:absolute; top:6px; right:6px; font-size:0.75rem; background:rgba(0,150,255,0.4); border:1px solid rgba(0,200,255,0.6); padding:2px 8px; border-radius:12px; backdrop-filter:blur(4px); line-height:1; z-index:10; font-weight:400 !important;">💧 Wet</span>`;
                 }
                 
                 if (plot.crop) {
                     const c = plot.crop;
                     const isReady = c.age >= c.maxAge;
-                    let pct = Math.floor((c.age / c.maxAge) * 100);
-                    label = `Plot ${item.plotIndex + 1}: ${c.name} (${isReady ? 'READY' : pct + '%'})`;
+                    label = `Plot ${item.plotIndex + 1}: ${c.name} (${isReady ? 'READY' : 'Day ' + c.age + '/' + c.maxAge})`;
                     
                     let cropEmoji = '🌱';
                     if (isReady) {
@@ -758,14 +809,7 @@
                     }
                     
                     if (isReady) {
-                        badges += `<span style="position:absolute; bottom:8px; right:8px; font-size:0.75rem; font-weight:bold; background:rgba(255,200,0,0.45); border:1px solid rgba(255,230,0,0.7); padding:3px 8px; border-radius:12px; backdrop-filter:blur(4px); color:#fff; line-height:1; z-index:10; animation: bounce 1s infinite alternate; font-weight:400 !important;">✨ HARVEST</span>`;
-                    } else {
-                        // Real-time crop growth progress bar inside square plot card
-                        badges += `
-                            <div style="position:absolute; bottom:12px; left:12px; right:12px; height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden; z-index:10;">
-                                <div style="height:100%; width:${pct}%; background:#73ff83; border-radius:3px;"></div>
-                            </div>
-                        `;
+                        badges += `<span style="position:absolute; bottom:6px; right:6px; font-size:0.7rem; font-weight:bold; background:rgba(255,200,0,0.45); border:1px solid rgba(255,230,0,0.6); padding:3px 8px; border-radius:12px; backdrop-filter:blur(4px); color:#fff; line-height:1; z-index:10; animation: bounce 1s infinite alternate; font-weight:400 !important;">✨ HARVEST</span>`;
                     }
                     
                     graphic = `<div style="font-size: 3.2rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));">${cropEmoji}</div>`;
@@ -788,7 +832,16 @@
                 } else if (item.id === 'coop') {
                     bg = 'linear-gradient(135deg, #381a1a, #1a0c0c)';
                     graphic = '🐔';
-                    badges += `<span style="position:absolute; top:8px; right:8px; font-size:0.8rem; background:rgba(255,100,100,0.25); border:1px solid rgba(255,100,100,0.4); padding:2px 8px; border-radius:12px; backdrop-filter:blur(4px); line-height:1; z-index:10;">🐔${STATE.chickens} 🐮${STATE.cows}</span>`;
+                    badges += `<span style="position:absolute; top:6px; right:6px; font-size:0.75rem; background:rgba(255,100,100,0.25); border:1px solid rgba(255,100,100,0.4); padding:2px 8px; border-radius:12px; backdrop-filter:blur(4px); line-height:1; z-index:10;">🐔${STATE.chickens} 🐮${STATE.cows}</span>`;
+                } else if (item.id === 'kitchen') {
+                    bg = 'linear-gradient(135deg, #132b24, #081410)';
+                    graphic = '🍳';
+                } else if (item.id === 'farmhouse') {
+                    bg = 'linear-gradient(135deg, #2a1b3d, #120b1c)';
+                    graphic = '🏡';
+                    if (STATE.energy < STATE.maxEnergy * 0.3) {
+                        badges += `<span style="position:absolute; top:6px; right:6px; font-size:0.75rem; background:rgba(255,150,0,0.3); border:1px solid rgba(255,150,0,0.5); padding:2px 8px; border-radius:12px; backdrop-filter:blur(4px); line-height:1; z-index:10; animation: blink 1s infinite alternate;">⚠️ Tired</span>`;
+                    }
                 }
                 
                 visual.style.background = bg;
@@ -799,6 +852,17 @@
                     </div>`;
                 titleEl.textContent = item.title;
             }
+        }
+
+        function createInvSlot(emoji, count, label) {
+            const slot = document.createElement('div');
+            slot.className = `inv-slot ${count === 0 ? 'empty' : ''}`;
+            slot.title = label;
+            slot.innerHTML = `
+                <span class="inv-emoji">${emoji}</span>
+                <span class="inv-badge">${count}</span>
+            `;
+            return slot;
         }
 
         function updateInventorySidebar() {
@@ -829,123 +893,25 @@
                 const count = STATE.other[cfg.id] || 0;
                 otherGrid.appendChild(createInvSlot(cfg.emoji, count, cfg.label));
             });
-
-            // Milestones sidebar summary
-            const msDiv = document.getElementById('inv-milestones');
-            msDiv.innerHTML = `
-                <div>🌾 First Harvest: ${STATE.milestones.firstHarvest ? '✅' : '🔒'}</div>
-                <div>💰 Tycoon (1k Gold): ${STATE.milestones.tycoon ? '✅' : '🔒'}</div>
-                <div>🐮 Animal Lover (4 animals): ${STATE.milestones.animalLover ? '✅' : '🔒'}</div>
-                <div>✨ Star Planter: ${STATE.milestones.starPlanter ? '✅' : '🔒'}</div>
-            `;
         }
 
-        // ==========================================================================
-        // Real-Time Delta Mechanics (Crops, Animals, Energy, Autosaver)
-        // ==========================================================================
-        function updateCropsRealtime(dt) {
-            let changed = false;
-            STATE.plots.forEach(plot => {
-                if (plot.crop) {
-                    if (plot.crop.age < plot.crop.maxAge) {
-                        // Optional watering booster accelerates growth progress by 2.0x
-                        const multiplier = plot.status === 'watered' ? 2.0 : 1.0;
-                        plot.crop.age += dt * multiplier;
-                        
-                        if (plot.crop.age >= plot.crop.maxAge) {
-                            plot.crop.age = plot.crop.maxAge;
-                            changed = true;
-                        }
-                    }
-                }
-            });
-            return changed;
+        function updateHUD() {
+            document.getElementById('hud-day').innerText = STATE.day;
+            document.getElementById('hud-gold').innerText = STATE.gold + 'g';
+            document.getElementById('hud-energy').innerText = STATE.energy + '/' + STATE.maxEnergy;
         }
 
-        function updateAnimalsRealtime(dt) {
-            let changed = false;
-            
-            // Livestock require feed timers to process milk/egg cycles
-            if (STATE.feedTimer > 0) {
-                STATE.feedTimer -= dt;
-                if (STATE.feedTimer < 0) {
-                    STATE.feedTimer = 0;
-                }
-                changed = true;
-                
-                if (STATE.chickens > 0) {
-                    STATE.chickenProgress += dt;
-                    // Chickens drop eggs every 30 seconds of fed duration
-                    if (STATE.chickenProgress >= 30) {
-                        STATE.eggsInCoop = Math.min(20, STATE.eggsInCoop + STATE.chickens);
-                        STATE.chickenProgress = 0;
-                        changed = true;
-                    }
-                }
-                if (STATE.cows > 0) {
-                    STATE.cowProgress += dt;
-                    // Cows produce milk every 50 seconds of fed duration
-                    if (STATE.cowProgress >= 50) {
-                        STATE.milkInBarn = Math.min(10, STATE.milkInBarn + STATE.cows);
-                        STATE.cowProgress = 0;
-                        changed = true;
-                    }
-                }
-            } else {
-                STATE.chickenProgress = 0;
-                STATE.cowProgress = 0;
-            }
-            
-            return changed;
+        // Action indicator feedback text
+        function showActionDeniedFeedback(message) {
+            const headerP = document.querySelector('#app-header p');
+            const originalText = "Cozy modular 2D farming estate. Navigate using Arrow Keys/D-pad, Select with Enter/A.";
+            headerP.innerText = `⚠️ ${message}`;
+            headerP.style.color = '#ff6b6b';
+            setTimeout(() => {
+                headerP.innerText = originalText;
+                headerP.style.color = 'var(--secondary-text)';
+            }, 1800);
         }
-
-        function updateHUDRealtime() {
-            document.getElementById('hud-gold').innerText = Math.floor(STATE.gold) + 'g';
-            document.getElementById('hud-energy').innerText = Math.floor(STATE.energy) + '/' + STATE.maxEnergy;
-            
-            const feedEl = document.getElementById('hud-feed');
-            if (STATE.feedTimer > 0) {
-                feedEl.innerText = `${Math.ceil(STATE.feedTimer)}s Left`;
-                feedEl.style.color = '#73ff83'; // Healthy green
-            } else {
-                feedEl.innerText = 'Hungry ⚠️';
-                feedEl.style.color = '#ff6b6b'; // Hungry red
-            }
-        }
-
-        let autoSaveTimer = 0;
-        function tickAutoSave(dt) {
-            autoSaveTimer += dt;
-            if (autoSaveTimer >= 5.0) { // Cycle auto-save profile files once every 5.0 seconds
-                saveGameState();
-                autoSaveTimer = 0;
-                updateInventorySidebar();
-            }
-        }
-
-        function mainGameLoop(timestamp) {
-            const dt = (timestamp - lastTime) / 1000;
-            lastTime = timestamp;
-            
-            if (dt > 0 && dt < 1) { // Secure against background browser tab suspensions
-                updateCropsRealtime(dt);
-                updateAnimalsRealtime(dt);
-                
-                // Active energy naturally regenerates at a solid rate of 1.5 per second
-                STATE.energy = Math.min(STATE.maxEnergy, STATE.energy + dt * 1.5);
-                
-                tickAutoSave(dt);
-            }
-            
-            updateHUDRealtime();
-            
-            for (let i = 0; i < 16; i++) {
-                renderCardContent(i);
-            }
-            
-            requestAnimationFrame(mainGameLoop);
-        }
-        let lastTime = performance.now();
 
         // ==========================================================================
         // Quick Contextual Interactions for Grid Clicks
@@ -987,7 +953,7 @@
                 return true; 
             }
             
-            // 3. Instantly water dry crops growing on tilled land (watering is now optional and doubles growth speed)
+            // 3. Instantly water dry crops growing on tilled land
             if (plot.crop && plot.status === 'soil') {
                 const cost = getWateringCost();
                 if (STATE.energy >= cost) {
@@ -1000,7 +966,7 @@
                 return true; 
             }
             
-            // 4. Return false to invoke the dynamic Seed selector if tilled and empty
+            // 4. Return false to invoke the dynamic Seed selector if empty
             if (plot.crop === null && (plot.status === 'soil' || plot.status === 'watered')) {
                 return false; 
             }
@@ -1009,7 +975,7 @@
         }
 
         // ==========================================================================
-        // Sub-navigation action listings
+        // Sub-navigation & Game Action Lists
         // ==========================================================================
         function getActionsForModule(item) {
             const actions = [];
@@ -1056,12 +1022,12 @@
                     });
                 });
 
-                // Yield sale mechanics
                 otherConfig.forEach(cfg => {
-                    const price = cfg.id === 'egg' ? 40 : 90;
+                    const prices = { egg: 40, milk: 90, bread: 65, cheese: 130, pie: 240, cornbread: 120, jam: 150, soup: 380, juice: 320 };
+                    const price = prices[cfg.id] || 50;
                     const amount = STATE.other[cfg.id];
                     actions.push({
-                        text: `Sell All ${cfg.label}s (Have ${amount} | +${amount * price}g)`,
+                        text: `Sell All ${cfg.label} (Have ${amount} | +${amount * price}g)`,
                         disabled: amount <= 0,
                         handler: () => sellItem('other', cfg.id, price)
                     });
@@ -1100,12 +1066,13 @@
                     }
                 });
                 
+                const feedCost = (STATE.chickens * 5) + (STATE.cows * 10);
                 actions.push({
-                    text: `Buy 60s Barn Feed (Costs 15g)`,
-                    disabled: STATE.gold < 15 || (STATE.chickens + STATE.cows <= 0),
+                    text: `Feed Barn & Coop (Costs ${feedCost}g)`,
+                    disabled: STATE.gold < feedCost || (STATE.chickens + STATE.cows <= 0) || STATE.animalsFed,
                     handler: () => {
-                        STATE.gold -= 15;
-                        STATE.feedTimer += 60;
+                        STATE.gold -= feedCost;
+                        STATE.animalsFed = true;
                         notifySuccess();
                     }
                 });
@@ -1123,13 +1090,91 @@
                         notifySuccess();
                     }
                 });
+            } else if (item.id === 'kitchen') {
+                actions.push({
+                    text: "Bake Crusty Bread (Uses 2 Wheat)",
+                    disabled: STATE.crops.wheat < 2,
+                    handler: () => { STATE.crops.wheat -= 2; STATE.other.bread++; notifySuccess(); }
+                });
+                actions.push({
+                    text: "Bake Strawberry Pie (Uses 2 Strawberry, 1 Egg)",
+                    disabled: STATE.crops.strawberry < 2 || STATE.other.egg < 1,
+                    handler: () => { STATE.crops.strawberry -= 2; STATE.other.egg -= 1; STATE.other.pie++; STATE.milestones.masterChef = true; notifySuccess(); }
+                });
+                actions.push({
+                    text: "Squeeze Starfruit Juice (Uses 1 Starfruit)",
+                    disabled: STATE.crops.starfruit < 1,
+                    handler: () => { STATE.crops.starfruit -= 1; STATE.other.juice++; notifySuccess(); }
+                });
+                actions.push({
+                    text: "Churn Cheese (Uses 1 Milk)",
+                    disabled: STATE.other.milk < 1,
+                    handler: () => { STATE.other.milk -= 1; STATE.other.cheese++; notifySuccess(); }
+                });
+                actions.push({
+                    text: "Bake Cornbread (Uses 1 Corn, 1 Egg)",
+                    disabled: STATE.crops.corn < 1 || STATE.other.egg < 1,
+                    handler: () => { STATE.crops.corn -= 1; STATE.other.egg -= 1; STATE.other.cornbread++; notifySuccess(); }
+                });
+                actions.push({
+                    text: "Simmer Blueberry Jam (Uses 2 Blueberries)",
+                    disabled: STATE.crops.blueberry < 2,
+                    handler: () => { STATE.crops.blueberry -= 2; STATE.other.jam++; notifySuccess(); }
+                });
+                actions.push({
+                    text: "Cook Pumpkin Soup (Uses 1 Pumpkin, 1 Milk)",
+                    disabled: STATE.crops.pumpkin < 1 || STATE.other.milk < 1,
+                    handler: () => { STATE.crops.pumpkin -= 1; STATE.other.milk -= 1; STATE.other.soup++; notifySuccess(); }
+                });
+            } else if (item.id === 'farmhouse') {
+                if (STATE.viewingMilestones) {
+                    actions.push({ text: `🌾 First Harvest: ${STATE.milestones.firstHarvest ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
+                    actions.push({ text: `💰 Tycoon (1k gold balance): ${STATE.milestones.tycoon ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
+                    actions.push({ text: `🐮 Animal Lover (4 livestock): ${STATE.milestones.animalLover ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
+                    actions.push({ text: `🥧 Master Chef (Strawberry Pie): ${STATE.milestones.masterChef ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
+                    actions.push({ text: `✨ Star Planter (Starfruit): ${STATE.milestones.starPlanter ? 'COMPLETED' : 'LOCKED'}`, disabled: true });
+                    actions.push({
+                        text: "Back",
+                        disabled: false,
+                        handler: () => {
+                            STATE.viewingMilestones = false;
+                            renderDetailMenu();
+                        }
+                    });
+                } else {
+                    actions.push({
+                        text: "Sleep & Save (Start Next Day)",
+                        disabled: false,
+                        handler: () => startNextDay()
+                    });
+                    actions.push({
+                        text: `Check Milestones (${getCompletedMilestones()}/5 Completed)`,
+                        disabled: false,
+                        handler: () => {
+                            STATE.viewingMilestones = true;
+                            renderDetailMenu();
+                        }
+                    });
+                    actions.push({
+                        text: "Reset Game Data (Wipes Save)",
+                        disabled: false,
+                        handler: () => {
+                            if (confirm("Are you sure you want to delete all saved data? This will reload the page.")) {
+                                localStorage.removeItem('cropwood_save_v2');
+                                window.location.reload();
+                            }
+                        }
+                    });
+                }
             }
             
-            actions.push({
-                text: "Back",
-                disabled: false,
-                handler: () => closeDetailView()
-            });
+            if (!STATE.viewingMilestones) {
+                actions.push({
+                    text: "Back",
+                    disabled: false,
+                    handler: () => closeDetailView()
+                });
+            }
             
             return actions;
         }
@@ -1150,10 +1195,10 @@
 
         function notifySuccess() {
             if (STATE.gold >= 1000) STATE.milestones.tycoon = true;
-            updateHUDRealtime();
+            updateHUD();
             updateInventorySidebar();
             renderCardContent(STATE.focusedIndex);
-            saveGameState(); 
+            saveGameState(); // Auto-save all state changes to local storage
             if (STATE.currentScreen === 'detail') {
                 renderDetailMenu();
             }
@@ -1188,6 +1233,7 @@
             const activeBtn = document.getElementById(`action-btn-${STATE.detailFocusedIndex}`);
             if (activeBtn) {
                 activeBtn.classList.add('is-focused');
+                // Ensure dynamic vertical scrolling for keyboard/gamepad navigation inside details overlay
                 activeBtn.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
             }
         }
@@ -1216,9 +1262,77 @@
         }
 
         function closeDetailView() {
+            STATE.viewingMilestones = false;
             STATE.currentScreen = 'grid';
             DOM_CACHE.detail.classList.remove('visible');
             updateFocus(false);
+        }
+
+        // ==========================================================================
+        // Overnight Calendar Progression
+        // ==========================================================================
+        function startNextDay() {
+            STATE.day++;
+            STATE.energy = STATE.maxEnergy;
+            
+            // Advance Crops growth
+            let cropsGrown = 0;
+            STATE.plots.forEach((plot, index) => {
+                if (plot.crop) {
+                    if (plot.status === 'watered') {
+                        plot.crop.age++;
+                        cropsGrown++;
+                    }
+                }
+                if (plot.status === 'watered') {
+                    plot.status = 'soil';
+                }
+            });
+            
+            // Animal production yields
+            let eggsLaid = 0;
+            let milkProduced = 0;
+            if (STATE.chickens > 0 || STATE.cows > 0) {
+                if (STATE.animalsFed) {
+                    eggsLaid = STATE.chickens;
+                    STATE.eggsInCoop += eggsLaid;
+                    
+                    milkProduced = STATE.cows;
+                    STATE.milkInBarn += milkProduced;
+                    
+                    STATE.animalsFed = false;
+                }
+            }
+            
+            updateHUD();
+            updateInventorySidebar();
+            for (let i = 0; i < 16; i++) {
+                renderCardContent(i);
+            }
+            
+            saveGameState(); // Auto-save on day transition
+            
+            STATE.currentScreen = 'night';
+            const nightSummary = document.getElementById('night-summary');
+            let log = `Day ${STATE.day - 1} ended safely.<br><br>`;
+            if (cropsGrown > 0) log += `🌱 ${cropsGrown} plots grew closer to harvest.<br>`;
+            if (eggsLaid > 0) log += `🥚 Your hens laid ${eggsLaid} egg(s).<br>`;
+            if (milkProduced > 0) log += `🥛 Your cows produced ${milkProduced} bucket(s) of milk.<br>`;
+            if ((STATE.chickens + STATE.cows > 0) && !STATE.animalsFed) log += `🐔 Your livestock went hungry! (Remember to buy feed)<br>`;
+            log += `<br>Energy fully restored.`;
+            
+            nightSummary.innerHTML = log;
+            document.getElementById('night-overlay').classList.add('visible');
+            
+            setTimeout(() => {
+                document.getElementById('night-continue-btn').classList.add('is-focused');
+            }, 60);
+        }
+
+        function wakeUp() {
+            document.getElementById('night-overlay').classList.remove('visible');
+            STATE.currentScreen = 'grid';
+            closeDetailView();
         }
 
         // ==========================================================================
@@ -1228,6 +1342,7 @@
             if (STATE.currentScreen === 'grid') {
                 const item = appItems[STATE.focusedIndex];
                 
+                // Direct context click validation checks
                 if (item.type === 'plot') {
                     const resolvedInstantly = handlePlotGridInteraction(item.plotIndex);
                     if (resolvedInstantly) return; // Action solved instantly without sub-menus
@@ -1239,12 +1354,16 @@
                 updateFocus(false);
             } else if (STATE.currentScreen === 'detail') {
                 executeDetailAction();
+            } else if (STATE.currentScreen === 'night') {
+                wakeUp();
             }
         }
 
         function handleSystemBack() {
             if (STATE.currentScreen === 'detail') {
                 closeDetailView();
+            } else if (STATE.currentScreen === 'night') {
+                wakeUp();
             } else {
                 window.parent.postMessage({ type: 'exitApp' }, '*');
             }
@@ -1379,7 +1498,7 @@
                 }
             });
 
-            // Handles menu transitions smoothly inside detail overlays
+            // Handle non-spring elements inside sub-menus
             if (activeTarget && activeTarget.icon && activeTarget.container && !activeTarget.icon.springs) {
                 const container = activeTarget.container;
                 const icon = activeTarget.icon;
