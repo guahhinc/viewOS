@@ -387,7 +387,7 @@
 
         // View Cloud Configuration & Local Version Parameters
         const VIEW_CLOUD_URL = 'https://script.google.com/macros/s/AKfycbzR_BI7fcEi1B_ZGG0nlP7Xw6vVSJ9WCDnlrsBWN8jDKmUmUtfNTJz0uEzMZsoDFeOgEA/exec';
-        const CURRENT_OS_VERSION = 0.5;
+        const CURRENT_OS_VERSION = 0.6;
         const CLIENT_VERSION = 1;
 
         (function() {
@@ -937,7 +937,7 @@
 
         async function installUpdate() {
             STATE.isInstallingUpdate = true;
-            showSystemPopup("Installing Update...", "Downloading viewOS core. Please do not turn off the system.", []);
+            showSystemPopup("Installing Update...", "Downloading viewOS update. Please do not turn off the system.", []);
             
             try {
                 const res = await fetch(`${VIEW_CLOUD_URL}?action=getOSCode`);
@@ -1624,7 +1624,7 @@
             buttons.push({ label: 'Cancel', action: () => {} });
             
             const popupTitle = `${app.name}<span style="display: block; font-size: 1.3rem; color: var(--secondary-text); margin-top: 6px;">v${app.version}</span>`;
-            const popupDesc = "Manage the installation state and parameters of this application on viewOS.";
+            const popupDesc = "Manage this application.";
             showSystemPopup(popupTitle, popupDesc, buttons, app.art);
         }
 
